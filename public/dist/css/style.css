@@ -1,0 +1,18 @@
+.modal-fullscreen { min-width: 99%; }
+.modal-fullscreen .modal-header { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+.modal-fullscreen .modal-footer { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+.tableFixHead { overflow-y: auto; }
+.tableFixHead thead th { position: sticky; top: 0; }
+.table>thead>tr>th { background-color: white; }
+.table td { font-size: 10.5pt; }
+.table th { font-size: 10.5pt; }
+.table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th { padding-top: 0.1rem; padding-bottom: 0.1rem; }
+table.dataTable thead .sorting:before, table.dataTable thead .sorting:after, table.dataTable thead .sorting_asc:before, table.dataTable thead .sorting_asc:after, table.dataTable thead .sorting_desc:before, table.dataTable thead .sorting_desc:after, table.dataTable thead .sorting_asc_disabled:before, table.dataTable thead .sorting_asc_disabled:after, table.dataTable thead .sorting_desc_disabled:before, table.dataTable thead .sorting_desc_disabled:after { bottom: 0.2em !important; }
+label { margin-bottom: 0rem !important; }
+.form-group { padding: 0px !important; margin-bottom: 0.5rem; }
+.form-control-sm { height: calc(1.25rem + 2px); padding: .125rem .125rem; line-height: 1; }
+.select2-container .select2-selection--single { height: 25px !important; padding-top: 0.5px !important; font-size: 10.5pt; }
+.select2-results__option { font-size: 10pt; }
+.select2-container--default .select2-selection--single .select2-selection__rendered { margin-top: 1px; line-height: 20px; }
+.select2-container--default .select2-selection--single .select2-selection__arrow { top: -5px; }
+.custom-control { min-height: 0; }

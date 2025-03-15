@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html><head>
+<link rel="stylesheet" href="css/bootstrap.min.css">
+<style type="text/css">
+  table {
+    font-size: 11px;
+  }
+
+  .table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
+    padding: 3px;
+  }
+</style>
+<script>
+function subst() {
+    var vars = {};
+    var x = window.location.search.substring(1).split('&');
+    for (var i in x) { var z = x[i].split('=' , 2); vars[z[0]] = unescape(z[1]); }
+    if (vars['page'] == vars['topage']) { document.getElementById("foot_page").style.display = "none"; } else { document.getElementById("last_foot_page").style.display = "none"; }
+
+    var vars = {};
+    var query_strings_from_url = document.location.search.substring(1).split('&');
+    for (var query_string in query_strings_from_url) {
+        if (query_strings_from_url.hasOwnProperty(query_string)) {
+            var temp_var = query_strings_from_url[query_string].split('=', 2);
+            vars[temp_var[0]] = decodeURI(temp_var[1]);
+        }
+    }
+
+    var css_selector_classes = ['page', 'frompage', 'topage', 'date', 'time', 'total', 'user', 'tanggal_oto'];
+    for (var css_class in css_selector_classes) {
+        if (css_selector_classes.hasOwnProperty(css_class)) {
+            var element = document.getElementsByClassName(css_selector_classes[css_class]);
+            for (var j = 0; j < element.length; ++j) {
+                element[j].textContent = vars[css_selector_classes[css_class]];
+            }
+        }
+    }
+}
+</script></head><body style="border:0; margin: 0;" onload="subst()">
+<div class="container-fluid" style="height: 100%;">
+  <div class="row" style="height: 100%;">
+    <div class="col-12" style="height: 100%;">
+      <table id='foot_page'><tr><td style='height: 170px'></td></tr></table>
+      <table class='table table-bordered text-center' border='1' id='last_foot_page'>
+        <colgroup><col width='8%'><col width='17%'><col width='8%'><col width='17%'><col width='8%'><col width='17%'><col width='8%'><col width='17%'></colgroup>
+        <tr><th colspan='7' style='text-align: left;'>Total</th><th style='text-align: right;'><span class="total"></th></tr>
+          <tr><th colspan='2'>Menyetujui</th><th colspan='2'>Mengetahui</th><th colspan='2'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Kasir&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th><th colspan='2'>Penerima</th></tr>
+    			<tr><th colspan='2' style='height: 100px'> </th><th colspan='2'> </th><th colspan='2'> </th><th colspan='2'> </th></tr>
+      </table>
+    </div>
+  </div>
+</div>
+<table style="border-top: 1px solid black; width: 100%; font-size: 13px;">
+  <tr>
+    <td>Waktu cetak <span class="date"></span> <span class="time"></span> oleh <span class="user"></span></td>
+    <td style="text-align:right">
+      <span class="tanggal_oto"></span> | Halaman <span class="page"></span> dari <span class="topage"></span>
+    </td>
+  </tr>
+</table>
+</body></html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html><head>
+<link rel="stylesheet" href="css/bootstrap.min.css">
+<style type="text/css">
+  table {
+    font-size: 11px;
+  }
+
+  .table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
+    padding: 3px;
+  }
+</style>
+<script>
+function subst() {
+    var vars = {};
+    var query_strings_from_url = document.location.search.substring(1).split('&');
+    for (var query_string in query_strings_from_url) {
+        if (query_strings_from_url.hasOwnProperty(query_string)) {
+            var temp_var = query_strings_from_url[query_string].split('=', 2);
+            vars[temp_var[0]] = decodeURI(temp_var[1]);
+        }
+    }
+    var css_selector_classes = ['total', 'user', 'head', 'no_bukti', 'tanggal', 'note', 'ket_perk', 'no_bon'];
+    for (var css_class in css_selector_classes) {
+        if (css_selector_classes.hasOwnProperty(css_class)) {
+            var element = document.getElementsByClassName(css_selector_classes[css_class]);
+            for (var j = 0; j < element.length; ++j) {
+                element[j].textContent = vars[css_selector_classes[css_class]];
+            }
+        }
+    }
+}
+</script>
+</head><body style="border:0; margin: 0;" onload="subst()">
+<div class="container-fluid" style="height: 100%;">
+  <div class="row" style="height: 100%;">
+    <div class="col-12" style="height: 100%;"><br>
+      <table class='table table-bordered text-center' border='1' style='width: 100%; margin: 0;'>
+        <colgroup><col width='8%'><col width='17%'><col width='8%'><col width='17%'><col width='8%'><col width='17%'><col width='8%'><col width='17%'></colgroup>
+  			<thead><tr><th rowspan='2' colspan='6' style='vertical-align: middle;'><span class="head"></span></th><th>No. Bukti</th><th><span class="no_bukti"></span></th></tr><tr><th>Tanggal</th><th><span class="tanggal"></span></th></tr>
+  			<tr><th colspan='3'>Kepada: <span class="note"></span></th><th colspan='3'><span class="ket_perk"></span></th><th colspan='2'><span class="no_bon"></span></th></tr><tr><th>Kode</th><th>Nama</th><th></th><th colspan='4'>Keterangan</th><th>Jumlah</th></tr></thead>
+      </table>
+    </div>
+  </div>
+</div>
+</body></html>

@@ -1,0 +1,43 @@
+<?php
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| contains the "web" middleware group. Now create something great!
+|
+*/
+
+
+
+
+// Route::get('/tesapicath', 'tesApiCathController@index');
+// Route::get('/loadDataApi', 'tesApiCathController@loadData'); //Semisal mau ganti nama e, nde sini
+
+// SO
+Route::get('/dbso', 'get_dbso@getData');
+Route::get('/dbso/tanggal', 'get_all_nobukti_by_tanggal@getData');
+Route::get('/dbso/tanggal/{tanggal}', 'get_detail_nobukti_by_tanggal@getData');
+Route::get('/dbso/cust', 'get_kodecust_by_tanggalSO@getData');
+Route::get('/dbso/detail/{nobukti}', 'get_sodet_by_nobukti@getData');
+
+// CUST
+Route::get('/alamat/{kode}', 'get_alamat_by_kodecust@getData');
+Route::get('/sopir/{kode}', 'get_sopir@getData');
+Route::get('/alamat', 'get_all_alamat@getData');
+
+// DO
+Route::get('/dbspp', 'get_all_dbspp@getData');
+Route::get('/dbspp/tanggal', 'get_all_dbspp_by_tanggal@getData');
+
+Route::post('/dbsppdet/nobukti', 'post_dbsppdet_nobukti@getDataByNOBUKTI');
+Route::post('/dbspp/nobukti', 'post_dbspp_nobukti@getDataByNOBUKTI');
+
+// Pengiriman
+Route::post('/upload/pengiriman', 'post_upload_dbPengiriman@uploadDataPengiriman');
+Route::get('/pengiriman/tanggal/{tanggal}', 'get_detail_dbpengiriman_by_tanggal@getData');
+Route::put('/pengiriman/update/{NoPengiriman}', 'put_update_status_dbPengiriman@updateStatus');
+

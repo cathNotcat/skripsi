@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html><meta charset="UTF-8" /><head>
+<link rel="stylesheet" href="css/bootstrap.min.css">
+<style type="text/css">
+</style>
+<script>
+function subst() {
+    var vars = {};
+    var query_strings_from_url = document.location.search.substring(1).split('&');
+    for (var query_string in query_strings_from_url) {
+        if (query_strings_from_url.hasOwnProperty(query_string)) {
+            var temp_var = query_strings_from_url[query_string].split('=', 2);
+            vars[temp_var[0]] = decodeURI(temp_var[1]);
+        }
+    }
+    var css_selector_classes = ['perusahaan', 'periode', 'judul', 'perkiraan'];
+    for (var css_class in css_selector_classes) {
+        if (css_selector_classes.hasOwnProperty(css_class)) {
+            var element = document.getElementsByClassName(css_selector_classes[css_class]);
+            for (var j = 0; j < element.length; ++j) {
+                element[j].textContent = vars[css_selector_classes[css_class]];
+            }
+        }
+    }
+}
+</script>
+</head><body style="border:0; margin: 0;" onload="subst()">
+<div class="container-fluid" style="height: 100%;">
+  <div class="row" style="height: 100%;">
+    <div class="col-3" style="height: 100%;">
+      <h6><span class="perusahaan"></span></h6>
+    </div>
+    <div class="col-6 text-center">
+      <h6><span class="judul"></span></h6><h6><span class="perkiraan"></span></h6><h6><span class="periode"></span></h6>
+    </div>
+  </div>
+</div>
+</body></html>
