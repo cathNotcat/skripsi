@@ -1,7 +1,9 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, avoid_print
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
+import 'package:web_admin_1/held_karp.dart';
 import 'package:web_admin_1/main.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -14,7 +16,8 @@ class PengirimanPage extends StatefulWidget {
 }
 
 class _PengirimanPageState extends State<PengirimanPage> {
-  var baseUrl = 'http://localhost/backend_api';
+  // var baseUrl = 'http://localhost/backend_api';
+  var baseUrl = dotenv.env['BASE_URL'] ?? '';
 
   DateTime now = DateTime.now();
 
@@ -247,7 +250,8 @@ class SupirProsesPage extends StatefulWidget {
 }
 
 class _SupirProsesPageState extends State<SupirProsesPage> {
-  var baseUrl = 'http://localhost/backend_api';
+  // var baseUrl = 'http://localhost/backend_api';
+  var baseUrl = dotenv.env['BASE_URL'] ?? '';
 
   DateTime now = DateTime.now();
   bool adaPengiriman = false;
@@ -632,6 +636,16 @@ class _SupirProsesPageState extends State<SupirProsesPage> {
   }
 }
 
+// class LatLng {
+//   final double latitude;
+//   final double longitude;
+
+//   LatLng(this.latitude, this.longitude);
+
+//   @override
+//   String toString() => "($latitude, $longitude)";
+// }
+
 class TambahPesananPage extends StatefulWidget {
   const TambahPesananPage({super.key});
 
@@ -640,11 +654,14 @@ class TambahPesananPage extends StatefulWidget {
 }
 
 class _TambahPesananPageState extends State<TambahPesananPage> {
-  // var baseUrl = 'http://10.0.2.2/backend_api';
-  var baseUrl = 'http://localhost/backend_api';
-  // var baseUrl = 'http://192.168.1.204:8000/backend_api';
+  // var baseUrl = 'http://localhost/backend_api';
+  var baseUrl = dotenv.env['BASE_URL'] ?? '';
   bool isLihatDetail = false;
   bool isLoading = true;
+  bool isTambah = false;
+
+  String custCoordinate = '';
+  List<String> points = ['-7.375729652261953, 112.6788318829139'];
 
   DateTime now = DateTime.now();
 
@@ -656,6 +673,7 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
   final TextEditingController customerController = TextEditingController();
 
   List<Map<String, dynamic>> details = [];
+  List<Map<String, dynamic>> listOfPesanan = [];
 
   Future<void> _getDbsppDetData() async {
     var url = Uri.parse('$baseUrl/dbsppdet/nobukti');
@@ -725,12 +743,81 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
     }
   }
 
+  Future<void> _getPengirimanSupirData() async {
+    String formattedDate = DateFormat('yyyy-MM-dd').format(now);
+    var url = Uri.parse('$baseUrl/pengiriman/tanggal/$formattedDate');
+
+    try {
+      var response =
+          await http.get(url, headers: {'Content-Type': 'application/json'});
+      print('status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        var responseBody = jsonDecode(response.body);
+        var data = responseBody['data'];
+
+        if (data.isNotEmpty) {
+          setState(() {
+            listOfPesanan = List<Map<String, dynamic>>.from(
+                data.map((item) => item as Map<String, dynamic>));
+          });
+        } else {
+          print('Unexpected response structure.');
+        }
+      } else {
+        print('Failed to load user data: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error occurred: $e');
+    }
+  }
+
+  Future<void> _getCoordinates(String kodeCust) async {
+    var url = Uri.parse('$baseUrl/customer/alamat/$kodeCust');
+    print('in _getCoordinates');
+
+    try {
+      var response = await http.get(
+        url,
+        headers: {
+          'Content-type': 'application/json',
+        },
+      );
+      print('_getCoordinate() status code: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        var responseBody = jsonDecode(response.body);
+        var data = responseBody['data'];
+        print('data: $data');
+
+        if (data != null) {
+          setState(() {
+            custCoordinate = data['KOORDINAT'].toString();
+            points.add(custCoordinate.toString());
+          });
+          print('_getCoordinate() koordinat: ${custCoordinate}');
+          print('points: ${points}');
+        }
+      }
+    } catch (e) {
+      print('Error _getCoordinate(): $e');
+    }
+  }
+
   Future<void> _tambahPesanan() async {
+    setState(() {
+      isTambah = true;
+    });
     var url = Uri.parse('$baseUrl/upload/pengiriman');
 
     String nobukti = inputDoController.text;
     String kodeCust = customerController.text;
     String tanggalKirim = tanggalKirimController.text;
+
+    // HeldKarp heldKarp = HeldKarp();
+    // heldKarp.calculateWithHeldKarp(points);
+    print('kodeCust before function _getCoordinates: $kodeCust');
+    _getCoordinates(kodeCust);
 
     try {
       var response = await http.post(url,
@@ -756,9 +843,42 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
     }
   }
 
+  List<LatLng> convertToLatLngList(List<String> coordinateStrings) {
+    List<LatLng> latLngList = [];
+
+    for (var coord in coordinateStrings) {
+      // Split the string by comma
+      List<String> parts = coord.split(',');
+
+      if (parts.length == 2) {
+        // Parse the latitude and longitude
+        double latitude = double.parse(parts[0].trim());
+        double longitude = double.parse(parts[1].trim());
+
+        // Create a LatLng object and add it to the list
+        latLngList.add(LatLng(latitude, longitude));
+      } else {
+        // Handle invalid coordinate string format if needed
+        print("Invalid coordinate format: $coord");
+      }
+    }
+
+    return latLngList;
+  }
+
+  Future<void> _calculateHeldKarp() async {
+    List<LatLng> pointsConverted = convertToLatLngList(points);
+    HeldKarp heldKarp = HeldKarp();
+    List<LatLng> pointsWithHeldKarp =
+        await heldKarp.calculateWithHeldKarp(pointsConverted);
+    print('before heldkarp: $points');
+    print('after heldkarp: $pointsWithHeldKarp');
+  }
+
   @override
   Widget build(BuildContext context) {
     int counter = 1;
+    int counterTambah = 1;
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
@@ -995,8 +1115,130 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
                             ),
                             SizedBox(height: 24),
                             ElevatedButton(
+                              onPressed: () async {
+                                await _tambahPesanan();
+                                setState(() {
+                                  _getPengirimanSupirData();
+                                });
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    Color.fromARGB(255, 23, 96, 232),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text(
+                                '+ Tambah Pesanan',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ],
+                        )
+                  : SizedBox(),
+              SizedBox(height: 24),
+              isTambah
+                  ? isLoading
+                      ? Center(
+                          child: CircularProgressIndicator(),
+                        )
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(16),
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.vertical,
+                                child: Table(
+                                  columnWidths: const {
+                                    0: FlexColumnWidth(
+                                        1), // Adjust these to control the column width ratio
+                                    1: FlexColumnWidth(1),
+                                    2: FlexColumnWidth(1),
+                                    3: FlexColumnWidth(1),
+                                  },
+                                  border:
+                                      TableBorder.all(color: Colors.grey[300]!),
+                                  children: [
+                                    // Header row
+                                    TableRow(
+                                      decoration: BoxDecoration(
+                                          color: Colors.grey[200]),
+                                      children: [
+                                        Center(
+                                          child: Padding(
+                                            padding: EdgeInsets.all(8.0),
+                                            child: Text(
+                                              'No.',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                          ),
+                                        ),
+                                        Center(
+                                            child: Padding(
+                                                padding: EdgeInsets.all(8.0),
+                                                child: Text('No. DO',
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold)))),
+                                        Center(
+                                            child: Padding(
+                                                padding: EdgeInsets.all(8.0),
+                                                child: Text('Customer',
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold)))),
+                                        Center(
+                                            child: Padding(
+                                                padding: EdgeInsets.all(8.0),
+                                                child: Text('Nama',
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold)))),
+                                      ],
+                                    ),
+                                    // Data rows
+                                    ...listOfPesanan.map(
+                                      (item) => TableRow(
+                                        children: [
+                                          Center(
+                                            child: Padding(
+                                              padding: EdgeInsets.all(8.0),
+                                              // child: Text(item['Kode Barang']!))),
+                                              child: Text('${counterTambah++}'),
+                                            ),
+                                          ),
+                                          Center(
+                                              child: Padding(
+                                                  padding: EdgeInsets.all(8.0),
+                                                  child: Text(item['NoDO']!))),
+                                          Center(
+                                              child: Padding(
+                                                  padding: EdgeInsets.all(8.0),
+                                                  child: Text(
+                                                      item['KodeCustSupp']!))),
+                                          Center(
+                                              child: Padding(
+                                                  padding: EdgeInsets.all(8.0),
+                                                  child: Text(item['Nama']!))),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 24),
+                            ElevatedButton(
                               onPressed: () {
-                                _tambahPesanan();
+                                // _tambahPesanan();
+                                _calculateHeldKarp();
                                 Navigator.of(context).pushNamed('/supirProses');
                                 // Navigator.push(
                                 //   context,
@@ -1012,7 +1254,7 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
                                 ),
                               ),
                               child: Text(
-                                '+ Tambah Pesanan',
+                                'Selesai',
                                 style: TextStyle(color: Colors.white),
                               ),
                             ),

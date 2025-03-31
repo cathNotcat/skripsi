@@ -1,11 +1,14 @@
 // ignore_for_file: prefer_const_constructors, prefer_typing_uninitialized_variables, library_private_types_in_public_api
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:web_admin_1/dashboard_page.dart';
+import 'package:web_admin_1/held_karp.dart';
 import 'package:web_admin_1/login_page.dart';
 import 'package:web_admin_1/pengiriman_page.dart';
 
-void main() {
+void main() async {
+  await dotenv.load();
   runApp(const MainApp());
 }
 
@@ -24,6 +27,7 @@ class MainApp extends StatelessWidget {
         home: SafeArea(
           // child: Navbar(),
           child: LoginPage(),
+          // child: CalculateRoute(),
         ));
   }
 }
@@ -50,7 +54,6 @@ class _NavbarState extends State<Navbar> {
   @override
   void initState() {
     super.initState();
-    // Initialize selectedIndex based on chosenIndex or default to 0
     selectedIndex = widget.chosenIndex ?? 0;
   }
 
