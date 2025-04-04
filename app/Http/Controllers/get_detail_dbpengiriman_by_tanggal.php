@@ -10,20 +10,21 @@ class get_detail_dbpengiriman_by_tanggal extends Controller
     {
         return response()->json(['message' => 'API is working']);
     }
-
     public function getData($tanggal)
     {
+        // Run the query to fetch the data
         $listData = DB::connection('SML')->select(
-            'SELECT p.NoPengiriman, p.NoDO, a.Nama, p.KodeCustSupp, a.Alamat, a.Koordinat, p.Status, p.TanggalKirim, COUNT(s.NoBukti) AS JumlahBarang  
-                    FROM dbPengiriman p
-                    JOIN dbSPPDet s ON p.noDO = s.NoBukti
-                    JOIN DBALAMATCUST a ON p.KodeCustSupp = a.KODECUSTSUPP 
-                    WHERE CAST(TanggalKirim AS DATE) = :tanggal
-                    GROUP BY p.NoPengiriman, p.noDO, p.kodecustsupp, p.Status, a.nama, a.alamat, a.koordinat, p.TanggalKirim
-                    ORDER BY p.noDO;',
+            'SELECT p.NoUrut, p.NoPengiriman, p.NoDO, a.Nama, p.KodeCustSupp, a.Alamat, a.Koordinat, p.Status, p.TanggalKirim, COUNT(s.NoBukti) AS JumlahBarang  
+                FROM dbPengiriman p
+                JOIN dbSPPDet s ON p.noDO = s.NoBukti
+                JOIN DBALAMATCUST a ON p.KodeCustSupp = a.KODECUSTSUPP 
+                WHERE CAST(TanggalKirim AS DATE) = :tanggal
+                GROUP BY p.NoUrut, p.NoPengiriman, p.noDO, p.kodecustsupp, p.Status, a.nama, a.alamat, a.koordinat, p.TanggalKirim
+                ORDER BY p.NoUrut',
             ['tanggal' => $tanggal]
         );
 
+        // If no data is found, return an empty response
         if (!$listData) {
             return response()->json([
                 'status' => 200,
@@ -32,67 +33,30 @@ class get_detail_dbpengiriman_by_tanggal extends Controller
             ], 200);
         }
 
-
-        $formattedData = [];
-
-        foreach ($listData as $item) {
-            if (!isset($formattedData[$item->TanggalKirim])) {
-                $formattedData[$item->TanggalKirim] = [
-                    'NoPengiriman' => [],
-                    'NoDO' => [],
-                    'Nama' => [],
-                    'KodeCustSupp' => [],
-                    'Alamat' => [],
-                    'Koordinat' => [],
-                    'Status' => [],
-                    'JumlahBarang' => [],
-                ];
-            }
-            $formattedData[$item->TanggalKirim]['NoPengiriman'] = $item->NoPengiriman;
-            $formattedData[$item->TanggalKirim]['NoDO'] = $item->NoDO;
-            $formattedData[$item->TanggalKirim]['Nama'] = $item->Nama;
-            $formattedData[$item->TanggalKirim]['KodeCustSupp'] = $item->KodeCustSupp;
-            $formattedData[$item->TanggalKirim]['Alamat'] = $item->Alamat;
-            $formattedData[$item->TanggalKirim]['Koordinat'] = $item->Koordinat;
-            $formattedData[$item->TanggalKirim]['Status'] = $item->Status;
-            $formattedData[$item->TanggalKirim]['JumlahBarang'] = $item->JumlahBarang;
-
-        }
-
+        // Prepare the final output array, returning each record individually
         $finalOutput = [];
-        foreach ($formattedData as $tanggal => $data) {
+        foreach ($listData as $item) {
             $finalOutput[] = [
-                'NoPengiriman' => $data['NoPengiriman'],
-                'TanggalKirim' => $tanggal,
-                'NoDO' => $data['NoDO'],
-                'Nama' => $data['Nama'],
-                'KodeCustSupp' => $data['KodeCustSupp'],
-                'Alamat' => $data['Alamat'],
-                'Koordinat' => $data['Koordinat'],
-                'Status' => $data['Status'],
-                'JumlahBarang' => $data['JumlahBarang'],
+                'NoUrut' => $item->NoUrut,
+                'NoPengiriman' => $item->NoPengiriman,
+                'TanggalKirim' => $item->TanggalKirim,
+                'NoDO' => $item->NoDO,
+                'Nama' => $item->Nama,
+                'KodeCustSupp' => $item->KodeCustSupp,
+                'Alamat' => $item->Alamat,
+                'Koordinat' => $item->Koordinat,
+                'Status' => $item->Status,
+                'JumlahBarang' => $item->JumlahBarang,
             ];
         }
 
-
-
-
-
-        // $formattedData = [
-        //     'TanggalKirim' => $data[0]->TanggalKirim,
-        //     'NoDO' => [],
-
-        // ];
-
-        // foreach ($data as $item) {
-        //     $formattedData['NoDO'][] = $item->NoDO; // $item->NoDo (harus sama persis dengan db)
-        // }
-
+        // Return the data as a JSON response
         return response()->json([
             'status' => 200,
             'message' => 'Berhasil mengambil data',
             'data' => $finalOutput
         ]);
     }
+
 }
 ?>

@@ -17,6 +17,6 @@ class VerifyCsrfToken extends Middleware
         '/dbspp/nobukti',
         '/upload/pengiriman',
         '/pengiriman/update/*',
-
+        '/pengiriman/delete',
     ];
 }

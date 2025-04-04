@@ -18,22 +18,36 @@ class post_upload_dbPengiriman extends Controller
         ]);
 
         try {
-            // Fetch the latest NoPengiriman from the database
-            $latestPengiriman = DB::connection('SML')
+            $tanggalKirim = date('Y-m-d', strtotime($request->input('TanggalKirim')));
+
+            // cari NoPengiriman yang existing di tanggal ini
+            $existingNoPengiriman = DB::connection('SML')
                 ->table('dbPengiriman')
-                ->orderBy('NoPengiriman', 'desc')
+                ->whereDate('TanggalKirim', $tanggalKirim)
                 ->value('NoPengiriman');
 
-            // Increment NoPengiriman
-            if ($latestPengiriman) {
-                $newNoPengiriman = (int) $latestPengiriman + 1;
+            // kalo sdh exist, pakai yang exist aja
+            if ($existingNoPengiriman) {
+                $newNoPengiriman = $existingNoPengiriman;
             } else {
-                $newNoPengiriman = 1;
+                $latestNoPengiriman = DB::connection('SML')
+                    ->table('dbPengiriman')
+                    ->orderBy('NoPengiriman', 'desc')
+                    ->value('NoPengiriman');
+                $newNoPengiriman = $latestNoPengiriman ? (int) $latestNoPengiriman + 1 : 1;
             }
+
+            $latestNoUrut = DB::connection('SML')
+                ->table('dbPengiriman')
+                ->where('NoPengiriman', $newNoPengiriman)
+                ->max('NoUrut');
+
+            $newNoUrut = $latestNoUrut ? $latestNoUrut + 1 : 1;
 
             // Prepare the data for insertion
             $data = [
                 'NoPengiriman' => $newNoPengiriman,
+                'NoUrut' => $newNoUrut,
                 'NoDO' => $request->input('NoDO'),
                 'KodeSopir' => $request->input('KodeSopir'),
                 'KodeCustSupp' => $request->input('KodeCustSupp'),

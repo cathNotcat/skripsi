@@ -29,21 +29,25 @@ class get_alamat_by_kodecust extends Controller
           WHERE KODECUSTSUPP LIKE :kode
       ', ['kode' => $kodePattern]);
 
-        $formattedData = [];
+        if (!empty($listData)) {
+            $item = $listData[0];
 
-        foreach ($listData as $item) {
-            $formattedData[] = [
-                'KODECUSTSUPP' => $item->KODECUSTSUPP,
-                'NAMA' => $item->NAMA,
-                'ALAMAT' => $item->ALAMAT,
-                'KOORDINAT' => $item->KOORDINAT,
-            ];
+            return response()->json([
+                'status' => 200,
+                'message' => 'Data berhasil diambil',
+                'data' => [
+                    'KODECUSTSUPP' => $item->KODECUSTSUPP,
+                    'NAMA' => $item->NAMA,
+                    'ALAMAT' => $item->ALAMAT,
+                    'KOORDINAT' => $item->KOORDINAT,
+                ]
+
+            ]);
         }
 
         return response()->json([
-            'status' => 200,
-            'message' => 'Berhasil mengambil data',
-            'data' => $formattedData
+            'status' => 404,
+            'message' => 'Tidak ada data',
         ]);
 
 
