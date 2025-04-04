@@ -6,10 +6,10 @@ use Illuminate\Support\Facades\DB;
 
 class put_update_status_dbPengiriman extends Controller
 {
-    public function updateStatus(Request $request, $NoPengiriman)
+    public function updateStatus(Request $request, $NoPengiriman, $NoUrut)
     {
         $request->validate([
-            'Status' => 'required|integer',  // Ensuring status is passed in the request
+            'Status' => 'required|integer',
         ]);
 
         try {
@@ -17,6 +17,7 @@ class put_update_status_dbPengiriman extends Controller
             $affected = DB::connection('SML')
                 ->table('dbPengiriman')
                 ->where('NoPengiriman', $NoPengiriman)
+                ->where('NoUrut', $NoUrut)
                 ->update(['Status' => $request->input('Status')]);
 
             // Check if any rows were affected

@@ -41,5 +41,5 @@ Route::post('/upload/pengiriman', 'post_upload_dbPengiriman@uploadDataPengiriman
 Route::post('/pengiriman/delete', 'post_delete_pesanan@deleteData');
 // Route::post('/pengiriman/delete', [post_delete_pesanan::class, 'deleteData']);
 Route::get('/pengiriman/tanggal/{tanggal}', 'get_detail_dbpengiriman_by_tanggal@getData');
-Route::put('/pengiriman/update/{NoPengiriman}', 'put_update_status_dbPengiriman@updateStatus');
+Route::put('/pengiriman/update/{NoPengiriman}/{NoUrut}', 'put_update_status_dbPengiriman@updateStatus');
 
