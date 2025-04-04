@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
 import 'package:web_admin_1/held_karp.dart';
-import 'package:web_admin_1/main.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -16,7 +15,6 @@ class PengirimanPage extends StatefulWidget {
 }
 
 class _PengirimanPageState extends State<PengirimanPage> {
-  // var baseUrl = 'http://localhost/backend_api';
   var baseUrl = dotenv.env['BASE_URL'] ?? '';
 
   DateTime now = DateTime.now();
@@ -250,7 +248,6 @@ class SupirProsesPage extends StatefulWidget {
 }
 
 class _SupirProsesPageState extends State<SupirProsesPage> {
-  // var baseUrl = 'http://localhost/backend_api';
   var baseUrl = dotenv.env['BASE_URL'] ?? '';
 
   DateTime now = DateTime.now();
@@ -280,9 +277,12 @@ class _SupirProsesPageState extends State<SupirProsesPage> {
     try {
       var response =
           await http.get(url, headers: {'Content-Type': 'application/json'});
-      print('status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
+        setState(() {
+          isLoading = false;
+        });
+
         var responseBody = jsonDecode(response.body);
         var data = responseBody['data'];
 
@@ -290,7 +290,6 @@ class _SupirProsesPageState extends State<SupirProsesPage> {
           setState(() {
             details = List<Map<String, dynamic>>.from(
                 data.map((item) => item as Map<String, dynamic>));
-            isLoading = false;
             adaPengiriman = true;
           });
           print('adapengiriman: $adaPengiriman');
@@ -306,7 +305,7 @@ class _SupirProsesPageState extends State<SupirProsesPage> {
             }
           }
         } else {
-          print('Unexpected response structure.');
+          print('_getPengirimanSupirData() data is empty.');
         }
       } else {
         print('Failed to load user data: ${response.statusCode}');
@@ -491,144 +490,151 @@ class _SupirProsesPageState extends State<SupirProsesPage> {
               ],
             ),
             SizedBox(height: 12),
-            adaPengiriman == false
-                ? Container(
-                    height: 100,
-                    width: double.infinity,
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'Tidak ada pengiriman',
-                        style:
-                            TextStyle(color: Color.fromARGB(255, 82, 89, 105)),
-                      ),
-                    ),
-                  )
-                : Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(16),
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.vertical,
-                            child: Table(
-                              columnWidths: const {
-                                0: FlexColumnWidth(
-                                    1), // Adjust these to control the column width ratio
-                                1: FlexColumnWidth(1),
-                                2: FlexColumnWidth(1),
-                                3: FlexColumnWidth(1),
-                              },
-                              border: TableBorder.all(color: Colors.grey[300]!),
-                              children: [
-                                // Header row
-                                TableRow(
-                                  decoration:
-                                      BoxDecoration(color: Colors.grey[200]),
-                                  children: [
-                                    Center(
-                                      child: Padding(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: Text(
-                                          'No. Bukti',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                      ),
-                                    ),
-                                    Center(
-                                        child: Padding(
-                                            padding: EdgeInsets.all(8.0),
-                                            child: Text('Kode Customer',
-                                                style: TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.bold)))),
-                                    Center(
-                                        child: Padding(
-                                            padding: EdgeInsets.all(8.0),
-                                            child: Text('Alamat',
-                                                style: TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.bold)))),
-                                    Center(
-                                        child: Padding(
-                                            padding: EdgeInsets.all(8.0),
-                                            child: Text('Status',
-                                                style: TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.bold)))),
-                                  ],
-                                ),
-                                // Data rows
-                                ...details.map(
-                                  (item) => TableRow(
-                                    children: [
-                                      Center(
-                                          child: Padding(
-                                              padding: EdgeInsets.all(8.0),
-                                              // child: Text(item['Kode Barang']!))),
-                                              child: Text(item['NoDO']!))),
-                                      Center(
-                                          child: Padding(
-                                              padding: EdgeInsets.all(8.0),
-                                              // child: Text(item['Nama Barang']!))),
-                                              child:
-                                                  Text(item['KodeCustSupp']!))),
-                                      Center(
-                                          child: Padding(
-                                              padding: EdgeInsets.all(8.0),
-                                              // child: Text(item['Qnt']!))),
-                                              child: Text(item['Alamat']!))),
-                                      Center(
-                                        child: Padding(
-                                            padding: EdgeInsets.all(8.0),
-                                            child: Container(
-                                              padding: EdgeInsets.only(
-                                                  top: 8,
-                                                  bottom: 8,
-                                                  left: 12,
-                                                  right: 12),
-                                              decoration: BoxDecoration(
-                                                  color: getStatusColor(
-                                                      item['Status']),
-                                                  borderRadius:
-                                                      BorderRadius.all(
-                                                          Radius.circular(20))),
-                                              child: Text(
-                                                getStatusString(item['Status']),
-                                                style: TextStyle(
-                                                    // color: getStatusTextColor(
-                                                    //     item['Status']),
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 14),
-                                              ),
-                                            )),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
+            isLoading
+                ? Center(child: CircularProgressIndicator())
+                : adaPengiriman == false
+                    ? Container(
+                        height: 100,
+                        width: double.infinity,
+                        padding: EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Tidak ada pengiriman',
+                            style: TextStyle(
+                                color: Color.fromARGB(255, 82, 89, 105)),
                           ),
                         ),
-                      ],
-                    ))
+                      )
+                    : Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(16),
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.vertical,
+                                child: Table(
+                                  columnWidths: const {
+                                    0: FlexColumnWidth(
+                                        1), // Adjust these to control the column width ratio
+                                    1: FlexColumnWidth(1),
+                                    2: FlexColumnWidth(1),
+                                    3: FlexColumnWidth(1),
+                                  },
+                                  border:
+                                      TableBorder.all(color: Colors.grey[300]!),
+                                  children: [
+                                    // Header row
+                                    TableRow(
+                                      decoration: BoxDecoration(
+                                          color: Colors.grey[200]),
+                                      children: [
+                                        Center(
+                                          child: Padding(
+                                            padding: EdgeInsets.all(8.0),
+                                            child: Text(
+                                              'No. Bukti',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                          ),
+                                        ),
+                                        Center(
+                                            child: Padding(
+                                                padding: EdgeInsets.all(8.0),
+                                                child: Text('Kode Customer',
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold)))),
+                                        Center(
+                                            child: Padding(
+                                                padding: EdgeInsets.all(8.0),
+                                                child: Text('Alamat',
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold)))),
+                                        Center(
+                                            child: Padding(
+                                                padding: EdgeInsets.all(8.0),
+                                                child: Text('Status',
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold)))),
+                                      ],
+                                    ),
+                                    // Data rows
+                                    ...details.map(
+                                      (item) => TableRow(
+                                        children: [
+                                          Center(
+                                              child: Padding(
+                                                  padding: EdgeInsets.all(8.0),
+                                                  // child: Text(item['Kode Barang']!))),
+                                                  child: Text(item['NoDO']!))),
+                                          Center(
+                                              child: Padding(
+                                                  padding: EdgeInsets.all(8.0),
+                                                  // child: Text(item['Nama Barang']!))),
+                                                  child: Text(
+                                                      item['KodeCustSupp']!))),
+                                          Center(
+                                              child: Padding(
+                                                  padding: EdgeInsets.all(8.0),
+                                                  // child: Text(item['Qnt']!))),
+                                                  child:
+                                                      Text(item['Alamat']!))),
+                                          Center(
+                                            child: Padding(
+                                                padding: EdgeInsets.all(8.0),
+                                                child: Container(
+                                                  padding: EdgeInsets.only(
+                                                      top: 8,
+                                                      bottom: 8,
+                                                      left: 12,
+                                                      right: 12),
+                                                  decoration: BoxDecoration(
+                                                      color: getStatusColor(
+                                                          item['Status']),
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(
+                                                                  20))),
+                                                  child: Text(
+                                                    getStatusString(
+                                                        item['Status']),
+                                                    style: TextStyle(
+                                                        // color: getStatusTextColor(
+                                                        //     item['Status']),
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 14),
+                                                  ),
+                                                )),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ))
           ],
         ),
       ),
@@ -636,15 +642,29 @@ class _SupirProsesPageState extends State<SupirProsesPage> {
   }
 }
 
-// class LatLng {
-//   final double latitude;
-//   final double longitude;
+class CustomSnackBar extends StatelessWidget {
+  final String message;
 
-//   LatLng(this.latitude, this.longitude);
+  const CustomSnackBar({Key? key, required this.message}) : super(key: key);
 
-//   @override
-//   String toString() => "($latitude, $longitude)";
-// }
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Container(
+          color: Colors.red,
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Text(
+            message,
+            style: TextStyle(color: Colors.white, fontSize: 16),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class TambahPesananPage extends StatefulWidget {
   const TambahPesananPage({super.key});
@@ -654,14 +674,16 @@ class TambahPesananPage extends StatefulWidget {
 }
 
 class _TambahPesananPageState extends State<TambahPesananPage> {
-  // var baseUrl = 'http://localhost/backend_api';
   var baseUrl = dotenv.env['BASE_URL'] ?? '';
   bool isLihatDetail = false;
   bool isLoading = true;
-  bool isTambah = false;
+  bool isPesananExist = false;
+  bool isCalculating = false;
 
-  String custCoordinate = '';
   List<String> points = ['-7.375729652261953, 112.6788318829139'];
+  Map<String, String> custCoordinateMap = {};
+  String namaCust = '';
+  String message = '';
 
   DateTime now = DateTime.now();
 
@@ -674,6 +696,14 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
 
   List<Map<String, dynamic>> details = [];
   List<Map<String, dynamic>> listOfPesanan = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _getPengirimanSupirData();
+    String formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
+    tanggalKirimController.text = formattedDate;
+  }
 
   Future<void> _getDbsppDetData() async {
     var url = Uri.parse('$baseUrl/dbsppdet/nobukti');
@@ -743,8 +773,105 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
     }
   }
 
+  Future<void> _getCustDetails(String kodeCust) async {
+    var url = Uri.parse('$baseUrl/customer/alamat/$kodeCust');
+
+    try {
+      var response = await http.get(
+        url,
+        headers: {
+          'Content-type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        var responseBody = jsonDecode(response.body);
+        var data = responseBody['data'];
+        print('data: $data');
+
+        if (data != null) {
+          String nama = data['NAMA'].toString();
+          String coordinate = data['KOORDINAT'].toString();
+
+          setState(() {
+            namaCust = nama;
+            points.add(coordinate.toString());
+            custCoordinateMap[kodeCust] = coordinate;
+          });
+          print('namaCust in _getCustDetail: $namaCust');
+        }
+      }
+    } catch (e) {
+      print('Error _getCoordinate(): $e');
+    }
+  }
+
+  Future<void> _tambahPesanan() async {
+    print('tambah pesanan clicked');
+    setState(() {
+      isPesananExist = true;
+    });
+
+    String nobukti = inputDoController.text;
+    String kodeCust = customerController.text;
+    String tanggalKirim = tanggalKirimController.text;
+
+    await _getCustDetails(kodeCust);
+
+    bool isNoDOExist = listOfPesanan.any((item) => item['NoDO'] == nobukti);
+
+    if (isNoDOExist) {
+      _showTopSnackBar(context, "No. DO sudah ada!", Colors.red);
+      return;
+    }
+
+    listOfPesanan.add({
+      'NoDO': nobukti,
+      'KodeSopir': 'ADI',
+      'KodeCustSupp': kodeCust,
+      'TanggalKirim': tanggalKirim,
+      'Nama': namaCust,
+      'Status': 0,
+    });
+    print('after listOfPesanan added');
+  }
+
+  void _showTopSnackBar(
+      BuildContext context, String message, Color backgroundColor) {
+    final overlay = Overlay.of(context);
+    final entry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: 50, // You can adjust the top value to move it higher or lower
+        left: 10,
+        right: 10,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              message,
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(entry);
+
+    // Remove the SnackBar after a delay
+    Future.delayed(Duration(seconds: 3), () {
+      entry.remove();
+    });
+  }
+
   Future<void> _getPengirimanSupirData() async {
     String formattedDate = DateFormat('yyyy-MM-dd').format(now);
+    print('formattedDate: $formattedDate');
     var url = Uri.parse('$baseUrl/pengiriman/tanggal/$formattedDate');
 
     try {
@@ -753,6 +880,9 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
       print('status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
+        setState(() {
+          isLoading = false;
+        });
         var responseBody = jsonDecode(response.body);
         var data = responseBody['data'];
 
@@ -760,7 +890,10 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
           setState(() {
             listOfPesanan = List<Map<String, dynamic>>.from(
                 data.map((item) => item as Map<String, dynamic>));
+
+            isPesananExist = true;
           });
+          print('adapengiriman: $isPesananExist');
         } else {
           print('Unexpected response structure.');
         }
@@ -772,93 +905,79 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
     }
   }
 
-  Future<void> _getCoordinates(String kodeCust) async {
-    var url = Uri.parse('$baseUrl/customer/alamat/$kodeCust');
-    print('in _getCoordinates');
+  Future<void> _uploadPesanan(List<Map<String, dynamic>> sortedPesanan) async {
+    var url = Uri.parse('$baseUrl/upload/pengiriman');
 
-    try {
-      var response = await http.get(
-        url,
-        headers: {
-          'Content-type': 'application/json',
-        },
-      );
-      print('_getCoordinate() status code: ${response.statusCode}');
+    for (var pesanan in sortedPesanan) {
+      try {
+        var response = await http.post(
+          url,
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'NoDO': pesanan['NoDO'],
+            'KodeSopir': pesanan['KodeSopir'],
+            'KodeCustSupp': pesanan['KodeCustSupp'],
+            'TanggalKirim': pesanan['TanggalKirim'],
+            'Status': pesanan['Status'],
+          }),
+        );
 
-      if (response.statusCode == 200) {
-        var responseBody = jsonDecode(response.body);
-        var data = responseBody['data'];
-        print('data: $data');
+        print('Status: ${response.statusCode} for NoDO: ${pesanan['NoDO']}');
 
-        if (data != null) {
-          setState(() {
-            custCoordinate = data['KOORDINAT'].toString();
-            points.add(custCoordinate.toString());
-          });
-          print('_getCoordinate() koordinat: ${custCoordinate}');
-          print('points: ${points}');
+        if (response.statusCode == 200) {
+          var responseBody = jsonDecode(response.body);
+          print('Success: ${responseBody['data']}');
+        } else {
+          print('Failed to upload NoDO ${pesanan['NoDO']}: ${response.body}');
         }
+      } catch (e) {
+        print('Error uploading NoDO ${pesanan['NoDO']}: $e');
       }
-    } catch (e) {
-      print('Error _getCoordinate(): $e');
     }
   }
 
-  Future<void> _tambahPesanan() async {
-    setState(() {
-      isTambah = true;
-    });
-    var url = Uri.parse('$baseUrl/upload/pengiriman');
-
-    String nobukti = inputDoController.text;
-    String kodeCust = customerController.text;
-    String tanggalKirim = tanggalKirimController.text;
-
-    // HeldKarp heldKarp = HeldKarp();
-    // heldKarp.calculateWithHeldKarp(points);
-    print('kodeCust before function _getCoordinates: $kodeCust');
-    _getCoordinates(kodeCust);
-
-    try {
-      var response = await http.post(url,
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({
-            'NoDO': nobukti,
-            'KodeSopir': 'ADI',
-            'KodeCustSupp': kodeCust,
-            'TanggalKirim': tanggalKirim,
-            'Status': 0,
-          }));
-      print('status: ${response.statusCode}');
-
-      if (response.statusCode == 200) {
-        var responseBody = jsonDecode(response.body);
-        var data = responseBody['data'];
-        print('data: $data');
-      } else {
-        print('Failed to load user data: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error occurred: $e');
+  Future<void> _selesai() async {
+    if (points.isEmpty) {
+      print("No coordinates available for calculation.");
+      return;
     }
+
+    setState(() {
+      isCalculating = true;
+    });
+    List<String> sortedKodeCustSupp = await _calculateHeldKarp();
+
+    List<Map<String, dynamic>> sortedPesanan = [];
+    for (String kodeCust in sortedKodeCustSupp) {
+      var pesanan = listOfPesanan.firstWhere(
+        (item) => item['KodeCustSupp'] == kodeCust,
+        orElse: () => {},
+      );
+
+      if (pesanan.isNotEmpty) {
+        sortedPesanan.add(pesanan);
+      }
+    }
+
+    await _uploadPesanan(sortedPesanan);
+
+    setState(() {
+      isCalculating = false;
+    });
   }
 
   List<LatLng> convertToLatLngList(List<String> coordinateStrings) {
     List<LatLng> latLngList = [];
 
     for (var coord in coordinateStrings) {
-      // Split the string by comma
       List<String> parts = coord.split(',');
 
       if (parts.length == 2) {
-        // Parse the latitude and longitude
         double latitude = double.parse(parts[0].trim());
         double longitude = double.parse(parts[1].trim());
 
-        // Create a LatLng object and add it to the list
         latLngList.add(LatLng(latitude, longitude));
       } else {
-        // Handle invalid coordinate string format if needed
         print("Invalid coordinate format: $coord");
       }
     }
@@ -866,13 +985,84 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
     return latLngList;
   }
 
-  Future<void> _calculateHeldKarp() async {
+  Future<List<String>> _calculateHeldKarp() async {
     List<LatLng> pointsConverted = convertToLatLngList(points);
+
     HeldKarp heldKarp = HeldKarp();
     List<LatLng> pointsWithHeldKarp =
         await heldKarp.calculateWithHeldKarp(pointsConverted);
+
     print('before heldkarp: $points');
     print('after heldkarp: $pointsWithHeldKarp');
+
+    List<String> sortedKodeCustSupp = [];
+
+    for (LatLng coord in pointsWithHeldKarp) {
+      String coordString =
+          "${coord.latitude.toStringAsFixed(15)}, ${coord.longitude.toStringAsFixed(15)}";
+      print("Checking for: $coordString");
+
+      for (var entry in custCoordinateMap.entries) {
+        print("Stored: ${entry.value} -> ${entry.key}");
+      }
+
+      String? kodeCust;
+      double epsilon = 0.000001; // Adjust tolerance as needed
+
+      for (var entry in custCoordinateMap.entries) {
+        List<String> storedCoords = entry.value.split(',');
+        double storedLat = double.parse(storedCoords[0]);
+        double storedLng = double.parse(storedCoords[1]);
+
+        if ((storedLat - coord.latitude).abs() < epsilon &&
+            (storedLng - coord.longitude).abs() < epsilon) {
+          kodeCust = entry.key;
+          break; // Stop once we find a match
+        }
+      }
+
+      if (kodeCust != null) {
+        sortedKodeCustSupp.add(kodeCust);
+      }
+    }
+
+    print("Sorted KodeCustSupp after Held-Karp: $sortedKodeCustSupp");
+
+    return sortedKodeCustSupp;
+  }
+
+  Future<void> _hapusPesanan(String noDO, String tanggalKirim) async {
+    print('clicked delete and inside function');
+    print('nodo: $noDO');
+    print('tanggal: $tanggalKirim');
+    var url = Uri.parse('$baseUrl/pengiriman/delete');
+
+    try {
+      var response = await http.post(url,
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'NoDO': noDO,
+            'TanggalKirim': tanggalKirim,
+          }));
+
+      if (response.statusCode == 200) {
+        var responseBody = jsonDecode(response.body);
+        setState(() {
+          listOfPesanan.removeWhere((item) => item['NoDO'] == noDO);
+          isPesananExist = false;
+          message = responseBody['message'];
+          _showTopSnackBar(context, message, Colors.green.shade300);
+        });
+      } else {
+        var responseBody = jsonDecode(response.body);
+        setState(() {
+          message = responseBody['message'];
+          _showTopSnackBar(context, message, Colors.red.shade300);
+        });
+      }
+    } catch (e) {
+      print('Gagal hapus pesanan: $e');
+    }
   }
 
   @override
@@ -1004,8 +1194,7 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
                                 scrollDirection: Axis.vertical,
                                 child: Table(
                                   columnWidths: const {
-                                    0: FlexColumnWidth(
-                                        1), // Adjust these to control the column width ratio
+                                    0: FlexColumnWidth(1),
                                     1: FlexColumnWidth(1),
                                     2: FlexColumnWidth(1),
                                     3: FlexColumnWidth(1),
@@ -1015,7 +1204,6 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
                                   border:
                                       TableBorder.all(color: Colors.grey[300]!),
                                   children: [
-                                    // Header row
                                     TableRow(
                                       decoration: BoxDecoration(
                                           color: Colors.grey[200]),
@@ -1067,33 +1255,28 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
                                                             FontWeight.bold)))),
                                       ],
                                     ),
-                                    // Data rows
                                     ...details.map(
                                       (item) => TableRow(
                                         children: [
                                           Center(
                                             child: Padding(
                                               padding: EdgeInsets.all(8.0),
-                                              // child: Text(item['Kode Barang']!))),
                                               child: Text('${counter++}'),
                                             ),
                                           ),
                                           Center(
                                               child: Padding(
                                                   padding: EdgeInsets.all(8.0),
-                                                  // child: Text(item['Kode Barang']!))),
                                                   child:
                                                       Text(item['KodeBrg']!))),
                                           Center(
                                               child: Padding(
                                                   padding: EdgeInsets.all(8.0),
-                                                  // child: Text(item['Nama Barang']!))),
                                                   child:
                                                       Text(item['NamaBrg']!))),
                                           Center(
                                               child: Padding(
                                                   padding: EdgeInsets.all(8.0),
-                                                  // child: Text(item['Qnt']!))),
                                                   child:
                                                       Text(item['Quantity']!))),
                                           Center(
@@ -1115,11 +1298,8 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
                             ),
                             SizedBox(height: 24),
                             ElevatedButton(
-                              onPressed: () async {
-                                await _tambahPesanan();
-                                setState(() {
-                                  _getPengirimanSupirData();
-                                });
+                              onPressed: () {
+                                _tambahPesanan();
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor:
@@ -1137,12 +1317,10 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
                         )
                   : SizedBox(),
               SizedBox(height: 24),
-              isTambah
-                  ? isLoading
-                      ? Center(
-                          child: CircularProgressIndicator(),
-                        )
-                      : Column(
+              isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : isPesananExist
+                      ? Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Container(
@@ -1156,16 +1334,15 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
                                 scrollDirection: Axis.vertical,
                                 child: Table(
                                   columnWidths: const {
-                                    0: FlexColumnWidth(
-                                        1), // Adjust these to control the column width ratio
+                                    0: FlexColumnWidth(1),
                                     1: FlexColumnWidth(1),
                                     2: FlexColumnWidth(1),
                                     3: FlexColumnWidth(1),
+                                    4: FlexColumnWidth(0.5),
                                   },
                                   border:
                                       TableBorder.all(color: Colors.grey[300]!),
                                   children: [
-                                    // Header row
                                     TableRow(
                                       decoration: BoxDecoration(
                                           color: Colors.grey[200]),
@@ -1201,6 +1378,13 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
                                                     style: TextStyle(
                                                         fontWeight:
                                                             FontWeight.bold)))),
+                                        Center(
+                                            child: Padding(
+                                                padding: EdgeInsets.all(8.0),
+                                                child: Text('Hapus',
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold)))),
                                       ],
                                     ),
                                     // Data rows
@@ -1210,7 +1394,6 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
                                           Center(
                                             child: Padding(
                                               padding: EdgeInsets.all(8.0),
-                                              // child: Text(item['Kode Barang']!))),
                                               child: Text('${counterTambah++}'),
                                             ),
                                           ),
@@ -1227,6 +1410,23 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
                                               child: Padding(
                                                   padding: EdgeInsets.all(8.0),
                                                   child: Text(item['Nama']!))),
+                                          Center(
+                                            child: Padding(
+                                              padding: EdgeInsets.all(8.0),
+                                              child: IconButton(
+                                                  onPressed: () {
+                                                    print('pressed hapus');
+                                                    _hapusPesanan(
+                                                        item['NoDO']!,
+                                                        tanggalKirimController
+                                                            .text);
+                                                  },
+                                                  icon: Icon(
+                                                    Icons.delete,
+                                                    color: Colors.red,
+                                                  )),
+                                            ),
+                                          ),
                                         ],
                                       ),
                                     ),
@@ -1235,32 +1435,31 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
                               ),
                             ),
                             SizedBox(height: 24),
-                            ElevatedButton(
-                              onPressed: () {
-                                // _tambahPesanan();
-                                _calculateHeldKarp();
-                                Navigator.of(context).pushNamed('/supirProses');
-                                // Navigator.push(
-                                //   context,
-                                //   MaterialPageRoute(
-                                //       builder: (context) => SupirProsesPage()),
-                                // );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    Color.fromARGB(255, 23, 96, 232),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                              child: Text(
-                                'Selesai',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
+                            isCalculating
+                                ? Center(
+                                    child: CircularProgressIndicator(),
+                                  )
+                                : ElevatedButton(
+                                    onPressed: () async {
+                                      await _selesai();
+                                      Navigator.of(context)
+                                          .pushNamed('/supirProses');
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor:
+                                          Color.fromARGB(255, 23, 96, 232),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      'Selesai',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ),
                           ],
                         )
-                  : SizedBox(),
+                      : SizedBox(),
             ],
           ),
         ),
