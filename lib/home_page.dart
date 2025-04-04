@@ -2,6 +2,7 @@
 
 import 'package:aplikasi_1/main.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -17,7 +18,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  var baseUrl = 'http://10.0.2.2/backend_api';
+  var baseUrl = dotenv.env['BASE_URL'];
 
   DateTime now = DateTime.now();
 
@@ -228,33 +229,44 @@ class _HomePageState extends State<HomePage> {
                           children: [
                             Icon(Icons.notifications_outlined),
                             SizedBox(width: 16),
-                            Text(
-                              notif,
-                              style: TextStyle(color: textColor),
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                notif,
+                                style: TextStyle(color: textColor),
+                              ),
                             ),
                           ],
                         ),
                         noNotif
                             ? SizedBox()
-                            : FilledButton(
-                                onPressed: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) => Navbar(
-                                        chosenIndex: 1,
+                            : Flexible(
+                                // 🔹 Makes the button flexible
+                                child: FilledButton(
+                                  onPressed: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => Navbar(
+                                          chosenIndex: 1,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  style: ButtonStyle(
+                                    backgroundColor:
+                                        WidgetStateProperty.all(buttonColor),
+                                    shape: WidgetStateProperty.all(
+                                      RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
                                       ),
                                     ),
-                                  );
-                                },
-                                style: ButtonStyle(
-                                  backgroundColor:
-                                      WidgetStateProperty.all(buttonColor),
-                                  shape: WidgetStateProperty.all(
-                                      RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  )),
+                                  ),
+                                  child: FittedBox(
+                                    // 🔹 Ensures text scales correctly
+                                    fit: BoxFit.scaleDown,
+                                    child: Text('Lihat Detail'),
+                                  ),
                                 ),
-                                child: Text('Lihat Detail'),
                               ),
                       ],
                     ),
@@ -314,7 +326,7 @@ class _PesananPageState extends State<PesananPage> {
   Color textColor = Color.fromARGB(255, 82, 89, 105);
   Color backgroundColor = Color.fromARGB(255, 245, 245, 245);
 
-  var baseUrl = 'http://10.0.2.2/backend_api';
+  var baseUrl = dotenv.env['BASE_URL'];
   DateTime now = DateTime.now();
 
   final LatLng _initialPosition = LatLng(37.42796133580664, -122.085749655962);
@@ -948,7 +960,7 @@ class SelesaiPage extends StatefulWidget {
 }
 
 class _SelesaiPageState extends State<SelesaiPage> {
-  var baseUrl = 'http://10.0.2.2/backend_api';
+  var baseUrl = dotenv.env['BASE_URL'];
 
   List<Map<String, dynamic>> filteredOrdersData = [];
 
