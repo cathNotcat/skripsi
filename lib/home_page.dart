@@ -3,12 +3,15 @@
 import 'package:aplikasi_1/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
+import 'dart:math';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -329,16 +332,13 @@ class _PesananPageState extends State<PesananPage> {
   var baseUrl = dotenv.env['BASE_URL'];
   DateTime now = DateTime.now();
 
-  final LatLng _initialPosition = LatLng(37.42796133580664, -122.085749655962);
-
-  void _onMapCreated(GoogleMapController controller) {}
-
   String detNoDO = '';
   String detAlamat = '';
   String detCust = '';
   String detJumlahBrg = '';
   String detStatus = '';
   String detNoPeng = '';
+  String detNoUrut = '';
 
   List<String> detKodeBrg = [];
   List<String> detQty = [];
@@ -354,10 +354,98 @@ class _PesananPageState extends State<PesananPage> {
 
   int pesanan = 0;
 
+  late GoogleMapController mapController;
+  LatLng _initialPosition = LatLng(0, 0);
+  // LatLng _initialPosition = LatLng(-7.375729652261953, 112.6788318829139);
+  List<LatLng> points = [
+    // LatLng(-7.375729652261953, 112.6788318829139),
+  ];
+  final Set<Polyline> _polylines = {};
+  final Set<Marker> _markers = {};
+
   @override
   void initState() {
     super.initState();
-    _getPengirimanSupirData();
+    _getLatLong();
+  }
+
+  Future<void> _getLatLong() async {
+    final prefs = await SharedPreferences.getInstance();
+    double? lat = prefs.getDouble('latitude');
+    double? lng = prefs.getDouble('longitude');
+    if (lat != null && lng != null) {
+      setState(() {
+        _initialPosition = LatLng(lat, lng);
+        points.clear();
+        points.add(_initialPosition);
+      });
+    }
+    print('initial position: $_initialPosition');
+  }
+
+  Future<void> _initializeWithAsync() async {
+    await _getPengirimanSupirData();
+
+    _initializeMarkers();
+    _moveCameraToShowRoute();
+  }
+
+  void _initializeMarkers() {
+    for (int i = 0; i < points.length; i++) {
+      _markers.add(Marker(
+        markerId: MarkerId('marker_$i'),
+        position: points[i],
+        infoWindow: InfoWindow(
+          title: 'Destination ${i + 1}',
+          snippet: 'Location ${i + 1}',
+        ),
+      ));
+    }
+  }
+
+  void _moveCameraToShowRoute() {
+    if (_polylines.isNotEmpty) {
+      LatLngBounds bounds = LatLngBounds(
+        southwest: LatLng(
+          points.map((e) => e.latitude).reduce(min),
+          points.map((e) => e.longitude).reduce(min),
+        ),
+        northeast: LatLng(
+          points.map((e) => e.latitude).reduce(max),
+          points.map((e) => e.longitude).reduce(max),
+        ),
+      );
+
+      mapController.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50));
+    }
+  }
+
+  Future<List<LatLng>> getPolylinePoints(LatLng start, LatLng end) async {
+    final origin = '${start.latitude},${start.longitude}';
+    final destination = '${end.latitude},${end.longitude}';
+    final apiKey =
+        dotenv.env['GOOGLEMAPS_API_KEY']; // Replace with your real key
+
+    final url = Uri.parse(
+      'https://maps.googleapis.com/maps/api/directions/json?origin=$origin&destination=$destination&key=$apiKey',
+    );
+
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+
+      if (data['routes'].isNotEmpty) {
+        final points = data['routes'][0]['overview_polyline']['points'];
+        final polylinePoints = PolylinePoints().decodePolyline(points);
+
+        return polylinePoints
+            .map((e) => LatLng(e.latitude, e.longitude))
+            .toList();
+      }
+    }
+
+    return [];
   }
 
   Future<void> _getPengirimanSupirData() async {
@@ -376,9 +464,23 @@ class _PesananPageState extends State<PesananPage> {
           setState(() {
             details = List<Map<String, dynamic>>.from(
                 data.map((item) => item as Map<String, dynamic>));
+
             for (var det in details) {
               if (det['Status'] == "2") {
                 isPesananSelesai = true;
+              }
+
+              String? koordinat = det['Koordinat'];
+              if (koordinat != null || koordinat!.isNotEmpty) {
+                var parts = koordinat.split(',');
+                if (parts.length == 2) {
+                  double? lat = double.tryParse(parts[0].trim());
+                  double? lng = double.tryParse(parts[1].trim());
+
+                  if (lat != null && lng != null) {
+                    points.add(LatLng(lat, lng));
+                  }
+                }
               }
             }
             pesanan = data.length;
@@ -387,20 +489,39 @@ class _PesananPageState extends State<PesananPage> {
               isDataAvailable = true;
             }
           });
-          print(details[0]['NoDO']);
+
+          for (int i = 0; i < points.length - 1; i++) {
+            final start = points[i];
+            final end = points[i + 1];
+
+            List<LatLng> routeSegment = await getPolylinePoints(start, end);
+
+            setState(() {
+              _polylines.add(
+                Polyline(
+                  polylineId: PolylineId('route_$i'),
+                  points: routeSegment,
+                  color: Colors.blue,
+                  width: 5,
+                ),
+              );
+            });
+          }
         } else {
-          print('Unexpected response structure.');
+          print(
+              'Unexpected response structure in _getPengirimanSupirData() in PesananPage');
         }
       } else {
         print(
-            'Failed to load user data(getpengiriman on pesanan page): ${response.statusCode}');
+            'Gagal load user data di _getPengirimanSupirData di PesananPage: ${response.statusCode}');
       }
     } catch (e) {
       print('Error occurred: $e');
     }
   }
 
-  Future<void> _confirmModal(BuildContext context, String noPeng) {
+  Future<void> _confirmModal(
+      BuildContext context, String noPeng, String noUrut) {
     print('ispesanan selesai: $isPesananSelesai');
     return showDialog<void>(
       context: context,
@@ -442,7 +563,7 @@ class _PesananPageState extends State<PesananPage> {
                     style: TextStyle(color: Colors.white),
                   ),
                   onPressed: () {
-                    _changeStatus(noPeng, 2);
+                    _changeStatus(noPeng, noUrut, 2);
                     setState(() {
                       _getPengirimanSupirData();
                       detStatus = '2';
@@ -498,11 +619,12 @@ class _PesananPageState extends State<PesananPage> {
     }
   }
 
-  Future<void> _changeStatus(String noPeng, int statusChange) async {
+  Future<void> _changeStatus(
+      String noPeng, String noUrut, int statusChange) async {
     print('no bukti: $noPeng');
     print('status change: $statusChange');
 
-    var url = Uri.parse('$baseUrl/pengiriman/update/$noPeng');
+    var url = Uri.parse('$baseUrl/pengiriman/update/$noPeng/$noUrut');
 
     try {
       var response = await http.put(
@@ -567,20 +689,37 @@ class _PesananPageState extends State<PesananPage> {
       body: SlidingUpPanel(
         minHeight: 150,
         maxHeight: MediaQuery.of(context).size.height * 0.7,
-        body: GoogleMap(
-          onMapCreated: _onMapCreated,
-          initialCameraPosition: CameraPosition(
-            target: _initialPosition,
-            zoom: 14,
-          ),
-          markers: {
-            Marker(
-              markerId: MarkerId('marker_1'),
-              position: _initialPosition,
-              infoWindow: InfoWindow(title: 'My Marker'),
-            ),
-          },
-        ),
+        body:
+            (_initialPosition.latitude == 0 && _initialPosition.longitude == 0)
+                ? Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : GoogleMap(
+                    initialCameraPosition: CameraPosition(
+                      target: _initialPosition,
+                      zoom: 12,
+                    ),
+                    polylines: _polylines,
+                    markers: _markers,
+                    onMapCreated: (GoogleMapController controller) {
+                      mapController = controller;
+                      _initializeWithAsync();
+                    },
+                  ),
+        // GoogleMap(
+        //   onMapCreated: _onMapCreated,
+        //   initialCameraPosition: CameraPosition(
+        //     target: _initialPosition,
+        //     zoom: 14,
+        //   ),
+        //   markers: {
+        //     Marker(
+        //       markerId: MarkerId('marker_1'),
+        //       position: _initialPosition,
+        //       infoWindow: InfoWindow(title: 'My Marker'),
+        //     ),
+        //   },
+        // ),
         panel: Container(
           color: backgroundColor,
           child: Column(
@@ -711,7 +850,8 @@ class _PesananPageState extends State<PesananPage> {
                                   pilihan_widget = 1;
                                   index_selected = index;
                                   if (item['Status'] != "2") {
-                                    _changeStatus(item['NoPengiriman'], 1);
+                                    _changeStatus(item['NoPengiriman'],
+                                        item['NoUrut'], 1);
                                     detStatus = '1';
                                   }
                                   detNoDO = item['NoDO'];
@@ -719,6 +859,7 @@ class _PesananPageState extends State<PesananPage> {
                                   detCust = item['Nama'];
                                   detJumlahBrg = item['JumlahBarang'];
                                   detNoPeng = item['NoPengiriman'];
+                                  detNoUrut = item['NoUrut'];
                                   _getPengirimanSupirData();
                                   _getDbsppDetData(item['NoDO']);
                                 });
@@ -742,211 +883,217 @@ class _PesananPageState extends State<PesananPage> {
   }
 
   Widget _detailPesananPage() {
-    return Container(
-      margin: EdgeInsets.all(10),
-      padding: EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                pilihan_widget = 0;
-              });
-            },
-            child: Row(
-              children: [
-                Icon(
-                  Icons.arrow_back_ios_new,
-                  color: Color.fromARGB(255, 152, 162, 179),
-                ),
-                SizedBox(width: 16),
-                Text(
-                  'Back',
-                  style: TextStyle(color: Color.fromARGB(255, 152, 162, 179)),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return SafeArea(
+      child: SingleChildScrollView(
+        child: Container(
+          margin: EdgeInsets.all(10),
+          padding: EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                // 'SON/00054/0724/MM',
-                detNoDO,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-              Container(
-                padding:
-                    EdgeInsets.only(top: 8, bottom: 8, left: 12, right: 12),
-                decoration: BoxDecoration(
-                    color: getStatusColor(detStatus),
-                    borderRadius: BorderRadius.all(Radius.circular(20))),
-                child: Text(
-                  getStatusString(detStatus),
-                  style: TextStyle(
-                      color: getStatusTextColor(detStatus),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14),
-                ),
-              )
-            ],
-          ),
-          SizedBox(height: 10),
-          Row(
-            children: [
-              Icon(
-                Icons.location_on_outlined,
-                size: 20,
-              ),
-              SizedBox(width: 8),
-              Text(
-                // 'Jl. Pasar Turi no. 19-21',
-                detAlamat,
-                style: TextStyle(color: textColor, fontSize: 14),
-              )
-            ],
-          ),
-          SizedBox(height: 10),
-          Row(
-            children: [
-              Icon(
-                Icons.person_outline,
-                size: 20,
-              ),
-              SizedBox(width: 8),
-              Text(
-                // 'Sastroijo Pungli',
-                detCust,
-                style: TextStyle(color: textColor, fontSize: 14),
-              )
-            ],
-          ),
-          SizedBox(height: 8),
-          Row(
-            children: [
-              Icon(
-                Icons.inbox_outlined,
-                size: 20,
-              ),
-              SizedBox(width: 8),
-              Text(
-                // '3 jenis barang',
-                '$detJumlahBrg jenis barang',
-                style: TextStyle(color: textColor, fontSize: 14),
-              )
-            ],
-          ),
-          SizedBox(height: 16),
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: containerColor,
-              borderRadius: BorderRadius.all(Radius.circular(10)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Detail Barang',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Divider(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    pilihan_widget = 0;
+                  });
+                },
+                child: Row(
                   children: [
-                    Text(
-                      'Kode Barang',
-                      style:
-                          TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                    Icon(
+                      Icons.arrow_back_ios_new,
+                      color: Color.fromARGB(255, 152, 162, 179),
                     ),
+                    SizedBox(width: 16),
                     Text(
-                      'Jumlah',
+                      'Back',
                       style:
-                          TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                          TextStyle(color: Color.fromARGB(255, 152, 162, 179)),
                     ),
                   ],
                 ),
-                // SizedBox(height: 16),
-                Container(
-                  height: (50 * detDetails.length).toDouble(),
-                  // height: 100,
-                  child: ListView.builder(
-                      itemCount: detDetails.length,
-                      itemBuilder: (context, index) {
-                        return Container(
-                          padding: EdgeInsets.only(bottom: 3),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                // detKodeBrg[index],
-                                detDetails[index]['KodeBrg'],
-                                style: TextStyle(
-                                  fontSize: 14,
-                                ),
-                              ),
-                              Text(
-                                // '${detQty[index]}',
-                                detDetails[index]['Quantity'],
-                                style: TextStyle(
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
-                )
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.only(top: 24),
-            child: SizedBox(
-              width: double.infinity,
-              height: 40,
-              child: FilledButton(
-                style: FilledButton.styleFrom(
-                  backgroundColor: detStatus == "2"
-                      ? Color.fromARGB(255, 217, 217, 217)
-                      : Color.fromARGB(255, 13, 130, 75),
-                  // backgroundColor: const Color.fromARGB(255, 13, 130, 75),
-                  foregroundColor: detStatus == "2"
-                      ? Color.fromARGB(255, 82, 89, 105)
-                      : Colors.white,
-                  // foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+              ),
+              SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    detNoDO,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
                   ),
-                  textStyle: const TextStyle(
-                    fontSize: 16.0,
+                  Container(
+                    padding:
+                        EdgeInsets.only(top: 8, bottom: 8, left: 12, right: 12),
+                    decoration: BoxDecoration(
+                        color: getStatusColor(detStatus),
+                        borderRadius: BorderRadius.all(Radius.circular(20))),
+                    child: Text(
+                      getStatusString(detStatus),
+                      style: TextStyle(
+                          color: getStatusTextColor(detStatus),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14),
+                    ),
+                  )
+                ],
+              ),
+              SizedBox(height: 10),
+              Row(
+                children: [
+                  Icon(
+                    Icons.location_on_outlined,
+                    size: 20,
                   ),
+                  SizedBox(width: 8),
+                  Text(
+                    // 'Jl. Pasar Turi no. 19-21',
+                    detAlamat,
+                    style: TextStyle(color: textColor, fontSize: 14),
+                  )
+                ],
+              ),
+              SizedBox(height: 10),
+              Row(
+                children: [
+                  Icon(
+                    Icons.person_outline,
+                    size: 20,
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    // 'Sastroijo Pungli',
+                    detCust,
+                    style: TextStyle(color: textColor, fontSize: 14),
+                  )
+                ],
+              ),
+              SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(
+                    Icons.inbox_outlined,
+                    size: 20,
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    '$detJumlahBrg jenis barang',
+                    style: TextStyle(color: textColor, fontSize: 14),
+                  )
+                ],
+              ),
+              SizedBox(height: 16),
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: containerColor,
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
                 ),
-                onPressed: () {
-                  print('detnopeng: $detNoPeng');
-                  if (detStatus != '2') {
-                    _confirmModal(context, detNoPeng);
-                    getStatusColor(detStatus);
-                    getStatusString(detStatus);
-                    getStatusTextColor(detStatus);
-                  }
-                },
-                child: Text(
-                  detStatus == '2' ? 'Pesanan Selesai' : 'Selesaikan Pesanan',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Detail Barang',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Divider(),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Kode Barang',
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          'Jumlah',
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      height: (40 * detDetails.length).toDouble(),
+                      constraints: BoxConstraints(
+                        maxHeight: 160, // 💡 adjust max height as needed
+                      ),
+                      child: ListView.builder(
+                          itemCount: detDetails.length,
+                          itemBuilder: (context, index) {
+                            return Container(
+                              padding: EdgeInsets.only(bottom: 3),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    // detKodeBrg[index],
+                                    detDetails[index]['KodeBrg'],
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  Text(
+                                    // '${detQty[index]}',
+                                    detDetails[index]['Quantity'],
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }),
+                    )
+                  ],
                 ),
               ),
-            ),
+              Container(
+                padding: const EdgeInsets.only(top: 24),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 40,
+                  child: FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: detStatus == "2"
+                          ? Color.fromARGB(255, 217, 217, 217)
+                          : Color.fromARGB(255, 13, 130, 75),
+                      // backgroundColor: const Color.fromARGB(255, 13, 130, 75),
+                      foregroundColor: detStatus == "2"
+                          ? Color.fromARGB(255, 82, 89, 105)
+                          : Colors.white,
+                      // foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      textStyle: const TextStyle(
+                        fontSize: 16.0,
+                      ),
+                    ),
+                    onPressed: () {
+                      if (detStatus != '2') {
+                        _confirmModal(context, detNoPeng, detNoUrut);
+                        getStatusColor(detStatus);
+                        getStatusString(detStatus);
+                        getStatusTextColor(detStatus);
+                      }
+                    },
+                    child: Text(
+                      detStatus == '2'
+                          ? 'Pesanan Selesai'
+                          : 'Selesaikan Pesanan',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

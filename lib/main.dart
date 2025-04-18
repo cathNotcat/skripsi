@@ -1,15 +1,41 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:aplikasi_1/home_page.dart';
-import 'package:aplikasi_1/login_page.dart';
+// import 'package:aplikasi_1/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:intl/intl.dart';
+import 'package:geolocator/geolocator.dart';
+// import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await requestLocationPermission();
   await dotenv.load();
   runApp(const MainApp());
+}
+
+Future<void> requestLocationPermission() async {
+  // Using permission_handler
+  if (await Permission.location.request().isGranted) {
+    print("Location permission granted.");
+  } else {
+    print("Location permission denied.");
+  }
+
+  // Optionally check service enabled too
+  bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    print("Location services are disabled.");
+  }
+  Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high);
+  print(position.latitude);
+  print(position.longitude);
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setDouble('latitude', position.latitude);
+  await prefs.setDouble('longitude', position.longitude);
 }
 
 class MainApp extends StatelessWidget {
