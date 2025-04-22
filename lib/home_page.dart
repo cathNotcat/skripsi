@@ -1,6 +1,8 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:aplikasi_1/main.dart';
+import 'package:aplikasi_1/model/sopir.dart';
+import 'package:aplikasi_1/services/sopir_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -25,7 +27,9 @@ class _HomePageState extends State<HomePage> {
 
   DateTime now = DateTime.now();
 
-  String nama = '';
+  final SopirService sopirService = SopirService();
+  Sopir? sopir;
+
   String hariIni = '';
 
   String notif = 'Tidak ada pesanan untuk hari ini';
@@ -45,8 +49,8 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _formatDate();
-    _getSopir();
     _getPengirimanSupirData();
+    _getSopir();
   }
 
   void _formatDate() {
@@ -110,28 +114,15 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<void> _getSopir() async {
-    var url = Uri.parse('$baseUrl/sopir/adi');
-
-    try {
-      var response = await http.get(url);
-
-      if (response.statusCode == 200) {
-        var responseBody = jsonDecode(response.body);
-        var data = responseBody['data'];
-        if (data != null) {
-          setState(() {
-            nama = data['kodesopir'];
-            isLoadingSupir = false;
-          });
-        } else {
-          print('Unexpected response structure.');
-        }
-      } else {
-        print('Failed to load user data: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error occurred: $e');
+  void _getSopir() async {
+    final result = await sopirService.getSopir();
+    print('sopir belum: ${sopir}');
+    if (mounted) {
+      setState(() {
+        sopir = result;
+        isLoadingSupir = false;
+        print('sopir: ${sopir}');
+      });
     }
   }
 
@@ -161,7 +152,7 @@ class _HomePageState extends State<HomePage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          nama,
+                          sopir!.kodeSopir,
                           style: TextStyle(
                               fontSize: 42, fontWeight: FontWeight.bold),
                         ),
@@ -232,45 +223,46 @@ class _HomePageState extends State<HomePage> {
                           children: [
                             Icon(Icons.notifications_outlined),
                             SizedBox(width: 16),
-                            FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                notif,
-                                style: TextStyle(color: textColor),
-                              ),
-                            ),
-                          ],
-                        ),
-                        noNotif
-                            ? SizedBox()
-                            : Flexible(
-                                // 🔹 Makes the button flexible
-                                child: FilledButton(
-                                  onPressed: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) => Navbar(
-                                          chosenIndex: 1,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  notif,
+                                  style: TextStyle(color: textColor),
+                                ),
+                                noNotif
+                                    ? SizedBox()
+                                    : FilledButton(
+                                        onPressed: () {
+                                          Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                              builder: (context) => Navbar(
+                                                chosenIndex: 1,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        style: ButtonStyle(
+                                          backgroundColor:
+                                              WidgetStateProperty.all(
+                                                  buttonColor),
+                                          shape: WidgetStateProperty.all(
+                                            RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                          ),
+                                        ),
+                                        child: FittedBox(
+                                          // 🔹 Ensures text scales correctly
+                                          fit: BoxFit.scaleDown,
+                                          child: Text('Lihat Detail'),
                                         ),
                                       ),
-                                    );
-                                  },
-                                  style: ButtonStyle(
-                                    backgroundColor:
-                                        WidgetStateProperty.all(buttonColor),
-                                    shape: WidgetStateProperty.all(
-                                      RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                    ),
-                                  ),
-                                  child: FittedBox(
-                                    // 🔹 Ensures text scales correctly
-                                    fit: BoxFit.scaleDown,
-                                    child: Text('Lihat Detail'),
-                                  ),
-                                ),
-                              ),
+                              ],
+                            )
+                          ],
+                        ),
                       ],
                     ),
                   ),
