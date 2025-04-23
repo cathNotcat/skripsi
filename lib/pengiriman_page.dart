@@ -684,6 +684,7 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
   Map<String, String> custCoordinateMap = {};
   String namaCust = '';
   String message = '';
+  int counter = 1;
 
   DateTime now = DateTime.now();
 
@@ -739,8 +740,9 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
 
   Future<void> _getDbsppData() async {
     var url = Uri.parse('$baseUrl/dbspp/nobukti');
-    String nobukti = inputDoController.text;
     String formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
+
+    String nobukti = inputDoController.text;
 
     try {
       var response = await http.post(url,
@@ -761,15 +763,18 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
             noSoController.text = data['NoSO'];
             noPesanController.text = data['NoPesan'];
             customerController.text = data['KodeCustSupp'];
+            isLihatDetail = true;
           });
+          _getDbsppDetData();
         } else {
-          print('Unexpected response structure.');
+          print('No NoDO');
         }
       } else {
-        print('Failed to load user data: ${response.statusCode}');
+        _showTopSnackBar(context, "No. DO tidak valid!", Colors.red);
+        print('Failed to getDbSPP data: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error occurred: $e');
+      print('Error in getDbSPP data: $e');
     }
   }
 
@@ -811,29 +816,28 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
     setState(() {
       isPesananExist = true;
     });
-
     String nobukti = inputDoController.text;
     String kodeCust = customerController.text;
     String tanggalKirim = tanggalKirimController.text;
-
-    await _getCustDetails(kodeCust);
 
     bool isNoDOExist = listOfPesanan.any((item) => item['NoDO'] == nobukti);
 
     if (isNoDOExist) {
       _showTopSnackBar(context, "No. DO sudah ada!", Colors.red);
       return;
-    }
+    } else {
+      await _getCustDetails(kodeCust);
 
-    listOfPesanan.add({
-      'NoDO': nobukti,
-      'KodeSopir': 'ADI',
-      'KodeCustSupp': kodeCust,
-      'TanggalKirim': tanggalKirim,
-      'Nama': namaCust,
-      'Status': 0,
-    });
-    print('after listOfPesanan added');
+      listOfPesanan.add({
+        'NoDO': nobukti,
+        'KodeSopir': 'ADI',
+        'KodeCustSupp': kodeCust,
+        'TanggalKirim': tanggalKirim,
+        'Nama': namaCust,
+        'Status': 0,
+      });
+      print('after listOfPesanan added');
+    }
   }
 
   void _showTopSnackBar(
@@ -936,6 +940,40 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
     }
   }
 
+  Future<void> _sendNotification(
+      List<Map<String, dynamic>> sortedPesanan) async {
+    var url = Uri.parse('$baseUrl/notification/send');
+
+    for (var pesanan in sortedPesanan) {
+      print('No DO di notif: ${pesanan['NoDO']}');
+      String nodo = pesanan['NoDO'];
+      try {
+        var response = await http.post(
+          url,
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'device_token':
+                'dZjEdjb_Q_-wVGIoG8w75J:APA91bEsKNDpMlsiHPecixbVBtVtTCJKadNRkCGF0eFRWmM04iFmFbPfRNkDlRtYXkeqpNkYVBvbN-bW_XwNfsDRhOJhtU-dLNajYkCzcnmhOPkgq2oN-bc',
+            'title': 'Pesanan Baru!',
+            'body': 'Terdapat pesanan $nodo'
+          }),
+        );
+
+        print('Status: ${response.statusCode} for NoDO: ${pesanan['NoDO']}');
+
+        if (response.statusCode == 200) {
+          var responseBody = jsonDecode(response.body);
+          print('Success: ${responseBody['message']}');
+        } else {
+          print(
+              'Failed to send notification ${pesanan['NoDO']}: ${response.body}');
+        }
+      } catch (e) {
+        print('Error sending notification ${pesanan['NoDO']}: $e');
+      }
+    }
+  }
+
   Future<void> _selesai() async {
     if (points.isEmpty) {
       print("No coordinates available for calculation.");
@@ -960,6 +998,7 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
     }
 
     await _uploadPesanan(sortedPesanan);
+    await _sendNotification(sortedPesanan);
 
     setState(() {
       isCalculating = false;
@@ -1032,9 +1071,9 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
   }
 
   Future<void> _hapusPesanan(String noDO, String tanggalKirim) async {
-    print('clicked delete and inside function');
-    print('nodo: $noDO');
-    print('tanggal: $tanggalKirim');
+    setState(() {
+      listOfPesanan.removeWhere((item) => item['NoDO'] == noDO);
+    });
     var url = Uri.parse('$baseUrl/pengiriman/delete');
 
     try {
@@ -1049,15 +1088,8 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
         var responseBody = jsonDecode(response.body);
         setState(() {
           listOfPesanan.removeWhere((item) => item['NoDO'] == noDO);
-          isPesananExist = false;
           message = responseBody['message'];
           _showTopSnackBar(context, message, Colors.green.shade300);
-        });
-      } else {
-        var responseBody = jsonDecode(response.body);
-        setState(() {
-          message = responseBody['message'];
-          _showTopSnackBar(context, message, Colors.red.shade300);
         });
       }
     } catch (e) {
@@ -1067,7 +1099,6 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
 
   @override
   Widget build(BuildContext context) {
-    int counter = 1;
     int counterTambah = 1;
     return Scaffold(
       body: SingleChildScrollView(
@@ -1148,10 +1179,8 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
                               ElevatedButton(
                                 onPressed: () {
                                   _getDbsppData();
-                                  _getDbsppDetData();
                                   setState(() {
                                     counter = 1;
-                                    isLihatDetail = true;
                                   });
                                 },
                                 style: ElevatedButton.styleFrom(
