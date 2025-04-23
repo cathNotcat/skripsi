@@ -43,3 +43,7 @@ Route::post('/pengiriman/delete', 'post_delete_pesanan@deleteData');
 Route::get('/pengiriman/tanggal/{tanggal}', 'get_detail_dbpengiriman_by_tanggal@getData');
 Route::put('/pengiriman/update/{NoPengiriman}/{NoUrut}', 'put_update_status_dbPengiriman@updateStatus');
 
+// Notif
+// Route::post('/notification/send', 'post_notification@sendNotification');
+
+Route::post('/notification/send', 'post_notification@sendNotification');

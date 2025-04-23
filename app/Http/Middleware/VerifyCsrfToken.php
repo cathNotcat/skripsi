@@ -18,5 +18,6 @@ class VerifyCsrfToken extends Middleware
         '/upload/pengiriman',
         '/pengiriman/update/*',
         '/pengiriman/delete',
+        '/notification/send'
     ];
 }

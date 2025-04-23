@@ -1,9 +1,15 @@
 <?php
 
-use App\Http\Controllers\get_detail_nobukti_by_tanggal;
+use App\Http\Controllers\post_notification;
+use App\Http\Controllers\get_alamat_by_kodecust;
+use App\Http\Controllers\post_delete_pesanan;
+use App\Http\Controllers\get_sopir;
+use App\Http\Controllers\get_detail_dbpengiriman_by_tanggal;
+use App\Http\Controllers\put_update_status_dbPengiriman;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\post_upload_dbPengiriman;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -24,11 +30,11 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 // Route::get('/spReport', 'tesApiCathController@spReport');
 
 // SO
-Route::get('/dbso', 'get_dbso@getData');
-Route::get('/dbso/tanggal', 'get_all_nobukti_by_tanggal@getData');
-Route::get('/dbso/tanggal/{tanggal}', [get_detail_nobukti_by_tanggal::class, 'getData']);
-Route::get('/dbso/cust', 'get_kodecust_by_tanggalSO@getData');
-Route::get('/dbso/detail/{nobukti}', [get_sodet_by_nobukti::class, 'getData']);
+// Route::get('/dbso', 'get_dbso@getData');
+// Route::get('/dbso/tanggal', 'get_all_nobukti_by_tanggal@getData');
+// Route::get('/dbso/tanggal/{tanggal}', [get_detail_nobukti_by_tanggal::class, 'getData']);
+// Route::get('/dbso/cust', 'get_kodecust_by_tanggalSO@getData');
+// Route::get('/dbso/detail/{nobukti}', [get_sodet_by_nobukti::class, 'getData']);
 
 // CUST
 Route::get('/customer/alamat/{kode}', [get_alamat_by_kodecust::class, 'getData']);
@@ -44,11 +50,13 @@ Route::post('/dbspp/nobukti', 'post_dbspp_nobukti@getDataByNOBUKTI');
 
 // Pengiriman
 Route::post('/upload/pengiriman', 'post_upload_dbPengiriman@uploadDataPengiriman');
-// Route::post('/pengiriman/delete', 'post_delete_pesanan@deleteData');
 Route::post('/pengiriman/delete', [post_delete_pesanan::class, 'deleteData']);
 Route::get('/pengiriman/tanggal/{tanggal}', [get_detail_dbpengiriman_by_tanggal::class, 'getData']);
 Route::put('/pengiriman/update/{NoPengiriman}/{NoUrut}', [put_update_status_dbPengiriman::class, 'updateStatus']);
 
+// Notif
+Route::post('/notification/send', [post_notification::class, 'sendNotification']);
+// Route::post('/notification/send', [post_notification::class, 'sendNotification']);
 
 
 
