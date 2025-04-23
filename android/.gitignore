@@ -11,3 +11,22 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+
+# Android-specific
+android/.gradle/
+android/app/build/
+*.iml
+.gradle/
+local.properties
+*.lock
+*.json
+
+# CMake and native build
+cmake-build-*
+CMakeFiles/
+CMakeCache.txt
+Makefile
+*.cmake
+
+# Misc
+*.log
