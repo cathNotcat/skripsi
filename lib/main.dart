@@ -1,16 +1,21 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:aplikasi_1/firebase_options.dart';
 import 'package:aplikasi_1/home_page.dart';
-// import 'package:aplikasi_1/login_page.dart';
+import 'package:aplikasi_1/services/notification_service.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';
-// import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  await NotificationService.instance.initialize();
   await requestLocationPermission();
   await dotenv.load();
   runApp(const MainApp());
@@ -48,13 +53,6 @@ class MainApp extends StatelessWidget {
           scaffoldBackgroundColor: Color.fromARGB(255, 245, 245, 245),
           bottomNavigationBarTheme: BottomNavigationBarThemeData(
               backgroundColor: Color.fromARGB(255, 255, 255, 255)),
-          // primaryColor: Color.fromARGB(255, 23, 96, 232),
-          // colorScheme: ColorScheme.fromSwatch().copyWith(
-          //   secondary: Color.fromARGB(255, 255, 255, 255),
-          //   tertiary: Color.fromARGB(255, 82, 89, 105),
-          // ),
-
-          // textTheme: GoogleFonts.aBeeZeeTextTheme(),
           textTheme: TextTheme(
             bodyMedium: TextStyle(fontSize: 16),
           )),
