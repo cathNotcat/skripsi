@@ -7,664 +7,657 @@ import 'package:web_admin_1/held_karp.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-class PengirimanPage extends StatefulWidget {
-  const PengirimanPage({super.key});
+// class PengirimanPage extends StatefulWidget {
+//   const PengirimanPage({super.key});
 
-  @override
-  State<PengirimanPage> createState() => _PengirimanPageState();
-}
+//   @override
+//   State<PengirimanPage> createState() => _PengirimanPageState();
+// }
 
-class _PengirimanPageState extends State<PengirimanPage> {
-  var baseUrl = dotenv.env['BASE_URL'] ?? '';
+// class _PengirimanPageState extends State<PengirimanPage> {
+//   var baseUrl = dotenv.env['BASE_URL'] ?? '';
 
-  DateTime now = DateTime.now();
+//   DateTime now = DateTime.now();
 
-  int pesanan = 0;
-  int belumDikirim = 0;
-  int sedangDikirim = 0;
-  int selesai = 0;
+//   int pesanan = 0;
+//   int belumDikirim = 0;
+//   int sedangDikirim = 0;
+//   int selesai = 0;
 
-  List<Map<String, dynamic>> details = [];
+//   List<Map<String, dynamic>> details = [];
 
-  @override
-  void initState() {
-    super.initState();
-    _getPengirimanSupirData();
-  }
+//   @override
+//   void initState() {
+//     super.initState();
+//     _getPengirimanSupirData();
+//   }
 
-  Future<void> _getPengirimanSupirData() async {
-    String formattedDate = DateFormat('yyyy-MM-dd').format(now);
-    var url = Uri.parse('$baseUrl/pengiriman/tanggal/$formattedDate');
+//   Future<void> _getPengirimanSupirData() async {
+//     String formattedDate = DateFormat('yyyy-MM-dd').format(now);
+//     var url = Uri.parse('$baseUrl/pengiriman/tanggal/$formattedDate');
 
-    try {
-      var response =
-          await http.get(url, headers: {'Content-Type': 'application/json'});
-      print('status: ${response.statusCode}');
+//     try {
+//       var response =
+//           await http.get(url, headers: {'Content-Type': 'application/json'});
+//       print('status: ${response.statusCode}');
 
-      if (response.statusCode == 200) {
-        var responseBody = jsonDecode(response.body);
-        var data = responseBody['data'];
-        if (data != null) {
-          setState(() {
-            for (var item in data) {
-              pesanan++;
-              String status = item["Status"];
-              if (status == "0") {
-                belumDikirim++;
-              } else if (status == "1") {
-                sedangDikirim++;
-              } else if (status == "2") {
-                selesai++;
-              }
-            }
-          });
-        } else {
-          print('Unexpected response structure.');
-        }
-      } else {
-        print('Failed to load user data: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error occurred: $e');
-    }
-  }
+//       if (response.statusCode == 200) {
+//         var responseBody = jsonDecode(response.body);
+//         var data = responseBody['data'];
+//         if (data != null) {
+//           setState(() {
+//             for (var item in data) {
+//               pesanan++;
+//               String status = item["Status"];
+//               if (status == "0") {
+//                 belumDikirim++;
+//               } else if (status == "1") {
+//                 sedangDikirim++;
+//               } else if (status == "2") {
+//                 selesai++;
+//               }
+//             }
+//           });
+//         } else {
+//           print('Unexpected response structure.');
+//         }
+//       } else {
+//         print('Failed to load user data: ${response.statusCode}');
+//       }
+//     } catch (e) {
+//       print('Error occurred: $e');
+//     }
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    DateTime now = DateTime.now();
-    String formattedDate =
-        '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
-    return Scaffold(
-      body: Container(
-        padding: EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 32),
-            Text(
-              'Hari Ini ($formattedDate)',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-            SizedBox(height: 12),
-            Container(
-              height: 140,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  // Pesanan
-                  Expanded(
-                    child: Container(
-                      margin: EdgeInsets.only(left: 16),
-                      padding: EdgeInsets.all(16),
-                      height: 100,
-                      width: 140,
-                      decoration: BoxDecoration(
-                          color: Color.fromARGB(255, 217, 217, 217),
-                          borderRadius: BorderRadius.circular(12)),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Pesanan'),
-                          Text(
-                            '$pesanan',
-                            style: TextStyle(fontSize: 24),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                  // Belum Dikirim
-                  Expanded(
-                    child: Container(
-                      margin: EdgeInsets.only(left: 16),
-                      padding: EdgeInsets.all(16),
-                      height: 100,
-                      width: 140,
-                      decoration: BoxDecoration(
-                          color: Color.fromARGB(255, 239, 181, 176),
-                          borderRadius: BorderRadius.circular(12)),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Belum Dikirim'),
-                          Text(
-                            '$belumDikirim',
-                            style: TextStyle(fontSize: 24),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                  // Sedang Dikirim
-                  Expanded(
-                    child: Container(
-                      margin: EdgeInsets.only(left: 16),
-                      padding: EdgeInsets.all(16),
-                      height: 100,
-                      width: 140,
-                      decoration: BoxDecoration(
-                          color: Color.fromARGB(255, 251, 228, 199),
-                          borderRadius: BorderRadius.circular(12)),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Sedang Dikirim'),
-                          Text(
-                            '$sedangDikirim',
-                            style: TextStyle(fontSize: 24),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                  // Selesai
-                  Expanded(
-                    child: Container(
-                      margin: EdgeInsets.only(left: 16, right: 16),
-                      padding: EdgeInsets.all(16),
-                      height: 100,
-                      width: 140,
-                      decoration: BoxDecoration(
-                          color: Color.fromARGB(255, 183, 240, 213),
-                          borderRadius: BorderRadius.circular(12)),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Selesai'),
-                          Text(
-                            '$selesai',
-                            style: TextStyle(fontSize: 24),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 48),
-            Text(
-              'Supir',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-            SizedBox(height: 12),
-            Container(
-              height: 100,
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: Colors.grey,
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                  ),
-                  SizedBox(width: 48),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).pushNamed('/supirProses');
-                      // Navigator.of(context).push(
-                      //   MaterialPageRoute(
-                      //     builder: (context) => SupirProsesPage(),
-                      //   ),
-                      // );
-                    },
-                    child: Text(
-                      'ADI',
-                      style: TextStyle(decoration: TextDecoration.underline),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     DateTime now = DateTime.now();
+//     String formattedDate =
+//         '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
+//     return Scaffold(
+//       body: Container(
+//         padding: EdgeInsets.all(24),
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             SizedBox(height: 32),
+//             Text(
+//               'Hari Ini ($formattedDate)',
+//               style: TextStyle(
+//                 fontWeight: FontWeight.bold,
+//                 fontSize: 18,
+//               ),
+//             ),
+//             SizedBox(height: 12),
+//             Container(
+//               height: 140,
+//               decoration: BoxDecoration(
+//                 color: Colors.white,
+//                 borderRadius: BorderRadius.circular(20),
+//               ),
+//               child: Row(
+//                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//                 children: [
+//                   // Pesanan
+//                   Expanded(
+//                     child: Container(
+//                       margin: EdgeInsets.only(left: 16),
+//                       padding: EdgeInsets.all(16),
+//                       height: 100,
+//                       width: 140,
+//                       decoration: BoxDecoration(
+//                           color: Color.fromARGB(255, 217, 217, 217),
+//                           borderRadius: BorderRadius.circular(12)),
+//                       child: Column(
+//                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                         children: [
+//                           Text('Pesanan'),
+//                           Text(
+//                             '$pesanan',
+//                             style: TextStyle(fontSize: 24),
+//                           )
+//                         ],
+//                       ),
+//                     ),
+//                   ),
+//                   // Belum Dikirim
+//                   Expanded(
+//                     child: Container(
+//                       margin: EdgeInsets.only(left: 16),
+//                       padding: EdgeInsets.all(16),
+//                       height: 100,
+//                       width: 140,
+//                       decoration: BoxDecoration(
+//                           color: Color.fromARGB(255, 239, 181, 176),
+//                           borderRadius: BorderRadius.circular(12)),
+//                       child: Column(
+//                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                         children: [
+//                           Text('Belum Dikirim'),
+//                           Text(
+//                             '$belumDikirim',
+//                             style: TextStyle(fontSize: 24),
+//                           )
+//                         ],
+//                       ),
+//                     ),
+//                   ),
+//                   // Sedang Dikirim
+//                   Expanded(
+//                     child: Container(
+//                       margin: EdgeInsets.only(left: 16),
+//                       padding: EdgeInsets.all(16),
+//                       height: 100,
+//                       width: 140,
+//                       decoration: BoxDecoration(
+//                           color: Color.fromARGB(255, 251, 228, 199),
+//                           borderRadius: BorderRadius.circular(12)),
+//                       child: Column(
+//                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                         children: [
+//                           Text('Sedang Dikirim'),
+//                           Text(
+//                             '$sedangDikirim',
+//                             style: TextStyle(fontSize: 24),
+//                           )
+//                         ],
+//                       ),
+//                     ),
+//                   ),
+//                   // Selesai
+//                   Expanded(
+//                     child: Container(
+//                       margin: EdgeInsets.only(left: 16, right: 16),
+//                       padding: EdgeInsets.all(16),
+//                       height: 100,
+//                       width: 140,
+//                       decoration: BoxDecoration(
+//                           color: Color.fromARGB(255, 183, 240, 213),
+//                           borderRadius: BorderRadius.circular(12)),
+//                       child: Column(
+//                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                         children: [
+//                           Text('Selesai'),
+//                           Text(
+//                             '$selesai',
+//                             style: TextStyle(fontSize: 24),
+//                           )
+//                         ],
+//                       ),
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             ),
+//             SizedBox(height: 48),
+//             Text(
+//               'Supir',
+//               style: TextStyle(
+//                 fontWeight: FontWeight.bold,
+//                 fontSize: 18,
+//               ),
+//             ),
+//             SizedBox(height: 12),
+//             Container(
+//               height: 100,
+//               padding: EdgeInsets.all(16),
+//               decoration: BoxDecoration(
+//                 color: Colors.white,
+//                 borderRadius: BorderRadius.circular(20),
+//               ),
+//               child: Row(
+//                 children: [
+//                   Container(
+//                     width: 50,
+//                     height: 50,
+//                     decoration: BoxDecoration(
+//                       color: Colors.grey,
+//                       borderRadius: BorderRadius.circular(50),
+//                     ),
+//                   ),
+//                   SizedBox(width: 48),
+//                   GestureDetector(
+//                     onTap: () {
+//                       Navigator.of(context).pushNamed('/supirProses');
+//                       // Navigator.of(context).push(
+//                       //   MaterialPageRoute(
+//                       //     builder: (context) => SupirProsesPage(),
+//                       //   ),
+//                       // );
+//                     },
+//                     child: Text(
+//                       'ADI',
+//                       style: TextStyle(decoration: TextDecoration.underline),
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
 
-class SupirProsesPage extends StatefulWidget {
-  const SupirProsesPage({super.key});
+// class SupirProsesPage extends StatefulWidget {
+//   const SupirProsesPage({super.key});
 
-  @override
-  State<SupirProsesPage> createState() => _SupirProsesPageState();
-}
+//   @override
+//   State<SupirProsesPage> createState() => _SupirProsesPageState();
+// }
 
-class _SupirProsesPageState extends State<SupirProsesPage> {
-  var baseUrl = dotenv.env['BASE_URL'] ?? '';
+// class _SupirProsesPageState extends State<SupirProsesPage> {
+//   var baseUrl = dotenv.env['BASE_URL'] ?? '';
 
-  DateTime now = DateTime.now();
-  bool adaPengiriman = false;
-  bool isLoading = true;
+//   DateTime now = DateTime.now();
+//   bool adaPengiriman = false;
+//   bool isLoading = true;
 
-  int pesanan = 0;
-  int belumDikirim = 0;
-  int sedangDikirim = 0;
-  int selesai = 0;
+//   int pesanan = 0;
+//   int belumDikirim = 0;
+//   int sedangDikirim = 0;
+//   int selesai = 0;
 
-  String status = '';
+//   String status = '';
 
-  List<Map<String, dynamic>> details = [];
+//   List<Map<String, dynamic>> details = [];
 
-  @override
-  void initState() {
-    super.initState();
-    _getPengirimanSupirData();
-  }
+//   @override
+//   void initState() {
+//     super.initState();
+//     _getPengirimanSupirData();
+//   }
 
-  Future<void> _getPengirimanSupirData() async {
-    String formattedDate = DateFormat('yyyy-MM-dd').format(now);
-    print('formattedDate: $formattedDate');
-    var url = Uri.parse('$baseUrl/pengiriman/tanggal/$formattedDate');
+//   Future<void> _getPengirimanSupirData() async {
+//     String formattedDate = DateFormat('yyyy-MM-dd').format(now);
+//     print('formattedDate: $formattedDate');
+//     var url = Uri.parse('$baseUrl/pengiriman/tanggal/$formattedDate');
 
-    try {
-      var response =
-          await http.get(url, headers: {'Content-Type': 'application/json'});
+//     try {
+//       var response =
+//           await http.get(url, headers: {'Content-Type': 'application/json'});
 
-      if (response.statusCode == 200) {
-        setState(() {
-          isLoading = false;
-        });
+//       if (response.statusCode == 200) {
+//         setState(() {
+//           isLoading = false;
+//         });
 
-        var responseBody = jsonDecode(response.body);
-        var data = responseBody['data'];
+//         var responseBody = jsonDecode(response.body);
+//         var data = responseBody['data'];
 
-        if (data.isNotEmpty) {
-          setState(() {
-            details = List<Map<String, dynamic>>.from(
-                data.map((item) => item as Map<String, dynamic>));
-            adaPengiriman = true;
-          });
-          print('adapengiriman: $adaPengiriman');
-          for (var item in data) {
-            pesanan++;
-            String status = item["Status"];
-            if (status == "0") {
-              belumDikirim++;
-            } else if (status == "1") {
-              sedangDikirim++;
-            } else if (status == "2") {
-              selesai++;
-            }
-          }
-        } else {
-          print('_getPengirimanSupirData() data is empty.');
-        }
-      } else {
-        print('Failed to load user data: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error occurred: $e');
-    }
-  }
+//         if (data.isNotEmpty) {
+//           setState(() {
+//             details = List<Map<String, dynamic>>.from(
+//                 data.map((item) => item as Map<String, dynamic>));
+//             adaPengiriman = true;
+//           });
+//           print('adapengiriman: $adaPengiriman');
+//           for (var item in data) {
+//             pesanan++;
+//             String status = item["Status"];
+//             if (status == "0") {
+//               belumDikirim++;
+//             } else if (status == "1") {
+//               sedangDikirim++;
+//             } else if (status == "2") {
+//               selesai++;
+//             }
+//           }
+//         } else {
+//           print('_getPengirimanSupirData() data is empty.');
+//         }
+//       } else {
+//         print('Failed to load user data: ${response.statusCode}');
+//       }
+//     } catch (e) {
+//       print('Error occurred: $e');
+//     }
+//   }
 
-  String getStatusString(String status) {
-    switch (status) {
-      case '0':
-        return "Belum Dikirim";
-      case '1':
-        return "Sedang Dikirim";
-      case '2':
-        return "Selesai";
-      default:
-        return "Unknown Status";
-    }
-  }
+//   String getStatusString(String status) {
+//     switch (status) {
+//       case '0':
+//         return "Belum Dikirim";
+//       case '1':
+//         return "Sedang Dikirim";
+//       case '2':
+//         return "Selesai";
+//       default:
+//         return "Unknown Status";
+//     }
+//   }
 
-  Color getStatusColor(String status) {
-    switch (status) {
-      case '0':
-        return Color.fromARGB(255, 239, 181, 176);
-      case '1':
-        return Color.fromARGB(255, 251, 228, 199);
-      case '2':
-        return Color.fromARGB(255, 183, 240, 213);
-      default:
-        return Color.fromARGB(255, 217, 217, 217);
-    }
-  }
+//   Color getStatusColor(String status) {
+//     switch (status) {
+//       case '0':
+//         return Color.fromARGB(255, 239, 181, 176);
+//       case '1':
+//         return Color.fromARGB(255, 251, 228, 199);
+//       case '2':
+//         return Color.fromARGB(255, 183, 240, 213);
+//       default:
+//         return Color.fromARGB(255, 217, 217, 217);
+//     }
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    DateTime now = DateTime.now();
-    String hariIni =
-        '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
-    return Scaffold(
-      body: Container(
-        padding: EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 32),
-            Text(
-              'Hari Ini ($hariIni)',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-            SizedBox(height: 12),
-            Container(
-              height: 140,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  // Pesanan
-                  Expanded(
-                    child: Container(
-                      margin: EdgeInsets.only(left: 16),
-                      padding: EdgeInsets.all(16),
-                      height: 100,
-                      width: 140,
-                      decoration: BoxDecoration(
-                          color: Color.fromARGB(255, 217, 217, 217),
-                          borderRadius: BorderRadius.circular(12)),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Pesanan'),
-                          Text(
-                            '$pesanan',
-                            style: TextStyle(fontSize: 24),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                  // Belum Dikirim
-                  Expanded(
-                    child: Container(
-                      margin: EdgeInsets.only(left: 16),
-                      padding: EdgeInsets.all(16),
-                      height: 100,
-                      width: 140,
-                      decoration: BoxDecoration(
-                          color: Color.fromARGB(255, 239, 181, 176),
-                          borderRadius: BorderRadius.circular(12)),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Belum Dikirim'),
-                          Text(
-                            '$belumDikirim',
-                            style: TextStyle(fontSize: 24),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                  // Sedang Dikirim
-                  Expanded(
-                    child: Container(
-                      margin: EdgeInsets.only(left: 16),
-                      padding: EdgeInsets.all(16),
-                      height: 100,
-                      width: 140,
-                      decoration: BoxDecoration(
-                          color: Color.fromARGB(255, 251, 228, 199),
-                          borderRadius: BorderRadius.circular(12)),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Sedang Dikirim'),
-                          Text(
-                            '$sedangDikirim',
-                            style: TextStyle(fontSize: 24),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                  // Selesai
-                  Expanded(
-                    child: Container(
-                      margin: EdgeInsets.only(left: 16, right: 16),
-                      padding: EdgeInsets.all(16),
-                      height: 100,
-                      width: 140,
-                      decoration: BoxDecoration(
-                          color: Color.fromARGB(255, 183, 240, 213),
-                          borderRadius: BorderRadius.circular(12)),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Selesai'),
-                          Text(
-                            '$selesai',
-                            style: TextStyle(fontSize: 24),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 48),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Proses',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pushNamed('/tambahPesanan');
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromARGB(255, 23, 96, 232),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Text(
-                    '+ Tambah Pesanan',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 12),
-            isLoading
-                ? Center(child: CircularProgressIndicator())
-                : adaPengiriman == false
-                    ? Container(
-                        height: 100,
-                        width: double.infinity,
-                        padding: EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Center(
-                          child: Text(
-                            'Tidak ada pengiriman',
-                            style: TextStyle(
-                                color: Color.fromARGB(255, 82, 89, 105)),
-                          ),
-                        ),
-                      )
-                    : Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Container(
-                              padding: EdgeInsets.all(16),
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: SingleChildScrollView(
-                                scrollDirection: Axis.vertical,
-                                child: Table(
-                                  columnWidths: const {
-                                    0: FlexColumnWidth(
-                                        1), // Adjust these to control the column width ratio
-                                    1: FlexColumnWidth(1),
-                                    2: FlexColumnWidth(1),
-                                    3: FlexColumnWidth(1),
-                                  },
-                                  border:
-                                      TableBorder.all(color: Colors.grey[300]!),
-                                  children: [
-                                    // Header row
-                                    TableRow(
-                                      decoration: BoxDecoration(
-                                          color: Colors.grey[200]),
-                                      children: [
-                                        Center(
-                                          child: Padding(
-                                            padding: EdgeInsets.all(8.0),
-                                            child: Text(
-                                              'No. Bukti',
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                          ),
-                                        ),
-                                        Center(
-                                            child: Padding(
-                                                padding: EdgeInsets.all(8.0),
-                                                child: Text('Kode Customer',
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold)))),
-                                        Center(
-                                            child: Padding(
-                                                padding: EdgeInsets.all(8.0),
-                                                child: Text('Alamat',
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold)))),
-                                        Center(
-                                            child: Padding(
-                                                padding: EdgeInsets.all(8.0),
-                                                child: Text('Status',
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold)))),
-                                      ],
-                                    ),
-                                    // Data rows
-                                    ...details.map(
-                                      (item) => TableRow(
-                                        children: [
-                                          Center(
-                                              child: Padding(
-                                                  padding: EdgeInsets.all(8.0),
-                                                  // child: Text(item['Kode Barang']!))),
-                                                  child: Text(item['NoDO']!))),
-                                          Center(
-                                              child: Padding(
-                                                  padding: EdgeInsets.all(8.0),
-                                                  // child: Text(item['Nama Barang']!))),
-                                                  child: Text(
-                                                      item['KodeCustSupp']!))),
-                                          Center(
-                                              child: Padding(
-                                                  padding: EdgeInsets.all(8.0),
-                                                  // child: Text(item['Qnt']!))),
-                                                  child:
-                                                      Text(item['Alamat']!))),
-                                          Center(
-                                            child: Padding(
-                                                padding: EdgeInsets.all(8.0),
-                                                child: Container(
-                                                  padding: EdgeInsets.only(
-                                                      top: 8,
-                                                      bottom: 8,
-                                                      left: 12,
-                                                      right: 12),
-                                                  decoration: BoxDecoration(
-                                                      color: getStatusColor(
-                                                          item['Status']),
-                                                      borderRadius:
-                                                          BorderRadius.all(
-                                                              Radius.circular(
-                                                                  20))),
-                                                  child: Text(
-                                                    getStatusString(
-                                                        item['Status']),
-                                                    style: TextStyle(
-                                                        // color: getStatusTextColor(
-                                                        //     item['Status']),
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: 14),
-                                                  ),
-                                                )),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ))
-          ],
-        ),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     DateTime now = DateTime.now();
+//     String hariIni =
+//         '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
+//     return Scaffold(
+//       body: Container(
+//         padding: EdgeInsets.all(24),
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             SizedBox(height: 32),
+//             Text(
+//               'Hari Ini ($hariIni)',
+//               style: TextStyle(
+//                 fontWeight: FontWeight.bold,
+//                 fontSize: 18,
+//               ),
+//             ),
+//             SizedBox(height: 12),
+//             Container(
+//               height: 140,
+//               decoration: BoxDecoration(
+//                 color: Colors.white,
+//                 borderRadius: BorderRadius.circular(20),
+//               ),
+//               child: Row(
+//                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//                 children: [
+//                   // Pesanan
+//                   Expanded(
+//                     child: Container(
+//                       margin: EdgeInsets.only(left: 16),
+//                       padding: EdgeInsets.all(16),
+//                       height: 100,
+//                       width: 140,
+//                       decoration: BoxDecoration(
+//                           color: Color.fromARGB(255, 217, 217, 217),
+//                           borderRadius: BorderRadius.circular(12)),
+//                       child: Column(
+//                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                         children: [
+//                           Text('Pesanan'),
+//                           Text(
+//                             '$pesanan',
+//                             style: TextStyle(fontSize: 24),
+//                           )
+//                         ],
+//                       ),
+//                     ),
+//                   ),
+//                   // Belum Dikirim
+//                   Expanded(
+//                     child: Container(
+//                       margin: EdgeInsets.only(left: 16),
+//                       padding: EdgeInsets.all(16),
+//                       height: 100,
+//                       width: 140,
+//                       decoration: BoxDecoration(
+//                           color: Color.fromARGB(255, 239, 181, 176),
+//                           borderRadius: BorderRadius.circular(12)),
+//                       child: Column(
+//                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                         children: [
+//                           Text('Belum Dikirim'),
+//                           Text(
+//                             '$belumDikirim',
+//                             style: TextStyle(fontSize: 24),
+//                           )
+//                         ],
+//                       ),
+//                     ),
+//                   ),
+//                   // Sedang Dikirim
+//                   Expanded(
+//                     child: Container(
+//                       margin: EdgeInsets.only(left: 16),
+//                       padding: EdgeInsets.all(16),
+//                       height: 100,
+//                       width: 140,
+//                       decoration: BoxDecoration(
+//                           color: Color.fromARGB(255, 251, 228, 199),
+//                           borderRadius: BorderRadius.circular(12)),
+//                       child: Column(
+//                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                         children: [
+//                           Text('Sedang Dikirim'),
+//                           Text(
+//                             '$sedangDikirim',
+//                             style: TextStyle(fontSize: 24),
+//                           )
+//                         ],
+//                       ),
+//                     ),
+//                   ),
+//                   // Selesai
+//                   Expanded(
+//                     child: Container(
+//                       margin: EdgeInsets.only(left: 16, right: 16),
+//                       padding: EdgeInsets.all(16),
+//                       height: 100,
+//                       width: 140,
+//                       decoration: BoxDecoration(
+//                           color: Color.fromARGB(255, 183, 240, 213),
+//                           borderRadius: BorderRadius.circular(12)),
+//                       child: Column(
+//                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                         children: [
+//                           Text('Selesai'),
+//                           Text(
+//                             '$selesai',
+//                             style: TextStyle(fontSize: 24),
+//                           )
+//                         ],
+//                       ),
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             ),
+//             SizedBox(height: 48),
+//             Row(
+//               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//               children: [
+//                 Text(
+//                   'Proses',
+//                   style: TextStyle(
+//                     fontWeight: FontWeight.bold,
+//                     fontSize: 18,
+//                   ),
+//                 ),
+//                 ElevatedButton(
+//                   onPressed: () {
+//                     Navigator.of(context).pushNamed('/tambahPesanan');
+//                   },
+//                   style: ElevatedButton.styleFrom(
+//                     backgroundColor: Color.fromARGB(255, 23, 96, 232),
+//                     shape: RoundedRectangleBorder(
+//                       borderRadius: BorderRadius.circular(8),
+//                     ),
+//                   ),
+//                   child: Text(
+//                     '+ Tambah Pesanan',
+//                     style: TextStyle(color: Colors.white),
+//                   ),
+//                 ),
+//               ],
+//             ),
+//             SizedBox(height: 12),
+//             isLoading
+//                 ? Center(child: CircularProgressIndicator())
+//                 : adaPengiriman == false
+//                     ? Container(
+//                         height: 100,
+//                         width: double.infinity,
+//                         padding: EdgeInsets.all(16),
+//                         decoration: BoxDecoration(
+//                           color: Colors.white,
+//                           borderRadius: BorderRadius.circular(20),
+//                         ),
+//                         child: Center(
+//                           child: Text(
+//                             'Tidak ada pengiriman',
+//                             style: TextStyle(
+//                                 color: Color.fromARGB(255, 82, 89, 105)),
+//                           ),
+//                         ),
+//                       )
+//                     : Container(
+//                         width: double.infinity,
+//                         padding: EdgeInsets.all(16),
+//                         decoration: BoxDecoration(
+//                           color: Colors.white,
+//                           borderRadius: BorderRadius.circular(20),
+//                         ),
+//                         child: Column(
+//                           crossAxisAlignment: CrossAxisAlignment.end,
+//                           children: [
+//                             Container(
+//                               padding: EdgeInsets.all(16),
+//                               width: double.infinity,
+//                               decoration: BoxDecoration(
+//                                 color: Colors.white,
+//                                 borderRadius: BorderRadius.circular(20),
+//                               ),
+//                               child: SingleChildScrollView(
+//                                 scrollDirection: Axis.vertical,
+//                                 child: Table(
+//                                   columnWidths: const {
+//                                     0: FlexColumnWidth(
+//                                         1), // Adjust these to control the column width ratio
+//                                     1: FlexColumnWidth(1),
+//                                     2: FlexColumnWidth(1),
+//                                     3: FlexColumnWidth(1),
+//                                   },
+//                                   border:
+//                                       TableBorder.all(color: Colors.grey[300]!),
+//                                   children: [
+//                                     // Header row
+//                                     TableRow(
+//                                       decoration: BoxDecoration(
+//                                           color: Colors.grey[200]),
+//                                       children: [
+//                                         Center(
+//                                           child: Padding(
+//                                             padding: EdgeInsets.all(8.0),
+//                                             child: Text(
+//                                               'No. Bukti',
+//                                               style: TextStyle(
+//                                                   fontWeight: FontWeight.bold),
+//                                             ),
+//                                           ),
+//                                         ),
+//                                         Center(
+//                                             child: Padding(
+//                                                 padding: EdgeInsets.all(8.0),
+//                                                 child: Text('Kode Customer',
+//                                                     style: TextStyle(
+//                                                         fontWeight:
+//                                                             FontWeight.bold)))),
+//                                         Center(
+//                                             child: Padding(
+//                                                 padding: EdgeInsets.all(8.0),
+//                                                 child: Text('Alamat',
+//                                                     style: TextStyle(
+//                                                         fontWeight:
+//                                                             FontWeight.bold)))),
+//                                         Center(
+//                                             child: Padding(
+//                                                 padding: EdgeInsets.all(8.0),
+//                                                 child: Text('Status',
+//                                                     style: TextStyle(
+//                                                         fontWeight:
+//                                                             FontWeight.bold)))),
+//                                       ],
+//                                     ),
+//                                     // Data rows
+//                                     ...details.map(
+//                                       (item) => TableRow(
+//                                         children: [
+//                                           Center(
+//                                               child: Padding(
+//                                                   padding: EdgeInsets.all(8.0),
+//                                                   child: Text(item['NoDO']!))),
+//                                           Center(
+//                                               child: Padding(
+//                                                   padding: EdgeInsets.all(8.0),
+//                                                   child: Text(
+//                                                       item['KodeCustSupp']!))),
+//                                           Center(
+//                                               child: Padding(
+//                                                   padding: EdgeInsets.all(8.0),
+//                                                   child:
+//                                                       Text(item['Alamat']!))),
+//                                           Center(
+//                                             child: Padding(
+//                                                 padding: EdgeInsets.all(8.0),
+//                                                 child: Container(
+//                                                   padding: EdgeInsets.only(
+//                                                       top: 8,
+//                                                       bottom: 8,
+//                                                       left: 12,
+//                                                       right: 12),
+//                                                   decoration: BoxDecoration(
+//                                                       color: getStatusColor(
+//                                                           item['Status']),
+//                                                       borderRadius:
+//                                                           BorderRadius.all(
+//                                                               Radius.circular(
+//                                                                   20))),
+//                                                   child: Text(
+//                                                     getStatusString(
+//                                                         item['Status']),
+//                                                     style: TextStyle(
+//                                                         fontWeight:
+//                                                             FontWeight.bold,
+//                                                         fontSize: 14),
+//                                                   ),
+//                                                 )),
+//                                           ),
+//                                         ],
+//                                       ),
+//                                     ),
+//                                   ],
+//                                 ),
+//                               ),
+//                             ),
+//                           ],
+//                         ))
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
 
-class CustomSnackBar extends StatelessWidget {
-  final String message;
-
-  const CustomSnackBar({Key? key, required this.message}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Container(
-          color: Colors.red,
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Text(
-            message,
-            style: TextStyle(color: Colors.white, fontSize: 16),
-          ),
-        ),
-      ),
-    );
-  }
-}
+// class CustomSnackBar extends StatelessWidget {
+//   final String message;
+//   const CustomSnackBar({Key? key, required this.message}) : super(key: key);
+//   @override
+//   Widget build(BuildContext context) {
+//     return Material(
+//       color: Colors.transparent,
+//       child: Padding(
+//         padding: const EdgeInsets.all(16.0),
+//         child: Container(
+//           color: Colors.red,
+//           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+//           child: Text(
+//             message,
+//             style: TextStyle(color: Colors.white, fontSize: 16),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 class TambahPesananPage extends StatefulWidget {
   const TambahPesananPage({super.key});
@@ -953,7 +946,7 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({
             'device_token':
-                'dZjEdjb_Q_-wVGIoG8w75J:APA91bEsKNDpMlsiHPecixbVBtVtTCJKadNRkCGF0eFRWmM04iFmFbPfRNkDlRtYXkeqpNkYVBvbN-bW_XwNfsDRhOJhtU-dLNajYkCzcnmhOPkgq2oN-bc',
+                'cyYGMRV-RySWEzvuKg5nOS:APA91bEQEk_jP8N2aVLe4oMhS9kF3d-PGy6kk1-sUmC3BN9r-Z536MpQe50bKMzgSPgbpKRYhjseMTmNRu1KeEoKHhOENBGS7SS97b2vUuO87Q5_-At3Rqo',
             'title': 'Pesanan Baru!',
             'body': 'Terdapat pesanan $nodo'
           }),

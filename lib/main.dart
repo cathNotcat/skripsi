@@ -2,17 +2,17 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:web_admin_1/dashboard_page.dart';
+import 'package:web_admin_1/dashboard_screen.dart';
 import 'package:web_admin_1/login_page.dart';
 import 'package:web_admin_1/pengiriman_page.dart';
+import 'package:web_admin_1/views/pengiriman_screen.dart';
+import 'package:web_admin_1/views/proses_screen.dart';
 
 void main() async {
   await dotenv.load();
   runApp(const MainApp());
 }
 
-// text: Color.fromARGB(255,82, 89, 105)
-// primary: Color.fromARGB(255, 23, 96, 232)
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
 
@@ -43,10 +43,12 @@ class _NavbarState extends State<Navbar> {
   late int selectedIndex;
 
   final List<Widget> pages = [
-    DashboardPage(),
-    PengirimanPage(),
+    DashboardScreen(),
+    // PengirimanPage(),
+    PengirimanScreen(),
     TambahPesananPage(),
-    SupirProsesPage(),
+    // SupirProsesPage(),
+    ProsesScreen(),
     LoginPage(),
   ];
 
@@ -161,7 +163,8 @@ class _NavbarState extends State<Navbar> {
                 Widget page = pages[selectedIndex];
 
                 if (settings.name == '/supirProses') {
-                  page = SupirProsesPage();
+                  page = ProsesScreen();
+                  // page = SupirProsesPage();
                 }
 
                 if (settings.name == '/tambahPesanan') {
