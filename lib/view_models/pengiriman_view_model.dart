@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:web_admin_1/models/pengiriman_all_model.dart';
 import 'package:web_admin_1/models/pengiriman_model.dart';
 import 'package:web_admin_1/services/pengiriman_service.dart';
 
@@ -19,6 +20,8 @@ class PengirimanViewModel extends ChangeNotifier {
   int sedangDikirim = 0;
   int selesai = 0;
 
+  List<GroupedPengirimanModel> groupedList = [];
+
   Future<void> fetchPengirimanData(String formattedDate) async {
     try {
       final List<PengirimanModel> data =
@@ -33,7 +36,6 @@ class PengirimanViewModel extends ChangeNotifier {
       } else {
         adaPengiriman = false;
         statusCount([]);
-        print('no data');
       }
 
       notifyListeners();
@@ -65,14 +67,21 @@ class PengirimanViewModel extends ChangeNotifier {
     for (int i = 0; i < 7; i++) {
       final date = DateTime.now().subtract(Duration(days: i));
       final formattedDate = DateFormat('yyyy-MM-dd').format(date);
-      print('date: ${formattedDate}');
-
       final result = await fetchPengirimanList(formattedDate);
-      print('result: ${result.length}');
       total += result.length;
     }
 
     totalPesanan7Hari = total;
     notifyListeners();
+  }
+
+  Future<void> fetchAllPengirimanByTanggal() async {
+    try {
+      groupedList = await apiService.getAllPengirimanDataByTanggal();
+
+      notifyListeners();
+    } catch (e) {
+      print('Error fetching grouped pengiriman: $e');
+    }
   }
 }

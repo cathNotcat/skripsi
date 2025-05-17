@@ -16,35 +16,61 @@ class LatLng {
 class HeldKarp {
   String apiKey = dotenv.env['OPENROUTESERVICE_API_KEY'] ?? '';
 
+  // Future<double> getDistance(
+  //   double startLong,
+  //   double startLat,
+  //   double endLong,
+  //   double endLat,
+  // ) async {
+  //   String urlAB =
+  //       "https://api.openrouteservice.org/v2/directions/driving-car?api_key=$apiKey&start=$startLong,$startLat&end=$endLong,$endLat";
+  //   String urlBA =
+  //       "https://api.openrouteservice.org/v2/directions/driving-car?api_key=$apiKey&start=$endLong,$endLat&end=$startLong,$startLat";
+
+  //   try {
+  //     final responseAB = await http.get(Uri.parse(urlAB));
+  //     final responseBA = await http.get(Uri.parse(urlBA));
+
+  //     if (responseAB.statusCode == 200 && responseBA.statusCode == 200) {
+  //       final dataAB = json.decode(responseAB.body);
+  //       final dataBA = json.decode(responseBA.body);
+
+  //       double distanceAB = extractDistance(dataAB);
+  //       double distanceBA = extractDistance(dataBA);
+
+  //       print(
+  //           'Distance $startLong → $endLong: $distanceAB km, Distance $endLong → $startLong: $distanceBA km');
+
+  //       return (distanceAB + distanceBA) / 2; // Store them separately if needed
+  //     } else {
+  //       print(
+  //           "Failed to fetch data: ${responseAB.statusCode} | ${responseBA.statusCode}");
+  //     }
+  //   } catch (e) {
+  //     print("Error: $e");
+  //   }
+  //   return double.infinity;
+  // }
+
   Future<double> getDistance(
     double startLong,
     double startLat,
     double endLong,
     double endLat,
   ) async {
-    String urlAB =
+    String url =
         "https://api.openrouteservice.org/v2/directions/driving-car?api_key=$apiKey&start=$startLong,$startLat&end=$endLong,$endLat";
-    String urlBA =
-        "https://api.openrouteservice.org/v2/directions/driving-car?api_key=$apiKey&start=$endLong,$endLat&end=$startLong,$startLat";
 
     try {
-      final responseAB = await http.get(Uri.parse(urlAB));
-      final responseBA = await http.get(Uri.parse(urlBA));
+      final response = await http.get(Uri.parse(url));
 
-      if (responseAB.statusCode == 200 && responseBA.statusCode == 200) {
-        final dataAB = json.decode(responseAB.body);
-        final dataBA = json.decode(responseBA.body);
-
-        double distanceAB = extractDistance(dataAB);
-        double distanceBA = extractDistance(dataBA);
-
-        print(
-            'Distance $startLong → $endLong: $distanceAB km, Distance $endLong → $startLong: $distanceBA km');
-
-        return (distanceAB + distanceBA) / 2; // Store them separately if needed
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        double distance = extractDistance(data);
+        print('Distance $startLong → $endLong: $distance km');
+        return distance;
       } else {
-        print(
-            "Failed to fetch data: ${responseAB.statusCode} | ${responseBA.statusCode}");
+        print("Failed to fetch data: ${response.statusCode}");
       }
     } catch (e) {
       print("Error: $e");

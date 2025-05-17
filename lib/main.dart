@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:web_admin_1/dashboard_screen.dart';
+import 'package:web_admin_1/views/dashboard_screen.dart';
 import 'package:web_admin_1/login_page.dart';
 import 'package:web_admin_1/pengiriman_page.dart';
 import 'package:web_admin_1/views/pengiriman_screen.dart';
