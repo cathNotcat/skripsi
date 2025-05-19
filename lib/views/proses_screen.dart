@@ -111,7 +111,7 @@ class ProsesScreen extends StatelessWidget {
                       decoration: BoxDecoration(color: Colors.grey[200]),
                       children: [
                         _columnTitles('No Bukti'),
-                        _columnTitles('Kode Customer'),
+                        _columnTitles('Nama Customer'),
                         _columnTitles('Alamat'),
                         _columnTitles('Status'),
                       ],
@@ -127,7 +127,7 @@ class ProsesScreen extends StatelessWidget {
                           Center(
                               child: Padding(
                                   padding: EdgeInsets.all(8.0),
-                                  child: Text(item.kodeCustSupp))),
+                                  child: Text(item.nama))),
                           Center(
                               child: Padding(
                                   padding: EdgeInsets.all(8.0),

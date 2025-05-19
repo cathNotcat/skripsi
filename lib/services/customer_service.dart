@@ -16,6 +16,7 @@ class CustomerService {
 
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body)['data'];
+      print('data customer: $data');
       return CustomerModel.fromJson(data);
     } else {
       throw Exception('Error in getCustomerDetails');

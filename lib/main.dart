@@ -7,6 +7,7 @@ import 'package:web_admin_1/login_page.dart';
 import 'package:web_admin_1/pengiriman_page.dart';
 import 'package:web_admin_1/views/pengiriman_screen.dart';
 import 'package:web_admin_1/views/proses_screen.dart';
+import 'package:web_admin_1/views/tambah_screen.dart';
 
 void main() async {
   await dotenv.load();
@@ -39,15 +40,13 @@ class Navbar extends StatefulWidget {
 }
 
 class _NavbarState extends State<Navbar> {
-  // int selectedIndex = 0;
   late int selectedIndex;
 
   final List<Widget> pages = [
     DashboardScreen(),
-    // PengirimanPage(),
     PengirimanScreen(),
-    TambahPesananPage(),
-    // SupirProsesPage(),
+    TambahScreen(),
+    // TambahPesananPage(),
     ProsesScreen(),
     LoginPage(),
   ];
@@ -74,7 +73,6 @@ class _NavbarState extends State<Navbar> {
     return Scaffold(
       body: Row(
         children: [
-          // Sidebar
           Container(
             width: 260,
             decoration: BoxDecoration(
@@ -93,7 +91,6 @@ class _NavbarState extends State<Navbar> {
             ),
             child: Column(
               children: [
-                // Logo Section
                 SizedBox(height: 40),
                 Container(
                   padding: EdgeInsets.symmetric(vertical: 20),
@@ -115,11 +112,6 @@ class _NavbarState extends State<Navbar> {
                   icon: Icons.dashboard_outlined,
                   title: 'Dashboard',
                   isSelected: selectedIndex == 0,
-                  // onTap: () {
-                  //   setState(() {
-                  //     selectedIndex = 0;
-                  //   });
-                  // },
                   onTap: () => onSidebarItemClicked(0),
                 ),
                 SizedBox(height: 16),
@@ -127,12 +119,6 @@ class _NavbarState extends State<Navbar> {
                   icon: Icons.local_shipping_outlined,
                   title: 'Pengiriman',
                   isSelected: selectedIndex == 1,
-                  // onTap: () {
-                  //   setState(() {
-                  //     selectedIndex = 1;
-                  //     print('selectedindex: $selectedIndex');
-                  //   });
-                  // },
                   onTap: () => onSidebarItemClicked(1),
                 ),
                 SizedBox(height: 16),
@@ -153,24 +139,17 @@ class _NavbarState extends State<Navbar> {
               ],
             ),
           ),
-          // Main Content
-          // Expanded(
-          //   child: pages[selectedIndex],
-          // ),
           Expanded(
             child: Navigator(
               onGenerateRoute: (settings) {
                 Widget page = pages[selectedIndex];
-
                 if (settings.name == '/supirProses') {
                   page = ProsesScreen();
-                  // page = SupirProsesPage();
                 }
-
                 if (settings.name == '/tambahPesanan') {
-                  page = TambahPesananPage();
+                  page = TambahScreen();
+                  // page = TambahPesananPage();
                 }
-
                 return MaterialPageRoute(builder: (_) => page);
               },
             ),
