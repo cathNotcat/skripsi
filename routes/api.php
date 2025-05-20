@@ -60,7 +60,12 @@ Route::put('/pengiriman/update/{NoPengiriman}/{NoUrut}', [put_update_status_dbPe
 
 // Notif
 Route::post('/notification/send', [post_notification::class, 'sendNotification']);
-// Route::post('/notification/send', [post_notification::class, 'sendNotification']);
+
+// Ping ipaddress
+Route::get('/ping', function () {
+    return response()->json(['status' => 'ok'], 200);
+});
+
 
 
 

@@ -45,6 +45,9 @@ Route::get('/pengiriman', 'get_all_dbpengiriman@getData');
 Route::put('/pengiriman/update/{NoPengiriman}/{NoUrut}', 'put_update_status_dbPengiriman@updateStatus');
 
 // Notif
-// Route::post('/notification/send', 'post_notification@sendNotification');
-
 Route::post('/notification/send', 'post_notification@sendNotification');
+
+// Ping
+Route::get('/ping', function () {
+    return response()->json(['status' => 'ok'], 200);
+});
