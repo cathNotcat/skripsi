@@ -14,12 +14,12 @@ class get_detail_dbpengiriman_by_tanggal extends Controller
     {
         // Run the query to fetch the data
         $listData = DB::connection('SML')->select(
-            'SELECT p.NoUrut, p.NoPengiriman, p.NoDO, a.Nama, p.KodeCustSupp, a.Alamat, a.Koordinat, p.Status, p.TanggalKirim, COUNT(s.NoBukti) AS JumlahBarang  
+            'SELECT p.NoUrut, p.NoPengiriman, p.NoDO, p.KodeSopir, a.Nama, p.KodeCustSupp, a.Alamat, a.Koordinat, p.Status, p.TanggalKirim, COUNT(s.NoBukti) AS JumlahBarang  
                 FROM dbPengiriman p
                 JOIN dbSPPDet s ON p.noDO = s.NoBukti
                 JOIN DBALAMATCUST a ON p.KodeCustSupp = a.KODECUSTSUPP 
                 WHERE CAST(TanggalKirim AS DATE) = :tanggal
-                GROUP BY p.NoUrut, p.NoPengiriman, p.noDO, p.kodecustsupp, p.Status, a.nama, a.alamat, a.koordinat, p.TanggalKirim
+                GROUP BY p.NoUrut, p.NoPengiriman, p.noDO, p.KodeSopir, p.kodecustsupp, p.Status, a.nama, a.alamat, a.koordinat, p.TanggalKirim
                 ORDER BY p.NoUrut',
             ['tanggal' => $tanggal]
         );
@@ -40,6 +40,7 @@ class get_detail_dbpengiriman_by_tanggal extends Controller
                 'NoUrut' => $item->NoUrut,
                 'NoPengiriman' => $item->NoPengiriman,
                 'TanggalKirim' => $item->TanggalKirim,
+                'KodeSopir' => $item->KodeSopir,
                 'NoDO' => $item->NoDO,
                 'Nama' => $item->Nama,
                 'KodeCustSupp' => $item->KodeCustSupp,

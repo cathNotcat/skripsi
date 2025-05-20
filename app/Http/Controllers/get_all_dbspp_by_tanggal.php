@@ -48,15 +48,8 @@ class get_all_dbspp_by_tanggal extends Controller
             $formattedData[$item->TANGGAL]['KODECUSTSUPP'][] = $item->KodeCustSupp;
         }
 
-        // Format the output to match your desired structure
         $finalOutput = [];
-        // foreach ($formattedData as $tanggal => $data) {
-        //     $finalOutput[] = [
-        //         'TANGGAL' => $tanggal,
-        //         'NOBUKTI' => $data['NOBUKTI'],
-        //         'KODECUSTSUPP' => $data['KODECUSTSUPP']
-        //     ];
-        // }
+
         foreach ($formattedData as $tanggal => $NOBUKTIs) {
             $finalOutput[] = [
                 'TANGGAL' => $tanggal,

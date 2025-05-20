@@ -6,6 +6,8 @@ use App\Http\Controllers\post_delete_pesanan;
 use App\Http\Controllers\get_sopir;
 use App\Http\Controllers\get_detail_dbpengiriman_by_tanggal;
 use App\Http\Controllers\put_update_status_dbPengiriman;
+use App\Http\Controllers\get_all_dbpengiriman_by_tanggal;
+use App\Http\Controllers\get_all_dbPengiriman;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\post_upload_dbPengiriman;
@@ -52,6 +54,8 @@ Route::post('/dbspp/nobukti', 'post_dbspp_nobukti@getDataByNOBUKTI');
 Route::post('/upload/pengiriman', 'post_upload_dbPengiriman@uploadDataPengiriman');
 Route::post('/pengiriman/delete', [post_delete_pesanan::class, 'deleteData']);
 Route::get('/pengiriman/tanggal/{tanggal}', [get_detail_dbpengiriman_by_tanggal::class, 'getData']);
+Route::get('/pengiriman/tanggal', [get_all_dbpengiriman_by_tanggal::class, 'getData']);
+Route::get('/pengiriman', [get_all_dbpengiriman::class, 'getData']);
 Route::put('/pengiriman/update/{NoPengiriman}/{NoUrut}', [put_update_status_dbPengiriman::class, 'updateStatus']);
 
 // Notif
