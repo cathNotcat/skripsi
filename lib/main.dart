@@ -3,6 +3,7 @@
 import 'package:aplikasi_1/firebase_options.dart';
 import 'package:aplikasi_1/home_page.dart';
 import 'package:aplikasi_1/services/notification_service.dart';
+import 'package:aplikasi_1/settings_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -75,11 +76,12 @@ class Navbar extends StatefulWidget {
 class _NavbarState extends State<Navbar> {
   Color buttonColor = Color.fromARGB(255, 23, 96, 232);
 
-  int _selectedIndex = 0;
+  int _selectedIndex = 3;
   final List<Widget> _pages = [
     HomePage(),
     PesananPage(),
     SelesaiPage(),
+    SettingsPage(),
   ];
 
   @override
@@ -88,7 +90,7 @@ class _NavbarState extends State<Navbar> {
     if (widget.chosenIndex != null) {
       _selectedIndex = widget.chosenIndex;
     } else {
-      _selectedIndex = 0;
+      _selectedIndex = 3;
     }
   }
 
@@ -125,9 +127,17 @@ class _NavbarState extends State<Navbar> {
             ),
             label: 'Selesai',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.settings,
+              size: 32,
+            ),
+            label: 'Settings',
+          ),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: buttonColor,
+        unselectedItemColor: buttonColor,
         onTap: _onItemTapped,
       ),
     );

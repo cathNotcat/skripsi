@@ -23,7 +23,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  var baseUrl = dotenv.env['BASE_URL'];
+  // var baseUrl;
+  // var baseUrl = dotenv.env['BASE_URL'];
 
   DateTime now = DateTime.now();
 
@@ -48,9 +49,16 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    _getBaseUrl();
     _formatDate();
     _getPengirimanSupirData();
     _getSopir();
+  }
+
+  Future<void> _getBaseUrl() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? baseUrl = prefs.getString('ip_address');
+    print('BASE URL = $baseUrl');
   }
 
   void _formatDate() {
@@ -71,11 +79,16 @@ class _HomePageState extends State<HomePage> {
     selesai = 0;
     noDO.clear();
     String formattedDate = DateFormat('yyyy-MM-dd').format(now);
+    final prefs = await SharedPreferences.getInstance();
+    String? baseUrl = prefs.getString('ip_addres');
+    print('base url in _getPengirimanSupirData: $baseUrl');
     var url = Uri.parse('$baseUrl/pengiriman/tanggal/$formattedDate');
 
     try {
-      var response =
-          await http.get(url, headers: {'Content-Type': 'application/json'});
+      var response = await http.get(
+        url,
+        headers: {'Content-Type': 'application/json'},
+      );
       print('status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
@@ -107,7 +120,8 @@ class _HomePageState extends State<HomePage> {
         }
       } else {
         print(
-            'Failed to load user data(getpengiriman on home): ${response.statusCode}');
+          'Failed to load user data(getpengiriman on home): ${response.statusCode}',
+        );
       }
     } catch (e) {
       print('Error occurred: $e');
@@ -134,118 +148,116 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: isLoadingSupir
-          ? Center(
-              child: CircularProgressIndicator(),
-            )
-          : Container(
-              padding: EdgeInsets.all(24),
-              margin: EdgeInsets.only(top: 40),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Selamat Datang,',
-                  ),
-                  Row(
+      body:
+          isLoadingSupir
+              ? Center(child: CircularProgressIndicator())
+              : Container(
+                padding: EdgeInsets.all(24),
+                margin: EdgeInsets.only(top: 40),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Selamat Datang,'),
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           sopir!.kodeSopir,
                           style: TextStyle(
-                              fontSize: 42, fontWeight: FontWeight.bold),
+                            fontSize: 42,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         GestureDetector(
                           onTap: _refreshData,
                           child: Icon(Icons.refresh),
                         ),
-                      ]),
-                  Container(
-                    height: 130,
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: containerColor,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.calendar_month_outlined),
-                            SizedBox(width: 16),
-                            Text(
-                              hariIni,
-                              style: TextStyle(color: textColor),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Icon(Icons.drive_eta_outlined),
-                            SizedBox(width: 16),
-                            Text(
-                              'L 1622 JK',
-                              style: TextStyle(color: textColor),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Icon(Icons.history_rounded),
-                            SizedBox(width: 16),
-                            Text(
-                              '$selesai pesanan selesai',
-                              style: TextStyle(color: textColor),
-                            ),
-                          ],
-                        ),
                       ],
                     ),
-                  ),
-                  SizedBox(height: 32),
-                  Text(
-                    'Notifikasi',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 8),
-                  Container(
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: containerColor,
-                      borderRadius: BorderRadius.circular(20),
+                    Container(
+                      height: 130,
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: containerColor,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.calendar_month_outlined),
+                              SizedBox(width: 16),
+                              Text(hariIni, style: TextStyle(color: textColor)),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Icon(Icons.drive_eta_outlined),
+                              SizedBox(width: 16),
+                              Text(
+                                'L 1622 JK',
+                                style: TextStyle(color: textColor),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Icon(Icons.history_rounded),
+                              SizedBox(width: 16),
+                              Text(
+                                '$selesai pesanan selesai',
+                                style: TextStyle(color: textColor),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.notifications_outlined),
-                            SizedBox(width: 16),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  notif,
-                                  style: TextStyle(color: textColor),
-                                ),
-                                noNotif
-                                    ? SizedBox()
-                                    : FilledButton(
+                    SizedBox(height: 32),
+                    Text(
+                      'Notifikasi',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 8),
+                    Container(
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: containerColor,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.notifications_outlined),
+                              SizedBox(width: 16),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    notif,
+                                    style: TextStyle(color: textColor),
+                                  ),
+                                  noNotif
+                                      ? SizedBox()
+                                      : FilledButton(
                                         onPressed: () {
                                           Navigator.of(context).push(
                                             MaterialPageRoute(
-                                              builder: (context) => Navbar(
-                                                chosenIndex: 1,
-                                              ),
+                                              builder:
+                                                  (context) =>
+                                                      Navbar(chosenIndex: 1),
                                             ),
                                           );
                                         },
                                         style: ButtonStyle(
                                           backgroundColor:
                                               WidgetStateProperty.all(
-                                                  buttonColor),
+                                                buttonColor,
+                                              ),
                                           shape: WidgetStateProperty.all(
                                             RoundedRectangleBorder(
                                               borderRadius:
@@ -259,25 +271,23 @@ class _HomePageState extends State<HomePage> {
                                           child: Text('Lihat Detail'),
                                         ),
                                       ),
-                              ],
-                            )
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 32),
-                  noDO.isEmpty
-                      ? SizedBox()
-                      : Text(
-                          'Pesanan Selesai Hari Ini',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
+                                ],
+                              ),
+                            ],
                           ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 32),
+                    noDO.isEmpty
+                        ? SizedBox()
+                        : Text(
+                          'Pesanan Selesai Hari Ini',
+                          style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                  SizedBox(height: 8),
-                  Expanded(
-                    child: ListView.builder(
+                    SizedBox(height: 8),
+                    Expanded(
+                      child: ListView.builder(
                         itemCount: noDO.length,
                         itemBuilder: (context, index) {
                           return Container(
@@ -299,11 +309,12 @@ class _HomePageState extends State<HomePage> {
                               ],
                             ),
                           );
-                        }),
-                  ),
-                ],
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
     );
   }
 }
@@ -321,7 +332,7 @@ class _PesananPageState extends State<PesananPage> {
   Color textColor = Color.fromARGB(255, 82, 89, 105);
   Color backgroundColor = Color.fromARGB(255, 245, 245, 245);
 
-  var baseUrl = dotenv.env['BASE_URL'];
+  // var baseUrl = dotenv.env['BASE_URL'];
   DateTime now = DateTime.now();
 
   String detNoDO = '';
@@ -384,14 +395,16 @@ class _PesananPageState extends State<PesananPage> {
 
   void _initializeMarkers() {
     for (int i = 0; i < points.length; i++) {
-      _markers.add(Marker(
-        markerId: MarkerId('marker_$i'),
-        position: points[i],
-        infoWindow: InfoWindow(
-          title: 'Destination ${i + 1}',
-          snippet: 'Location ${i + 1}',
+      _markers.add(
+        Marker(
+          markerId: MarkerId('marker_$i'),
+          position: points[i],
+          infoWindow: InfoWindow(
+            title: 'Destination ${i + 1}',
+            snippet: 'Location ${i + 1}',
+          ),
         ),
-      ));
+      );
     }
   }
 
@@ -442,11 +455,15 @@ class _PesananPageState extends State<PesananPage> {
 
   Future<void> _getPengirimanSupirData() async {
     String formattedDate = DateFormat('yyyy-MM-dd').format(now);
+    final prefs = await SharedPreferences.getInstance();
+    String? baseUrl = prefs.getString('ip_addres');
     var url = Uri.parse('$baseUrl/pengiriman/tanggal/$formattedDate');
 
     try {
-      var response =
-          await http.get(url, headers: {'Content-Type': 'application/json'});
+      var response = await http.get(
+        url,
+        headers: {'Content-Type': 'application/json'},
+      );
       print('status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
@@ -455,7 +472,8 @@ class _PesananPageState extends State<PesananPage> {
         if (data != null) {
           setState(() {
             details = List<Map<String, dynamic>>.from(
-                data.map((item) => item as Map<String, dynamic>));
+              data.map((item) => item as Map<String, dynamic>),
+            );
 
             for (var det in details) {
               if (det['Status'] == "2") {
@@ -501,11 +519,13 @@ class _PesananPageState extends State<PesananPage> {
           }
         } else {
           print(
-              'Unexpected response structure in _getPengirimanSupirData() in PesananPage');
+            'Unexpected response structure in _getPengirimanSupirData() in PesananPage',
+          );
         }
       } else {
         print(
-            'Gagal load user data di _getPengirimanSupirData di PesananPage: ${response.statusCode}');
+          'Gagal load user data di _getPengirimanSupirData di PesananPage: ${response.statusCode}',
+        );
       }
     } catch (e) {
       print('Error occurred: $e');
@@ -513,7 +533,10 @@ class _PesananPageState extends State<PesananPage> {
   }
 
   Future<void> _confirmModal(
-      BuildContext context, String noPeng, String noUrut) {
+    BuildContext context,
+    String noPeng,
+    String noUrut,
+  ) {
     print('ispesanan selesai: $isPesananSelesai');
     return showDialog<void>(
       context: context,
@@ -612,21 +635,22 @@ class _PesananPageState extends State<PesananPage> {
   }
 
   Future<void> _changeStatus(
-      String noPeng, String noUrut, int statusChange) async {
+    String noPeng,
+    String noUrut,
+    int statusChange,
+  ) async {
     print('no bukti: $noPeng');
     print('status change: $statusChange');
 
+    final prefs = await SharedPreferences.getInstance();
+    String? baseUrl = prefs.getString('ip_addres');
     var url = Uri.parse('$baseUrl/pengiriman/update/$noPeng/$noUrut');
 
     try {
       var response = await http.put(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'Status': statusChange,
-        }),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'Status': statusChange}),
       );
 
       if (response.statusCode == 200) {
@@ -645,14 +669,16 @@ class _PesananPageState extends State<PesananPage> {
   }
 
   Future<void> _getDbsppDetData(String nobukti) async {
+    final prefs = await SharedPreferences.getInstance();
+    String? baseUrl = prefs.getString('ip_addres');
     var url = Uri.parse('$baseUrl/dbsppdet/nobukti');
 
     try {
-      var response = await http.post(url,
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({
-            'NOBUKTI': nobukti,
-          }));
+      var response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'NOBUKTI': nobukti}),
+      );
       print('status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
@@ -661,7 +687,8 @@ class _PesananPageState extends State<PesananPage> {
         if (data != null) {
           setState(() {
             detDetails = List<Map<String, dynamic>>.from(
-                data.map((item) => item as Map<String, dynamic>));
+              data.map((item) => item as Map<String, dynamic>),
+            );
           });
           print(detDetails[0]['KodeBrg']);
         } else {
@@ -683,21 +710,19 @@ class _PesananPageState extends State<PesananPage> {
         maxHeight: MediaQuery.of(context).size.height * 0.7,
         body:
             (_initialPosition.latitude == 0 && _initialPosition.longitude == 0)
-                ? Center(
-                    child: CircularProgressIndicator(),
-                  )
+                ? Center(child: CircularProgressIndicator())
                 : GoogleMap(
-                    initialCameraPosition: CameraPosition(
-                      target: _initialPosition,
-                      zoom: 12,
-                    ),
-                    polylines: _polylines,
-                    markers: _markers,
-                    onMapCreated: (GoogleMapController controller) {
-                      mapController = controller;
-                      _initializeWithAsync();
-                    },
+                  initialCameraPosition: CameraPosition(
+                    target: _initialPosition,
+                    zoom: 12,
                   ),
+                  polylines: _polylines,
+                  markers: _markers,
+                  onMapCreated: (GoogleMapController controller) {
+                    mapController = controller;
+                    _initializeWithAsync();
+                  },
+                ),
         // GoogleMap(
         //   onMapCreated: _onMapCreated,
         //   initialCameraPosition: CameraPosition(
@@ -730,9 +755,7 @@ class _PesananPageState extends State<PesananPage> {
                   ? pilihan_widget == 0
                       ? _listPesananPage()
                       : _detailPesananPage()
-                  : Center(
-                      child: Text('Tidak ada pesanan'),
-                    )
+                  : Center(child: Text('Tidak ada pesanan')),
             ],
           ),
         ),
@@ -743,133 +766,158 @@ class _PesananPageState extends State<PesananPage> {
   Widget _listPesananPage() {
     return Expanded(
       child: ListView(
-        children: details
-            .asMap()
-            .map((index, item) {
-              return MapEntry(
-                  index,
-                  Container(
-                    margin: EdgeInsets.all(10),
-                    padding: EdgeInsets.all(16),
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(16)),
-                      color: containerColor,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              item['NoDO']!, // Access NoDO from the item
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.only(
-                                  top: 8, bottom: 8, left: 12, right: 12),
-                              decoration: BoxDecoration(
-                                  color: getStatusColor(item['Status']),
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(20))),
-                              child: Text(
-                                getStatusString(item['Status']),
+        children:
+            details
+                .asMap()
+                .map((index, item) {
+                  return MapEntry(
+                    index,
+                    Container(
+                      margin: EdgeInsets.all(10),
+                      padding: EdgeInsets.all(16),
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(16)),
+                        color: containerColor,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                item['NoDO']!, // Access NoDO from the item
                                 style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
+                              ),
+                              Container(
+                                padding: EdgeInsets.only(
+                                  top: 8,
+                                  bottom: 8,
+                                  left: 12,
+                                  right: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: getStatusColor(item['Status']),
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(20),
+                                  ),
+                                ),
+                                child: Text(
+                                  getStatusString(item['Status']),
+                                  style: TextStyle(
                                     color: getStatusTextColor(item['Status']),
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 14),
-                              ),
-                            )
-                          ],
-                        ),
-                        SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Icon(Icons.location_on_outlined, size: 20),
-                            SizedBox(width: 8),
-                            Text(
-                              item['Alamat']!, // Access Alamat from the item
-                              style: TextStyle(color: textColor, fontSize: 14),
-                            )
-                          ],
-                        ),
-                        SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Icon(Icons.person_outline, size: 20),
-                            SizedBox(width: 8),
-                            Text(
-                              item['Nama']!,
-                              style: TextStyle(color: textColor, fontSize: 14),
-                            )
-                          ],
-                        ),
-                        SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Icon(Icons.inbox_outlined, size: 20),
-                            SizedBox(width: 8),
-                            Text(
-                              '${item['JumlahBarang']} jenis barang',
-                              style: TextStyle(color: textColor, fontSize: 14),
-                            )
-                          ],
-                        ),
-                        Container(
-                          padding: const EdgeInsets.only(top: 24),
-                          child: SizedBox(
-                            width: double.infinity,
-                            height: 40,
-                            child: FilledButton(
-                              style: FilledButton.styleFrom(
-                                backgroundColor:
-                                    const Color.fromARGB(255, 23, 96, 232),
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                ),
-                                textStyle: const TextStyle(
-                                  fontSize: 16.0,
+                                    fontSize: 14,
+                                  ),
                                 ),
                               ),
-                              onPressed: () {
-                                print('no pengiriman: ${item['NoPengiriman']}');
-                                setState(() {
-                                  pilihan_widget = 1;
-                                  index_selected = index;
-                                  if (item['Status'] != "2") {
-                                    _changeStatus(item['NoPengiriman'],
-                                        item['NoUrut'], 1);
-                                    detStatus = '1';
-                                  }
-                                  detNoDO = item['NoDO'];
-                                  detAlamat = item['Alamat'];
-                                  detCust = item['Nama'];
-                                  detJumlahBrg = item['JumlahBarang'];
-                                  detNoPeng = item['NoPengiriman'];
-                                  detNoUrut = item['NoUrut'];
-                                  _getPengirimanSupirData();
-                                  _getDbsppDetData(item['NoDO']);
-                                });
-                                print('det no do: $detNoDO');
-                              },
-                              child: Text(
-                                'Lihat Detail',
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                            ],
+                          ),
+                          SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Icon(Icons.location_on_outlined, size: 20),
+                              SizedBox(width: 8),
+                              Text(
+                                item['Alamat']!, // Access Alamat from the item
+                                style: TextStyle(
+                                  color: textColor,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Icon(Icons.person_outline, size: 20),
+                              SizedBox(width: 8),
+                              Text(
+                                item['Nama']!,
+                                style: TextStyle(
+                                  color: textColor,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Icon(Icons.inbox_outlined, size: 20),
+                              SizedBox(width: 8),
+                              Text(
+                                '${item['JumlahBarang']} jenis barang',
+                                style: TextStyle(
+                                  color: textColor,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            padding: const EdgeInsets.only(top: 24),
+                            child: SizedBox(
+                              width: double.infinity,
+                              height: 40,
+                              child: FilledButton(
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: const Color.fromARGB(
+                                    255,
+                                    23,
+                                    96,
+                                    232,
+                                  ),
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30),
+                                  ),
+                                  textStyle: const TextStyle(fontSize: 16.0),
+                                ),
+                                onPressed: () {
+                                  print(
+                                    'no pengiriman: ${item['NoPengiriman']}',
+                                  );
+                                  setState(() {
+                                    pilihan_widget = 1;
+                                    index_selected = index;
+                                    if (item['Status'] != "2") {
+                                      _changeStatus(
+                                        item['NoPengiriman'],
+                                        item['NoUrut'],
+                                        1,
+                                      );
+                                      detStatus = '1';
+                                    }
+                                    detNoDO = item['NoDO'];
+                                    detAlamat = item['Alamat'];
+                                    detCust = item['Nama'];
+                                    detJumlahBrg = item['JumlahBarang'];
+                                    detNoPeng = item['NoPengiriman'];
+                                    detNoUrut = item['NoUrut'];
+                                    _getPengirimanSupirData();
+                                    _getDbsppDetData(item['NoDO']);
+                                  });
+                                  print('det no do: $detNoDO');
+                                },
+                                child: Text(
+                                  'Lihat Detail',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ));
-            })
-            .values
-            .toList(),
+                  );
+                })
+                .values
+                .toList(),
       ),
     );
   }
@@ -878,8 +926,8 @@ class _PesananPageState extends State<PesananPage> {
     return SafeArea(
       child: SingleChildScrollView(
         child: Container(
-          margin: EdgeInsets.all(10),
-          padding: EdgeInsets.all(16),
+          margin: EdgeInsets.only(left: 10, right: 10),
+          padding: EdgeInsets.only(left: 16, right: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -898,87 +946,82 @@ class _PesananPageState extends State<PesananPage> {
                     SizedBox(width: 16),
                     Text(
                       'Back',
-                      style:
-                          TextStyle(color: Color.fromARGB(255, 152, 162, 179)),
+                      style: TextStyle(
+                        color: Color.fromARGB(255, 152, 162, 179),
+                      ),
                     ),
                   ],
                 ),
               ),
-              SizedBox(height: 24),
+              SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     detNoDO,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                   ),
                   Container(
-                    padding:
-                        EdgeInsets.only(top: 8, bottom: 8, left: 12, right: 12),
+                    padding: EdgeInsets.only(
+                      top: 8,
+                      bottom: 8,
+                      left: 12,
+                      right: 12,
+                    ),
                     decoration: BoxDecoration(
-                        color: getStatusColor(detStatus),
-                        borderRadius: BorderRadius.all(Radius.circular(20))),
+                      color: getStatusColor(detStatus),
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                    ),
                     child: Text(
                       getStatusString(detStatus),
                       style: TextStyle(
-                          color: getStatusTextColor(detStatus),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14),
+                        color: getStatusTextColor(detStatus),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
                     ),
-                  )
+                  ),
                 ],
               ),
               SizedBox(height: 10),
               Row(
                 children: [
-                  Icon(
-                    Icons.location_on_outlined,
-                    size: 20,
-                  ),
+                  Icon(Icons.location_on_outlined, size: 20),
                   SizedBox(width: 8),
                   Text(
                     // 'Jl. Pasar Turi no. 19-21',
                     detAlamat,
                     style: TextStyle(color: textColor, fontSize: 14),
-                  )
+                  ),
                 ],
               ),
               SizedBox(height: 10),
               Row(
                 children: [
-                  Icon(
-                    Icons.person_outline,
-                    size: 20,
-                  ),
+                  Icon(Icons.person_outline, size: 20),
                   SizedBox(width: 8),
                   Text(
                     // 'Sastroijo Pungli',
                     detCust,
                     style: TextStyle(color: textColor, fontSize: 14),
-                  )
+                  ),
                 ],
               ),
               SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(
-                    Icons.inbox_outlined,
-                    size: 20,
-                  ),
+                  Icon(Icons.inbox_outlined, size: 20),
                   SizedBox(width: 8),
                   Text(
                     '$detJumlahBrg jenis barang',
                     style: TextStyle(color: textColor, fontSize: 14),
-                  )
+                  ),
                 ],
               ),
               SizedBox(height: 16),
               Container(
                 width: double.infinity,
-                padding: EdgeInsets.all(16),
+                padding: EdgeInsets.only(top: 8, left: 16, right: 16),
                 decoration: BoxDecoration(
                   color: containerColor,
                   borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -988,9 +1031,7 @@ class _PesananPageState extends State<PesananPage> {
                   children: [
                     Text(
                       'Detail Barang',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     Divider(),
                     Row(
@@ -999,48 +1040,49 @@ class _PesananPageState extends State<PesananPage> {
                         Text(
                           'Kode Barang',
                           style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.bold),
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         Text(
                           'Jumlah',
                           style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.bold),
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),
                     Container(
-                      height: (40 * detDetails.length).toDouble(),
-                      constraints: BoxConstraints(
-                        maxHeight: 160, // 💡 adjust max height as needed
-                      ),
+                      // height: (40 * detDetails.length).toDouble(),
+                      height: 80,
+                      // constraints: BoxConstraints(
+                      //     // maxHeight: 80,
+                      //     ),
                       child: ListView.builder(
-                          itemCount: detDetails.length,
-                          itemBuilder: (context, index) {
-                            return Container(
-                              padding: EdgeInsets.only(bottom: 3),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    // detKodeBrg[index],
-                                    detDetails[index]['KodeBrg'],
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                  Text(
-                                    // '${detQty[index]}',
-                                    detDetails[index]['Quantity'],
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }),
-                    )
+                        itemCount: detDetails.length,
+                        itemBuilder: (context, index) {
+                          return Container(
+                            padding: EdgeInsets.only(bottom: 3),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  // detKodeBrg[index],
+                                  detDetails[index]['KodeBrg'],
+                                  style: TextStyle(fontSize: 14),
+                                ),
+                                Text(
+                                  // '${detQty[index]}',
+                                  detDetails[index]['Quantity'],
+                                  style: TextStyle(fontSize: 14),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -1051,20 +1093,20 @@ class _PesananPageState extends State<PesananPage> {
                   height: 40,
                   child: FilledButton(
                     style: FilledButton.styleFrom(
-                      backgroundColor: detStatus == "2"
-                          ? Color.fromARGB(255, 217, 217, 217)
-                          : Color.fromARGB(255, 13, 130, 75),
+                      backgroundColor:
+                          detStatus == "2"
+                              ? Color.fromARGB(255, 217, 217, 217)
+                              : Color.fromARGB(255, 13, 130, 75),
                       // backgroundColor: const Color.fromARGB(255, 13, 130, 75),
-                      foregroundColor: detStatus == "2"
-                          ? Color.fromARGB(255, 82, 89, 105)
-                          : Colors.white,
+                      foregroundColor:
+                          detStatus == "2"
+                              ? Color.fromARGB(255, 82, 89, 105)
+                              : Colors.white,
                       // foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
-                      textStyle: const TextStyle(
-                        fontSize: 16.0,
-                      ),
+                      textStyle: const TextStyle(fontSize: 16.0),
                     ),
                     onPressed: () {
                       if (detStatus != '2') {
@@ -1099,7 +1141,7 @@ class SelesaiPage extends StatefulWidget {
 }
 
 class _SelesaiPageState extends State<SelesaiPage> {
-  var baseUrl = dotenv.env['BASE_URL'];
+  // var baseUrl = dotenv.env['BASE_URL'];
 
   List<Map<String, dynamic>> filteredOrdersData = [];
 
@@ -1129,27 +1171,29 @@ class _SelesaiPageState extends State<SelesaiPage> {
     "December": false,
   };
 
-  Map<String, bool> selectedYears = {
-    "2023": false,
-    "2024": false,
-  };
+  Map<String, bool> selectedYears = {"2023": false, "2024": false};
 
   List<Map<String, dynamic>> ordersData = [];
   void applyFilters() {
     setState(() {
-      filteredOrdersData = ordersData.where((order) {
-        DateTime date = DateTime.parse(order["TANGGAL"]);
-        String month = DateFormat('MMMM').format(date); // Month in full text
-        String year = date.year.toString();
+      filteredOrdersData =
+          ordersData.where((order) {
+            DateTime date = DateTime.parse(order["TANGGAL"]);
+            String month = DateFormat(
+              'MMMM',
+            ).format(date); // Month in full text
+            String year = date.year.toString();
 
-        // Match the selected months and years
-        return (selectedMonths[month] ?? false) ||
-            (selectedYears[year] ?? false);
-      }).toList();
+            // Match the selected months and years
+            return (selectedMonths[month] ?? false) ||
+                (selectedYears[year] ?? false);
+          }).toList();
     });
   }
 
   Future<void> _getHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? baseUrl = prefs.getString('ip_addres');
     var url = Uri.parse('$baseUrl/dbso/tanggal');
 
     try {
@@ -1187,10 +1231,7 @@ class _SelesaiPageState extends State<SelesaiPage> {
           children: [
             Text(
               'Pesanan Selesai',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
             ),
             // Container(
             //   padding: EdgeInsets.all(16),
@@ -1253,11 +1294,13 @@ class _SelesaiPageState extends State<SelesaiPage> {
                   itemBuilder: (context, index) {
                     var dateData = ordersData[index];
                     String rawDate = dateData["TANGGAL"];
-                    List<String> orders =
-                        List<String>.from(dateData["NOBUKTI"]);
+                    List<String> orders = List<String>.from(
+                      dateData["NOBUKTI"],
+                    );
                     DateTime dateTime = DateTime.parse(rawDate);
-                    String formattedDate =
-                        DateFormat('d MMMM yyyy').format(dateTime);
+                    String formattedDate = DateFormat(
+                      'd MMMM yyyy',
+                    ).format(dateTime);
                     return Container(
                       margin: EdgeInsets.all(8),
                       child: Column(
@@ -1268,7 +1311,9 @@ class _SelesaiPageState extends State<SelesaiPage> {
                             child: Text(
                               formattedDate,
                               style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold),
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                           ListView.builder(
