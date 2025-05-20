@@ -1,24 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:web_admin_1/view_models/pengiriman_view_model.dart';
-import 'package:web_admin_1/widget/button.dart';
 import 'package:web_admin_1/widget/date_formatter.dart';
 
-class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+class SemuaPesanan extends StatefulWidget {
+  const SemuaPesanan({super.key});
 
   @override
-  State<DashboardScreen> createState() => _DashboardScreenState();
+  State<SemuaPesanan> createState() => _SemuaPesananState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _SemuaPesananState extends State<SemuaPesanan> {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) {
         final viewModel = PengirimanViewModel();
-        viewModel.fetchPengirimanData(DateFormatter.formatToday());
-        viewModel.fetchPesananSeminggu();
         viewModel.fetchAllPengirimanByTanggal();
         return viewModel;
       },
@@ -27,97 +24,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
           builder: (context, viewModel, _) {
             return Container(
               padding: const EdgeInsets.all(24),
-              child: viewModel.isLoading
+              child: viewModel.isLoadingPesananByTanggal
                   ? const Center(child: CircularProgressIndicator())
                   : Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 32),
-                        const Text('Dashboard',
+                        const Text('Semua Pesanan',
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 12),
-                        viewModel.isLoadingPesanan
-                            ? const Center(child: CircularProgressIndicator())
-                            : Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  _dashboardCard('Total Pesanan', 'seminggu',
-                                      viewModel.totalPesanan7Hari.toString()),
-                                  const SizedBox(width: 32),
-                                  _dashboardCard(
-                                      'Total Barang Dikirim',
-                                      'seminggu',
-                                      viewModel.totalBarang.toString()),
-                                  const SizedBox(width: 32),
-                                  _dashboardCard(
-                                      'Pesanan Belum Dikirim',
-                                      'hari ini',
-                                      viewModel.belumDikirim.toString()),
-                                ],
-                              ),
-                        const SizedBox(height: 24),
-                        Container(
-                          height: 100,
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.2),
-                                blurRadius: 4,
-                                offset: Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Row(
-                                children: [
-                                  Icon(Icons.trending_up_outlined),
-                                  SizedBox(width: 16),
-                                  Text(
-                                    'Aksi Cepat',
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                              Button('+ Tambah Pesanan', '/tambahPesanan')
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        Container(
-                          padding: EdgeInsets.all(8),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                'Pesanan Terakhir',
-                                style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.of(context)
-                                      .pushNamed('/semuaPesanan');
-                                },
-                                child: const Text(
-                                  'Lihat Semua',
-                                  style: TextStyle(
-                                      color: Color.fromARGB(255, 91, 146, 248),
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
                         Expanded(
                           child: ListView.builder(
                             itemCount: viewModel.groupedList.length > 7 ? 7 : 7,
@@ -142,7 +58,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                               color:
                                                   Colors.grey.withOpacity(0.2),
                                               blurRadius: 4,
-                                              offset: Offset(0, 2),
+                                              offset: const Offset(0, 2),
                                             ),
                                           ],
                                         ),
@@ -169,7 +85,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                 ),
                                               ],
                                             ),
-                                            SizedBox(height: 24),
+                                            const SizedBox(height: 24),
                                             const Row(
                                               children: [
                                                 Expanded(
@@ -207,7 +123,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                             TextAlign.start)),
                                               ],
                                             ),
-                                            Divider(),
+                                            const Divider(),
                                             const SizedBox(height: 8),
                                             ...group.pengirimanList.map((item) {
                                               return Padding(
@@ -257,38 +173,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
             );
           },
-        ),
-      ),
-    );
-  }
-
-  Widget _dashboardCard(String title, String desc, String value) {
-    return Expanded(
-      child: Container(
-        height: 150,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              blurRadius: 4,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(title,
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-            Text(desc, style: const TextStyle(fontSize: 12)),
-            Text(value,
-                style:
-                    const TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
-          ],
         ),
       ),
     );

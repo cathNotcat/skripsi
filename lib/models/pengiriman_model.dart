@@ -66,14 +66,14 @@ class PengirimanAllModel {
 
   factory PengirimanAllModel.fromJson(Map<String, dynamic> json) {
     return PengirimanAllModel(
-      noPengiriman: json['NoPengiriman'] ?? '',
-      noDO: json['NoDO'] ?? '',
-      kodeCustSupp: json['KodeCustSupp'] ?? '',
-      namaCust: json['Nama'] ?? '',
-      tanggalKirim: json['TanggalKirim'] ?? '',
-      status: json['Status'] ?? '',
-      noUrut: json['NoUrut'] ?? '',
-      selesaiAt: json['SelesaiAt'] ?? '',
+      noPengiriman: json['NoPengiriman'] ?? '-',
+      noDO: json['NoDO'] ?? '-',
+      kodeCustSupp: json['KodeCustSupp'] ?? '-',
+      namaCust: json['Nama'] ?? '-',
+      tanggalKirim: json['TanggalKirim'] ?? '-',
+      status: json['Status'] ?? '-',
+      noUrut: json['NoUrut'] ?? '-',
+      selesaiAt: json['SelesaiAt'] ?? '-',
     );
   }
 }

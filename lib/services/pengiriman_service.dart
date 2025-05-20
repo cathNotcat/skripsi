@@ -2,6 +2,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:web_admin_1/models/pengiriman_model.dart';
+import 'package:web_admin_1/widget/date_formatter.dart';
 
 class PengirimanService {
   final baseUrl = dotenv.env['BASE_URL'] ?? '';
@@ -52,6 +53,40 @@ class PengirimanService {
       return data.map((item) => PengirimanAllModel.fromJson(item)).toList();
     } else {
       throw Exception('Error in getPengirimanData');
+    }
+  }
+
+  Future<void> uploadPesanan(List<Map<String, dynamic>> sortedPesanan) async {
+    print('sortedPesanan service: $sortedPesanan');
+    var url = Uri.parse('$baseUrl/upload/pengiriman');
+
+    for (var pesanan in sortedPesanan) {
+      print('in uploadPesanan: $pesanan');
+      print('pesanan kodesopir: ${pesanan['KodeSopir']}');
+      try {
+        var response = await http.post(
+          url,
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'NoDO': pesanan['NoDO'],
+            'KodeSopir': pesanan['KodeSopir'],
+            'KodeCustSupp': pesanan['KodeCustSupp'],
+            'TanggalKirim': pesanan['TanggalKirim'],
+            'Status': pesanan['Status'],
+          }),
+        );
+
+        print('Status: ${response.statusCode} for NoDO: ${pesanan['NoDO']}');
+
+        if (response.statusCode == 200) {
+          var responseBody = jsonDecode(response.body);
+          print('Success in uploadPesanan service: ${responseBody['data']}');
+        } else {
+          print('Failed to upload NoDO ${pesanan['NoDO']}: ${response.body}');
+        }
+      } catch (e) {
+        print('Error uploading NoDO in uploadPesanan ${pesanan['NoDO']}: $e');
+      }
     }
   }
 }

@@ -2,11 +2,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_admin_1/views/dashboard_screen.dart';
 import 'package:web_admin_1/login_page.dart';
 import 'package:web_admin_1/pengiriman_page.dart';
 import 'package:web_admin_1/views/pengiriman_screen.dart';
 import 'package:web_admin_1/views/proses_screen.dart';
+import 'package:web_admin_1/views/semua_pesanan.dart';
 import 'package:web_admin_1/views/tambah_screen.dart';
 
 void main() async {
@@ -25,8 +27,8 @@ class MainApp extends StatelessWidget {
           scaffoldBackgroundColor: Color.fromARGB(255, 245, 245, 245),
         ),
         home: SafeArea(
-          // child: Navbar(),
-          child: LoginPage(),
+          child: Navbar(),
+          // child: LoginPage(),
           // child: CalculateRoute(),
         ));
   }
@@ -41,10 +43,12 @@ class Navbar extends StatefulWidget {
 
 class _NavbarState extends State<Navbar> {
   late int selectedIndex;
+  late bool isLoading;
 
   final List<Widget> pages = [
     DashboardScreen(),
     PengirimanScreen(),
+    SemuaPesanan(),
     TambahScreen(),
     // TambahPesananPage(),
     ProsesScreen(),
@@ -107,25 +111,37 @@ class _NavbarState extends State<Navbar> {
                   thickness: 1,
                 ),
                 SizedBox(height: 40),
-                // Sidebar Menu
                 SidebarItem(
-                  icon: Icons.dashboard_outlined,
-                  title: 'Dashboard',
-                  isSelected: selectedIndex == 0,
-                  onTap: () => onSidebarItemClicked(0),
-                ),
+                    icon: Icons.dashboard_outlined,
+                    title: 'Dashboard',
+                    isSelected: selectedIndex == 0,
+                    onTap: () async {
+                      await Future.delayed(Duration(seconds: 1));
+                      onSidebarItemClicked(0);
+                    }),
                 SizedBox(height: 16),
                 SidebarItem(
-                  icon: Icons.local_shipping_outlined,
-                  title: 'Pengiriman',
-                  isSelected: selectedIndex == 1,
-                  onTap: () => onSidebarItemClicked(1),
-                ),
+                    icon: Icons.local_shipping_outlined,
+                    title: 'Pengiriman',
+                    isSelected: selectedIndex == 1,
+                    onTap: () async {
+                      await Future.delayed(Duration(seconds: 1));
+                      onSidebarItemClicked(1);
+                    }),
+                SizedBox(height: 16),
+                SidebarItem(
+                    icon: Icons.card_travel,
+                    title: 'Pesanan',
+                    isSelected: selectedIndex == 2,
+                    onTap: () async {
+                      await Future.delayed(Duration(seconds: 1));
+                      onSidebarItemClicked(2);
+                    }),
                 SizedBox(height: 16),
                 SidebarItem(
                   icon: Icons.logout,
                   title: 'Log Out',
-                  isSelected: selectedIndex == 2,
+                  isSelected: selectedIndex == 3,
                   onTap: () {
                     Navigator.push(
                       context,
@@ -143,12 +159,15 @@ class _NavbarState extends State<Navbar> {
             child: Navigator(
               onGenerateRoute: (settings) {
                 Widget page = pages[selectedIndex];
-                if (settings.name == '/supirProses') {
+                if (settings.name == '/sopirProses') {
                   page = ProsesScreen();
                 }
                 if (settings.name == '/tambahPesanan') {
                   page = TambahScreen();
                   // page = TambahPesananPage();
+                }
+                if (settings.name == '/semuaPesanan') {
+                  page = SemuaPesanan();
                 }
                 return MaterialPageRoute(builder: (_) => page);
               },

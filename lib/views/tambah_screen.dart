@@ -22,7 +22,6 @@ class _TambahScreenState extends State<TambahScreen> {
       create: (_) {
         final viewModel = TambahPesananViewModel();
         viewModel.fetchPengirimanData(DateFormatter.formatToday());
-        print('islihat detail: ${viewModel.isLihatDetail}');
         return viewModel;
       },
       child: Scaffold(
@@ -30,21 +29,21 @@ class _TambahScreenState extends State<TambahScreen> {
           builder: (context, viewModel, _) {
             return SingleChildScrollView(
               child: Container(
-                padding: EdgeInsets.all(24),
+                padding: const EdgeInsets.all(24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: 32),
-                    Text(
+                    const SizedBox(height: 32),
+                    const Text(
                       'Tambah Pesanan',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
                       ),
                     ),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     Container(
-                      padding: EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16),
                       // height: 140,
                       width: double.infinity,
                       decoration: BoxDecoration(
@@ -64,12 +63,12 @@ class _TambahScreenState extends State<TambahScreen> {
                                   controller: viewModel.inputDoController,
                                   isInput: true,
                                 ),
-                                SizedBox(height: 12),
+                                const SizedBox(height: 12),
                                 InputField(
                                   label: 'No. Urut',
                                   controller: viewModel.noUrutController,
                                 ),
-                                SizedBox(height: 12),
+                                const SizedBox(height: 12),
                                 InputField(
                                   label: 'Tanggal Kirim',
                                   controller: viewModel.tanggalKirimController,
@@ -79,7 +78,7 @@ class _TambahScreenState extends State<TambahScreen> {
                               ],
                             ),
                           ),
-                          SizedBox(width: 32),
+                          const SizedBox(width: 32),
                           Expanded(
                             flex: 2,
                             child: Column(
@@ -89,17 +88,17 @@ class _TambahScreenState extends State<TambahScreen> {
                                   label: 'No. SO',
                                   controller: viewModel.noSoController,
                                 ),
-                                SizedBox(height: 12),
+                                const SizedBox(height: 12),
                                 InputField(
                                   label: 'Customer',
                                   controller: viewModel.customerController,
                                 ),
-                                SizedBox(height: 12),
+                                const SizedBox(height: 12),
                                 InputField(
                                   label: 'No Pesan',
                                   controller: viewModel.noPesanController,
                                 ),
-                                SizedBox(height: 24),
+                                const SizedBox(height: 24),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
@@ -115,15 +114,15 @@ class _TambahScreenState extends State<TambahScreen> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 32),
+                    const SizedBox(height: 32),
                     viewModel.isLihatDetail
                         ? viewModel.isLoading
-                            ? Center(child: CircularProgressIndicator())
+                            ? const Center(child: CircularProgressIndicator())
                             : Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   Container(
-                                    padding: EdgeInsets.all(16),
+                                    padding: const EdgeInsets.all(16),
                                     width: double.infinity,
                                     decoration: BoxDecoration(
                                       color: Colors.white,
@@ -146,105 +145,24 @@ class _TambahScreenState extends State<TambahScreen> {
                                           TableRow(
                                             decoration: BoxDecoration(
                                                 color: Colors.grey[200]),
-                                            children: const [
-                                              Center(
-                                                child: Padding(
-                                                  padding: EdgeInsets.all(8.0),
-                                                  child: Text(
-                                                    'No.',
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold),
-                                                  ),
-                                                ),
-                                              ),
-                                              Center(
-                                                  child: Padding(
-                                                      padding:
-                                                          EdgeInsets.all(8.0),
-                                                      child: Text('Kode Barang',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold)))),
-                                              Center(
-                                                  child: Padding(
-                                                      padding:
-                                                          EdgeInsets.all(8.0),
-                                                      child: Text('Nama Barang',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold)))),
-                                              Center(
-                                                  child: Padding(
-                                                      padding:
-                                                          EdgeInsets.all(8.0),
-                                                      child: Text('Qnt',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold)))),
-                                              Center(
-                                                  child: Padding(
-                                                      padding:
-                                                          EdgeInsets.all(8.0),
-                                                      child: Text('Satuan',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold)))),
-                                              Center(
-                                                  child: Padding(
-                                                      padding:
-                                                          EdgeInsets.all(8.0),
-                                                      child: Text('Keterangan',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold)))),
+                                            children: [
+                                              _columnHeader('No.'),
+                                              _columnHeader('Kode Barang'),
+                                              _columnHeader('Nama Barang'),
+                                              _columnHeader('Qnt'),
+                                              _columnHeader('Satuan'),
+                                              _columnHeader('Keterangan'),
                                             ],
                                           ),
                                           ...viewModel.detailDO.map(
                                             (item) => TableRow(
                                               children: [
-                                                Center(
-                                                  child: Padding(
-                                                    padding:
-                                                        EdgeInsets.all(8.0),
-                                                    child: Text('${counter++}'),
-                                                  ),
-                                                ),
-                                                Center(
-                                                    child: Padding(
-                                                        padding:
-                                                            EdgeInsets.all(8.0),
-                                                        child: Text(
-                                                            item.kodeBarang))),
-                                                Center(
-                                                    child: Padding(
-                                                        padding:
-                                                            EdgeInsets.all(8.0),
-                                                        child: Text(
-                                                            item.namaBarang))),
-                                                Center(
-                                                    child: Padding(
-                                                        padding:
-                                                            EdgeInsets.all(8.0),
-                                                        child: Text(
-                                                            item.quantity))),
-                                                Center(
-                                                    child: Padding(
-                                                        padding:
-                                                            EdgeInsets.all(8.0),
-                                                        child:
-                                                            Text(item.satuan))),
-                                                Center(
-                                                    child: Padding(
-                                                        padding:
-                                                            EdgeInsets.all(8.0),
-                                                        child: Text(
-                                                            item.keterangan))),
+                                                _columnValue('${counter++}'),
+                                                _columnValue(item.kodeBarang),
+                                                _columnValue(item.namaBarang),
+                                                _columnValue(item.quantity),
+                                                _columnValue(item.satuan),
+                                                _columnValue(item.keterangan),
                                               ],
                                             ),
                                           ),
@@ -252,15 +170,10 @@ class _TambahScreenState extends State<TambahScreen> {
                                       ),
                                     ),
                                   ),
-                                  SizedBox(height: 24),
+                                  const SizedBox(height: 24),
                                   ButtonDetail(
                                     'Tambah Pesanan',
                                     () => viewModel.tambahPesanan(
-                                      // noDO: viewModel.inputDoController.text,
-                                      // kodeCust:
-                                      //     viewModel.customerController.text,
-                                      // tanggalKirim:
-                                      //     viewModel.tanggalKirimController.text,
                                       showSnackBar: (msg, color) =>
                                           ErrorTopSnackbar.show(
                                         context,
@@ -271,16 +184,16 @@ class _TambahScreenState extends State<TambahScreen> {
                                   ),
                                 ],
                               )
-                        : SizedBox(),
-                    SizedBox(height: 24),
+                        : const SizedBox(),
+                    const SizedBox(height: 24),
                     viewModel.isLoading
-                        ? Center(child: CircularProgressIndicator())
+                        ? const Center(child: CircularProgressIndicator())
                         : viewModel.isPesananExist
                             ? Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   Container(
-                                    padding: EdgeInsets.all(16),
+                                    padding: const EdgeInsets.all(16),
                                     width: double.infinity,
                                     decoration: BoxDecoration(
                                       color: Colors.white,
@@ -302,94 +215,30 @@ class _TambahScreenState extends State<TambahScreen> {
                                           TableRow(
                                             decoration: BoxDecoration(
                                                 color: Colors.grey[200]),
-                                            children: const [
-                                              Center(
-                                                child: Padding(
-                                                  padding: EdgeInsets.all(8.0),
-                                                  child: Text(
-                                                    'No.',
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold),
-                                                  ),
-                                                ),
-                                              ),
-                                              Center(
-                                                  child: Padding(
-                                                      padding:
-                                                          EdgeInsets.all(8.0),
-                                                      child: Text('No. DO',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold)))),
-                                              Center(
-                                                  child: Padding(
-                                                      padding:
-                                                          EdgeInsets.all(8.0),
-                                                      child: Text('Customer',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold)))),
-                                              Center(
-                                                  child: Padding(
-                                                      padding:
-                                                          EdgeInsets.all(8.0),
-                                                      child: Text('Nama',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold)))),
-                                              Center(
-                                                  child: Padding(
-                                                      padding:
-                                                          EdgeInsets.all(8.0),
-                                                      child: Text('Hapus',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold)))),
+                                            children: [
+                                              _columnHeader('No.'),
+                                              _columnHeader('No.DO'),
+                                              _columnHeader('Customer'),
+                                              _columnHeader('Nama'),
+                                              _columnHeader('Hapus'),
                                             ],
                                           ),
                                           // Data rows
                                           ...viewModel.listOfPesanan.map(
                                             (item) => TableRow(
                                               children: [
+                                                _columnValue(
+                                                    '${counterTambah++}'),
+                                                _columnValue(item.noDO),
+                                                _columnValue(item.kodeCustSupp),
+                                                _columnValue(item.nama),
                                                 Center(
                                                   child: Padding(
                                                     padding:
-                                                        EdgeInsets.all(8.0),
-                                                    child: Text(
-                                                        '${counterTambah++}'),
-                                                  ),
-                                                ),
-                                                Center(
-                                                    child: Padding(
-                                                        padding:
-                                                            EdgeInsets.all(8.0),
-                                                        child:
-                                                            Text(item.noDO))),
-                                                Center(
-                                                    child: Padding(
-                                                        padding:
-                                                            EdgeInsets.all(8.0),
-                                                        child: Text(item
-                                                            .kodeCustSupp))),
-                                                Center(
-                                                    child: Padding(
-                                                        padding:
-                                                            EdgeInsets.all(8.0),
-                                                        child:
-                                                            Text(item.nama))),
-                                                Center(
-                                                  child: Padding(
-                                                    padding:
-                                                        EdgeInsets.all(8.0),
+                                                        const EdgeInsets.all(
+                                                            8.0),
                                                     child: IconButton(
                                                         onPressed: () {
-                                                          print(
-                                                              'pressed hapus');
                                                           viewModel
                                                               .hapusPesanan(
                                                             context: context,
@@ -404,7 +253,7 @@ class _TambahScreenState extends State<TambahScreen> {
                                                             ),
                                                           );
                                                         },
-                                                        icon: Icon(
+                                                        icon: const Icon(
                                                           Icons.delete,
                                                           color: Colors.red,
                                                         )),
@@ -416,10 +265,34 @@ class _TambahScreenState extends State<TambahScreen> {
                                         ],
                                       ),
                                     ),
-                                  )
+                                  ),
+                                  SizedBox(height: 24),
+                                  viewModel.isCalculating
+                                      ? Center(
+                                          child: CircularProgressIndicator())
+                                      : ElevatedButton(
+                                          onPressed: () async {
+                                            await viewModel.selesaiPesanan();
+                                            Navigator.of(context)
+                                                .pushNamed('/sopirProses');
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Color.fromARGB(
+                                                255, 23, 96, 232),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            'Selesai',
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                        ),
                                 ],
                               )
-                            : SizedBox()
+                            : const SizedBox()
                   ],
                 ),
               ),
@@ -428,5 +301,18 @@ class _TambahScreenState extends State<TambahScreen> {
         ),
       ),
     );
+  }
+
+  Widget _columnHeader(String value) {
+    return Center(
+        child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(value,
+                style: const TextStyle(fontWeight: FontWeight.bold))));
+  }
+
+  Widget _columnValue(String value) {
+    return Center(
+        child: Padding(padding: const EdgeInsets.all(8.0), child: Text(value)));
   }
 }

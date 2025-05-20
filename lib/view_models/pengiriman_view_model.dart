@@ -9,9 +9,12 @@ class PengirimanViewModel extends ChangeNotifier {
   final apiService = PengirimanService();
 
   int totalPesanan7Hari = 0;
+  int totalBarang = 0;
 
   List<PengirimanModel> details = [];
   bool isLoading = true;
+  bool isLoadingPesanan = true;
+  bool isLoadingPesananByTanggal = true;
   bool adaPengiriman = false;
 
   int pesanan = 0;
@@ -61,26 +64,61 @@ class PengirimanViewModel extends ChangeNotifier {
   }
 
   Future<void> fetchPesananSeminggu() async {
-    int total = 0;
+    int totalPesanan = 0;
+    int totalBrg = 0;
 
     for (int i = 0; i < 7; i++) {
       final date = DateTime.now().subtract(Duration(days: i));
       final formattedDate = DateFormat('yyyy-MM-dd').format(date);
       final result = await fetchPengirimanList(formattedDate);
-      total += result.length;
+      totalPesanan += result.length;
+
+      for (final item in result) {
+        final jumlah = int.tryParse(item.jumlahBarang) ?? 0;
+        totalBrg += jumlah;
+      }
     }
 
-    totalPesanan7Hari = total;
+    totalPesanan7Hari = totalPesanan;
+    totalBarang = totalBrg;
+    isLoadingPesanan = false;
     notifyListeners();
   }
 
   Future<void> fetchAllPengirimanByTanggal() async {
     try {
       groupedList = await apiService.getAllPengirimanDataByTanggal();
+      isLoadingPesananByTanggal = false;
 
       notifyListeners();
     } catch (e) {
       print('Error fetching grouped pengiriman: $e');
+    }
+  }
+
+  String changeStatus(String status) {
+    switch (status) {
+      case '0':
+        return 'Belum Dikirim';
+      case '1':
+        return 'Sedang Dikirim';
+      case '2':
+        return 'Selesai';
+      default:
+        return '';
+    }
+  }
+
+  Color changeStatusColor(String status) {
+    switch (status) {
+      case '0':
+        return const Color.fromARGB(255, 255, 98, 83);
+      case '1':
+        return const Color.fromARGB(255, 255, 184, 98);
+      case '2':
+        return const Color.fromARGB(255, 25, 206, 121);
+      default:
+        return const Color.fromARGB(255, 217, 217, 217);
     }
   }
 }

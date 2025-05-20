@@ -24,52 +24,55 @@ class _PengirimanScreenState extends State<PengirimanScreen> {
           builder: (context, viewModel, _) {
             return Padding(
               padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Header(
-                    pesanan: viewModel.pesanan,
-                    belumDikirim: viewModel.belumDikirim,
-                    sedangDikirim: viewModel.sedangDikirim,
-                    selesai: viewModel.selesai,
-                  ),
-                  SizedBox(height: 48),
-                  Text('Sopir',
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                  Container(
-                    height: 100,
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
+              child: viewModel.isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: Colors.grey,
-                            borderRadius: BorderRadius.circular(50),
-                          ),
+                        Header(
+                          pesanan: viewModel.pesanan,
+                          belumDikirim: viewModel.belumDikirim,
+                          sedangDikirim: viewModel.sedangDikirim,
+                          selesai: viewModel.selesai,
                         ),
-                        SizedBox(width: 48),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.of(context).pushNamed('/supirProses');
-                          },
-                          child: Text(
-                            'ADI',
-                            style:
-                                TextStyle(decoration: TextDecoration.underline),
+                        SizedBox(height: 48),
+                        Text('Sopir',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 18)),
+                        Container(
+                          height: 100,
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 50,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey,
+                                  borderRadius: BorderRadius.circular(50),
+                                ),
+                              ),
+                              SizedBox(width: 48),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context)
+                                      .pushNamed('/sopirProses');
+                                },
+                                child: Text(
+                                  'ADI',
+                                  style: TextStyle(
+                                      decoration: TextDecoration.underline),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
             );
           },
         ),

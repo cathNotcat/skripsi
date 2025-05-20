@@ -1,16 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:intl/intl.dart';
+import 'package:web_admin_1/held_karp.dart';
 import 'package:web_admin_1/models/customer_model.dart';
 import 'package:web_admin_1/models/dbspp_model.dart';
 import 'package:web_admin_1/models/pesanan_model.dart';
 import 'package:web_admin_1/services/customer_service.dart';
+import 'package:web_admin_1/services/notification_service.dart';
 import 'package:web_admin_1/services/pengiriman_service.dart';
 import 'package:web_admin_1/services/pesanan_service.dart';
+import 'package:web_admin_1/widget/date_formatter.dart';
 
 class TambahPesananViewModel extends ChangeNotifier {
   final pesananService = PesananService();
   final pengirimanService = PengirimanService();
   final customerService = CustomerService();
+  final notificationService = NotificationService();
+
   DBSPPModel? dbsppData;
+  CustomerModel? customer;
 
   bool isLihatDetail = false;
   bool isLoading = true;
@@ -34,8 +42,8 @@ class TambahPesananViewModel extends ChangeNotifier {
 
   List<PesananModel> listOfPesanan = [];
   List<DBSPPDetModel> detailDO = [];
-  // List<PesananModel> detailPengiriman = [];
-  CustomerModel? customer;
+
+  final deviceToken = dotenv.env['NOTIF_DEVICE_TOKEN'] ?? '';
 
   Future<void> fetchPengirimanData(String formattedDate) async {
     try {
@@ -58,6 +66,7 @@ class TambahPesananViewModel extends ChangeNotifier {
   }
 
   Future<void> fetchDbsppData() async {
+    String dateNow = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
     try {
       if (inputDoController.text != '' || inputDoController.text.isNotEmpty) {
         dbsppData = await pesananService.getDbsppData(inputDoController.text);
@@ -65,6 +74,7 @@ class TambahPesananViewModel extends ChangeNotifier {
         if (dbsppData != null) {
           noUrutController.text = dbsppData!.noUrut;
           noSoController.text = dbsppData!.noSO;
+          tanggalKirimController.text = dateNow;
           noPesanController.text = dbsppData!.noPesan;
           customerController.text = dbsppData!.kodeCustSupp;
         }
@@ -95,6 +105,9 @@ class TambahPesananViewModel extends ChangeNotifier {
     try {
       customer = await customerService.getCustomerDetails(kodeCust);
       namaCust = customer!.nama;
+      String coordinate = customer!.koordinat;
+      points.add(coordinate.toString());
+      custCoordinateMap[kodeCust] = coordinate;
       notifyListeners();
     } catch (e) {
       print('Error in fetchCustDetails: $e');
@@ -149,5 +162,112 @@ class TambahPesananViewModel extends ChangeNotifier {
       print('Gagal hapus pesanan: $e');
       showSnackBar('Terjadi kesalahan saat menghapus', Colors.red);
     }
+  }
+
+  Future<void> selesaiPesanan() async {
+    if (points.isEmpty) {
+      print('Tidak ada koordinat');
+      return;
+    }
+
+    isCalculating = true;
+    notifyListeners();
+    try {
+      List<String> sortedKodeCustSupp = await _calculateHeldKarp();
+
+      List<Map<String, dynamic>> sortedPesanan = [];
+      for (String kodeCust in sortedKodeCustSupp) {
+        PesananModel? pesanan = listOfPesanan
+            .where((item) => item.kodeCustSupp == kodeCust)
+            .cast<PesananModel?>()
+            .firstOrNull;
+
+        if (pesanan != null) {
+          sortedPesanan.add({
+            'NoDO': pesanan.noDO,
+            'KodeSopir': pesanan.kodeSopir,
+            'KodeCustSupp': pesanan.kodeCustSupp,
+            'TanggalKirim': pesanan.tanggalKirim,
+            // 'Nama': pesanan.nama,
+            'Status': pesanan.status,
+          });
+        }
+      }
+
+      print('sortedPesanan before: $sortedPesanan');
+      await pengirimanService.uploadPesanan(sortedPesanan);
+      // await notificationService.sendNotifications(sortedPesanan);
+      notifyListeners();
+    } catch (e) {
+      print('Error in selesaiPesanan: $e');
+    }
+
+    isCalculating = false;
+    notifyListeners();
+  }
+
+  List<LatLng> convertToLatLngList(List<String> coordinateStrings) {
+    List<LatLng> latLngList = [];
+
+    for (var coord in coordinateStrings) {
+      List<String> parts = coord.split(',');
+
+      if (parts.length == 2) {
+        double latitude = double.parse(parts[0].trim());
+        double longitude = double.parse(parts[1].trim());
+
+        latLngList.add(LatLng(latitude, longitude));
+      } else {
+        print("Invalid coordinate format: $coord");
+      }
+    }
+
+    return latLngList;
+  }
+
+  Future<List<String>> _calculateHeldKarp() async {
+    List<LatLng> pointsConverted = convertToLatLngList(points);
+
+    HeldKarp heldKarp = HeldKarp();
+    List<LatLng> pointsWithHeldKarp =
+        await heldKarp.calculateWithHeldKarp(pointsConverted);
+
+    print('before heldkarp: $points');
+    print('after heldkarp: $pointsWithHeldKarp');
+
+    List<String> sortedKodeCustSupp = [];
+
+    for (LatLng coord in pointsWithHeldKarp) {
+      String coordString =
+          "${coord.latitude.toStringAsFixed(15)}, ${coord.longitude.toStringAsFixed(15)}";
+      print("Checking for: $coordString");
+
+      for (var entry in custCoordinateMap.entries) {
+        print("Stored: ${entry.value} -> ${entry.key}");
+      }
+
+      String? kodeCust;
+      double epsilon = 0.000001;
+
+      for (var entry in custCoordinateMap.entries) {
+        List<String> storedCoords = entry.value.split(',');
+        double storedLat = double.parse(storedCoords[0]);
+        double storedLng = double.parse(storedCoords[1]);
+
+        if ((storedLat - coord.latitude).abs() < epsilon &&
+            (storedLng - coord.longitude).abs() < epsilon) {
+          kodeCust = entry.key;
+          break;
+        }
+      }
+
+      if (kodeCust != null) {
+        sortedKodeCustSupp.add(kodeCust);
+      }
+    }
+
+    print("Sorted KodeCustSupp after Held-Karp: $sortedKodeCustSupp");
+
+    return sortedKodeCustSupp;
   }
 }

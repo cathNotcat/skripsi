@@ -1039,7 +1039,7 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
       }
 
       String? kodeCust;
-      double epsilon = 0.000001; // Adjust tolerance as needed
+      double epsilon = 0.000001;
 
       for (var entry in custCoordinateMap.entries) {
         List<String> storedCoords = entry.value.split(',');
@@ -1465,7 +1465,7 @@ class _TambahPesananPageState extends State<TambahPesananPage> {
                                     onPressed: () async {
                                       await _selesai();
                                       Navigator.of(context)
-                                          .pushNamed('/supirProses');
+                                          .pushNamed('/sopirProses');
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor:

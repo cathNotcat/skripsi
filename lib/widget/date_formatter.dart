@@ -13,4 +13,9 @@ class DateFormatter {
       return tanggal;
     }
   }
+
+  static String formatDateToday() {
+    final now = DateTime.now();
+    return DateFormat('d MMMM y').format(now);
+  }
 }
