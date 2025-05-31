@@ -1,8 +1,7 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:aplikasi_1/main.dart';
-import 'package:aplikasi_1/models/sopir.dart';
-import 'package:aplikasi_1/services/network_finding_service.dart';
+import 'package:aplikasi_1/models/sopir_model.dart';
 import 'package:aplikasi_1/services/sopir_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -24,9 +23,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // var baseUrl;
-  // var baseUrl = dotenv.env['BASE_URL'];
-
   DateTime now = DateTime.now();
 
   final SopirService sopirService = SopirService();
@@ -50,7 +46,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    // NetworkFindingService().findLocalBackend();
     _getBaseUrl();
     _formatDate();
     _getPengirimanSupirData();
@@ -83,7 +78,6 @@ class _HomePageState extends State<HomePage> {
     String formattedDate = DateFormat('yyyy-MM-dd').format(now);
     final prefs = await SharedPreferences.getInstance();
     String? baseUrl = prefs.getString('ip_address');
-    // Future<String?> baseUrl = NetworkFindingService().getUrlFromBackend();
     print('base url in _getPengirimanSupirData: $baseUrl');
     var url = Uri.parse('$baseUrl/pengiriman/tanggal/$formattedDate');
 
@@ -361,10 +355,7 @@ class _PesananPageState extends State<PesananPage> {
 
   late GoogleMapController mapController;
   LatLng _initialPosition = LatLng(0, 0);
-  // LatLng _initialPosition = LatLng(-7.375729652261953, 112.6788318829139);
-  List<LatLng> points = [
-    // LatLng(-7.375729652261953, 112.6788318829139),
-  ];
+  List<LatLng> points = [];
   final Set<Polyline> _polylines = {};
   final Set<Marker> _markers = {};
 

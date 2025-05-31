@@ -2,9 +2,9 @@
 
 import 'package:aplikasi_1/firebase_options.dart';
 import 'package:aplikasi_1/home_page.dart';
-import 'package:aplikasi_1/services/network_finding_service.dart';
 import 'package:aplikasi_1/services/notification_service.dart';
 import 'package:aplikasi_1/settings_page.dart';
+import 'package:aplikasi_1/views/home_screen.dart';
 import 'package:aplikasi_1/views/login_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -15,9 +15,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // final networkFindingService = NetworkFindingService();
-  // await networkFindingService.findLocalBackend();
-
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -28,22 +25,18 @@ void main() async {
 }
 
 Future<void> requestLocationPermission() async {
-  // Using permission_handler
   if (await Permission.location.request().isGranted) {
     print("Location permission granted.");
   } else {
     print("Location permission denied.");
   }
 
-  // Optionally check service enabled too
   bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
   if (!serviceEnabled) {
     print("Location services are disabled.");
   }
   Position position = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high);
-  print(position.latitude);
-  print(position.longitude);
   final prefs = await SharedPreferences.getInstance();
   await prefs.setDouble('latitude', position.latitude);
   await prefs.setDouble('longitude', position.longitude);
@@ -63,8 +56,8 @@ class MainApp extends StatelessWidget {
             bodyMedium: TextStyle(fontSize: 16),
           )),
       debugShowCheckedModeBanner: false,
-      // home: SafeArea(child: SettingsPage()),
-      home: SafeArea(child: LoginScreen()),
+      home: SafeArea(child: SettingsPage()),
+      // home: SafeArea(child: LoginScreen()),
       // home: SafeArea(child: HomePage()),
       // home: SafeArea(child: Navbar()),
     );
@@ -85,7 +78,7 @@ class _NavbarState extends State<Navbar> {
 
   int _selectedIndex = 0;
   final List<Widget> _pages = [
-    HomePage(),
+    HomeScreen(),
     PesananPage(),
     SelesaiPage(),
     SettingsPage(),
