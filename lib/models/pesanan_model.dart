@@ -4,7 +4,7 @@ class PesananModel {
   final String kodeCustSupp;
   final String tanggalKirim;
   final String nama;
-  final int status;
+  final String status;
 
   PesananModel({
     required this.noDO,

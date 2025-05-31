@@ -4,20 +4,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_admin_1/views/dashboard_screen.dart';
-import 'package:web_admin_1/login_page.dart';
-import 'package:web_admin_1/pengiriman_page.dart';
+import 'package:web_admin_1/views/login_screen.dart';
 import 'package:web_admin_1/views/pengiriman_screen.dart';
 import 'package:web_admin_1/views/proses_screen.dart';
-import 'package:web_admin_1/views/semua_pesanan.dart';
+import 'package:web_admin_1/views/semua_pesanan_screen.dart';
 import 'package:web_admin_1/views/tambah_screen.dart';
 
 void main() async {
   await dotenv.load();
-  runApp(const MainApp());
+  final prefs = await SharedPreferences.getInstance();
+  final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+  runApp(MainApp(isLoggedIn: isLoggedIn));
 }
 
 class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+  final bool isLoggedIn;
+
+  const MainApp({super.key, required this.isLoggedIn});
 
   @override
   Widget build(BuildContext context) {
@@ -27,9 +30,7 @@ class MainApp extends StatelessWidget {
           scaffoldBackgroundColor: Color.fromARGB(255, 245, 245, 245),
         ),
         home: SafeArea(
-          child: Navbar(),
-          // child: LoginPage(),
-          // child: CalculateRoute(),
+          child: isLoggedIn ? Navbar() : LoginScreen(),
         ));
   }
 }
@@ -50,9 +51,8 @@ class _NavbarState extends State<Navbar> {
     PengirimanScreen(),
     SemuaPesanan(),
     TambahScreen(),
-    // TambahPesananPage(),
+    LoginScreen(),
     ProsesScreen(),
-    LoginPage(),
   ];
 
   @override
@@ -142,14 +142,13 @@ class _NavbarState extends State<Navbar> {
                   icon: Icons.logout,
                   title: 'Log Out',
                   isSelected: selectedIndex == 3,
-                  onTap: () {
+                  onTap: () async {
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setBool('isLoggedIn', false);
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => LoginPage()),
+                      MaterialPageRoute(builder: (context) => LoginScreen()),
                     );
-                    // setState(() {
-                    //   selectedIndex = 2;
-                    // });
                   },
                 ),
               ],
@@ -164,7 +163,6 @@ class _NavbarState extends State<Navbar> {
                 }
                 if (settings.name == '/tambahPesanan') {
                   page = TambahScreen();
-                  // page = TambahPesananPage();
                 }
                 if (settings.name == '/semuaPesanan') {
                   page = SemuaPesanan();

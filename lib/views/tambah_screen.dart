@@ -1,7 +1,8 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:web_admin_1/view_models/tambah_pesanan_view_model.dart';
-import 'package:web_admin_1/widget/button.dart';
 import 'package:web_admin_1/widget/date_formatter.dart';
 import 'package:web_admin_1/widget/error_top_snackbar.dart';
 import 'package:web_admin_1/widget/input_field.dart';
@@ -102,10 +103,30 @@ class _TambahScreenState extends State<TambahScreen> {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
-                                    ButtonDetail(
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        counter = 1;
+                                        counterTambah = 1;
+                                        print('clicked');
+                                        viewModel.fetchDbsppData();
+                                        print('clicked');
+                                        viewModel.fetchDbsppDetData();
+                                        print('clicked');
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color.fromARGB(
+                                            255, 23, 96, 232),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                      ),
+                                      child: Text(
                                         'Lihat Detail',
-                                        viewModel.fetchDbsppData,
-                                        viewModel.fetchDbsppDetData),
+                                        style: const TextStyle(
+                                            color: Colors.white),
+                                      ),
+                                    )
                                   ],
                                 ),
                               ],
@@ -171,17 +192,32 @@ class _TambahScreenState extends State<TambahScreen> {
                                     ),
                                   ),
                                   const SizedBox(height: 24),
-                                  ButtonDetail(
-                                    'Tambah Pesanan',
-                                    () => viewModel.tambahPesanan(
-                                      showSnackBar: (msg, color) =>
-                                          ErrorTopSnackbar.show(
-                                        context,
-                                        message: msg,
-                                        backgroundColor: color,
+                                  ElevatedButton(
+                                    onPressed: () async {
+                                      await viewModel.tambahPesanan(
+                                        showSnackBar: (msg, color) =>
+                                            ErrorTopSnackbar.show(
+                                          context,
+                                          message: msg,
+                                          backgroundColor: color,
+                                        ),
+                                      );
+                                      counter = 1;
+                                      counterTambah = 1;
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color.fromARGB(
+                                          255, 23, 96, 232),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
                                       ),
                                     ),
-                                  ),
+                                    child: Text(
+                                      'Tambah Pesanan',
+                                      style:
+                                          const TextStyle(color: Colors.white),
+                                    ),
+                                  )
                                 ],
                               )
                         : const SizedBox(),

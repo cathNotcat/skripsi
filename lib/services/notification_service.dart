@@ -6,7 +6,10 @@ class NotificationService {
   final String baseUrl = dotenv.env['BASE_URL'] ?? '';
 
   Future<void> sendNotification(
-      String deviceToken, String title, String body) async {
+    String deviceToken,
+    String title,
+    String body,
+  ) async {
     var url = Uri.parse('$baseUrl/notification/send');
     await http.post(
       url,
@@ -20,7 +23,8 @@ class NotificationService {
   }
 
   Future<void> sendNotifications(
-      List<Map<String, dynamic>> sortedPesanan) async {
+    List<Map<String, dynamic>> sortedPesanan,
+  ) async {
     var url = Uri.parse('$baseUrl/notification/send');
 
     for (var pesanan in sortedPesanan) {
@@ -31,9 +35,9 @@ class NotificationService {
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({
             'device_token':
-                'cyYGMRV-RySWEzvuKg5nOS:APA91bEQEk_jP8N2aVLe4oMhS9kF3d-PGy6kk1-sUmC3BN9r-Z536MpQe50bKMzgSPgbpKRYhjseMTmNRu1KeEoKHhOENBGS7SS97b2vUuO87Q5_-At3Rqo',
+                'fv4_XOOxQdinQoaxh_AhAg:APA91bF2iyb19P6LfiXDFdzLtEd_lTQ05N6ZwVM27nFSWSOa6pTtZ0as_x81cEE_QEMoBg909Sen3nvupXRSdlBstppNLpZSSlGXKknz2oZXFifxN2zmMM4',
             'title': 'Pesanan Baru!',
-            'body': 'Terdapat pesanan $nodo'
+            'body': 'Terdapat pesanan $nodo',
           }),
         );
 
@@ -44,7 +48,8 @@ class NotificationService {
           print('Success in notification service: ${responseBody['message']}');
         } else {
           print(
-              'Failed to send notification ${pesanan['NoDO']}: ${response.body}');
+            'Failed to send notification ${pesanan['NoDO']}: ${response.body}',
+          );
         }
       } catch (e) {
         print('Error sending notification ${pesanan['NoDO']}: $e');

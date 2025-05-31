@@ -9,7 +9,6 @@ import 'package:web_admin_1/services/customer_service.dart';
 import 'package:web_admin_1/services/notification_service.dart';
 import 'package:web_admin_1/services/pengiriman_service.dart';
 import 'package:web_admin_1/services/pesanan_service.dart';
-import 'package:web_admin_1/widget/date_formatter.dart';
 
 class TambahPesananViewModel extends ChangeNotifier {
   final pesananService = PesananService();
@@ -61,7 +60,7 @@ class TambahPesananViewModel extends ChangeNotifier {
 
       notifyListeners();
     } catch (e) {
-      print('Error in fetchPengirimanData: $e');
+      print('Error in fetchPengirimanData in tambah pesanan view model: $e');
     }
   }
 
@@ -77,6 +76,7 @@ class TambahPesananViewModel extends ChangeNotifier {
           tanggalKirimController.text = dateNow;
           noPesanController.text = dbsppData!.noPesan;
           customerController.text = dbsppData!.kodeCustSupp;
+          isLoading = false;
         }
         notifyListeners();
       }
@@ -94,6 +94,7 @@ class TambahPesananViewModel extends ChangeNotifier {
       print('islihatdetail after: $isLihatDetail');
       if (dbsppDetData.isNotEmpty) {
         detailDO = dbsppDetData;
+        isLoading = false;
       }
       notifyListeners();
     } catch (e) {
@@ -135,7 +136,7 @@ class TambahPesananViewModel extends ChangeNotifier {
       kodeCustSupp: customerController.text,
       tanggalKirim: tanggalKirimController.text,
       nama: namaCust,
-      status: 0,
+      status: '0',
     );
 
     listOfPesanan.add(newPesanan);
@@ -188,7 +189,6 @@ class TambahPesananViewModel extends ChangeNotifier {
             'KodeSopir': pesanan.kodeSopir,
             'KodeCustSupp': pesanan.kodeCustSupp,
             'TanggalKirim': pesanan.tanggalKirim,
-            // 'Nama': pesanan.nama,
             'Status': pesanan.status,
           });
         }

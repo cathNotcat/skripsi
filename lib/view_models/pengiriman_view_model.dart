@@ -29,6 +29,8 @@ class PengirimanViewModel extends ChangeNotifier {
       final List<PengirimanModel> data =
           await apiService.getPengirimanData(formattedDate);
 
+      print('Raw data: ${data.runtimeType}');
+
       details = data;
       isLoading = false;
 
@@ -42,7 +44,7 @@ class PengirimanViewModel extends ChangeNotifier {
 
       notifyListeners();
     } catch (e) {
-      print('Error in fetchPengirimanData: $e');
+      print('Error in fetchPengirimanData in pengiriman view model: $e');
     }
   }
 

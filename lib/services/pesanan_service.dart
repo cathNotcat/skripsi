@@ -16,6 +16,8 @@ class PesananService {
 
     if (response.statusCode == 200) {
       var responseBody = jsonDecode(response.body);
+      print('Raw data: ${jsonDecode(response.body)}');
+
       final List<dynamic> data = responseBody['data'] ?? [];
       return data.map((item) => PesananModel.fromJson(item)).toList();
     } else {

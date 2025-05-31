@@ -57,12 +57,9 @@ class PengirimanService {
   }
 
   Future<void> uploadPesanan(List<Map<String, dynamic>> sortedPesanan) async {
-    print('sortedPesanan service: $sortedPesanan');
     var url = Uri.parse('$baseUrl/upload/pengiriman');
 
     for (var pesanan in sortedPesanan) {
-      print('in uploadPesanan: $pesanan');
-      print('pesanan kodesopir: ${pesanan['KodeSopir']}');
       try {
         var response = await http.post(
           url,
