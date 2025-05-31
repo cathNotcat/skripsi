@@ -2,8 +2,10 @@
 
 import 'package:aplikasi_1/firebase_options.dart';
 import 'package:aplikasi_1/home_page.dart';
+import 'package:aplikasi_1/services/network_finding_service.dart';
 import 'package:aplikasi_1/services/notification_service.dart';
 import 'package:aplikasi_1/settings_page.dart';
+import 'package:aplikasi_1/views/login_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -13,13 +15,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // final networkFindingService = NetworkFindingService();
+  // await networkFindingService.findLocalBackend();
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await NotificationService.instance.initialize();
   await requestLocationPermission();
   await dotenv.load();
-  runApp(const MainApp());
+  runApp(MainApp());
 }
 
 Future<void> requestLocationPermission() async {
@@ -58,9 +63,10 @@ class MainApp extends StatelessWidget {
             bodyMedium: TextStyle(fontSize: 16),
           )),
       debugShowCheckedModeBanner: false,
-      // home: SafeArea(child: LoginPage()),
+      // home: SafeArea(child: SettingsPage()),
+      home: SafeArea(child: LoginScreen()),
       // home: SafeArea(child: HomePage()),
-      home: SafeArea(child: Navbar()),
+      // home: SafeArea(child: Navbar()),
     );
   }
 }
@@ -74,9 +80,10 @@ class Navbar extends StatefulWidget {
 }
 
 class _NavbarState extends State<Navbar> {
-  Color buttonColor = Color.fromARGB(255, 23, 96, 232);
+  Color selectedbuttonColor = Color.fromARGB(255, 71, 129, 236);
+  Color unselectedButtonColor = Color.fromARGB(255, 104, 111, 124);
 
-  int _selectedIndex = 3;
+  int _selectedIndex = 0;
   final List<Widget> _pages = [
     HomePage(),
     PesananPage(),
@@ -90,7 +97,7 @@ class _NavbarState extends State<Navbar> {
     if (widget.chosenIndex != null) {
       _selectedIndex = widget.chosenIndex;
     } else {
-      _selectedIndex = 3;
+      _selectedIndex = 0;
     }
   }
 
@@ -136,8 +143,8 @@ class _NavbarState extends State<Navbar> {
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: buttonColor,
-        unselectedItemColor: buttonColor,
+        selectedItemColor: selectedbuttonColor,
+        unselectedItemColor: unselectedButtonColor,
         onTap: _onItemTapped,
       ),
     );

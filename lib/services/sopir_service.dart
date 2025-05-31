@@ -1,4 +1,4 @@
-import 'package:aplikasi_1/model/sopir.dart';
+import 'package:aplikasi_1/models/sopir.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -9,7 +9,7 @@ class SopirService {
 
   Future<Sopir?> getSopir() async {
     final prefs = await SharedPreferences.getInstance();
-    String? baseUrl = prefs.getString('ip_addres');
+    String? baseUrl = prefs.getString('ip_address');
     var url = Uri.parse('$baseUrl/sopir/adi');
 
     try {

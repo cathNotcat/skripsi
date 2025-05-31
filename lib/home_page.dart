@@ -1,7 +1,8 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:aplikasi_1/main.dart';
-import 'package:aplikasi_1/model/sopir.dart';
+import 'package:aplikasi_1/models/sopir.dart';
+import 'package:aplikasi_1/services/network_finding_service.dart';
 import 'package:aplikasi_1/services/sopir_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -49,6 +50,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    // NetworkFindingService().findLocalBackend();
     _getBaseUrl();
     _formatDate();
     _getPengirimanSupirData();
@@ -80,7 +82,8 @@ class _HomePageState extends State<HomePage> {
     noDO.clear();
     String formattedDate = DateFormat('yyyy-MM-dd').format(now);
     final prefs = await SharedPreferences.getInstance();
-    String? baseUrl = prefs.getString('ip_addres');
+    String? baseUrl = prefs.getString('ip_address');
+    // Future<String?> baseUrl = NetworkFindingService().getUrlFromBackend();
     print('base url in _getPengirimanSupirData: $baseUrl');
     var url = Uri.parse('$baseUrl/pengiriman/tanggal/$formattedDate');
 
@@ -124,7 +127,7 @@ class _HomePageState extends State<HomePage> {
         );
       }
     } catch (e) {
-      print('Error occurred: $e');
+      print('Error occurred in getPengirimanSopirData: $e');
     }
   }
 
@@ -148,116 +151,115 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body:
-          isLoadingSupir
-              ? Center(child: CircularProgressIndicator())
-              : Container(
-                padding: EdgeInsets.all(24),
-                margin: EdgeInsets.only(top: 40),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Selamat Datang,'),
-                    Row(
+      body: isLoadingSupir
+          ? Center(child: CircularProgressIndicator())
+          : Container(
+              padding: EdgeInsets.all(24),
+              margin: EdgeInsets.only(top: 40),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Selamat Datang,'),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        // sopir!.kodeSopir,
+                        'ADI',
+                        style: TextStyle(
+                          fontSize: 42,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: _refreshData,
+                        child: Icon(Icons.refresh),
+                      ),
+                    ],
+                  ),
+                  Container(
+                    height: 130,
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: containerColor,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          sopir!.kodeSopir,
-                          style: TextStyle(
-                            fontSize: 42,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        Row(
+                          children: [
+                            Icon(Icons.calendar_month_outlined),
+                            SizedBox(width: 16),
+                            Text(hariIni, style: TextStyle(color: textColor)),
+                          ],
                         ),
-                        GestureDetector(
-                          onTap: _refreshData,
-                          child: Icon(Icons.refresh),
+                        Row(
+                          children: [
+                            Icon(Icons.drive_eta_outlined),
+                            SizedBox(width: 16),
+                            Text(
+                              'L 1622 JK',
+                              style: TextStyle(color: textColor),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Icon(Icons.history_rounded),
+                            SizedBox(width: 16),
+                            Text(
+                              '$selesai pesanan selesai',
+                              style: TextStyle(color: textColor),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                    Container(
-                      height: 130,
-                      padding: EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: containerColor,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(Icons.calendar_month_outlined),
-                              SizedBox(width: 16),
-                              Text(hariIni, style: TextStyle(color: textColor)),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Icon(Icons.drive_eta_outlined),
-                              SizedBox(width: 16),
-                              Text(
-                                'L 1622 JK',
-                                style: TextStyle(color: textColor),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Icon(Icons.history_rounded),
-                              SizedBox(width: 16),
-                              Text(
-                                '$selesai pesanan selesai',
-                                style: TextStyle(color: textColor),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                  ),
+                  SizedBox(height: 32),
+                  Text(
+                    'Notifikasi',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 8),
+                  Container(
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: containerColor,
+                      borderRadius: BorderRadius.circular(20),
                     ),
-                    SizedBox(height: 32),
-                    Text(
-                      'Notifikasi',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 8),
-                    Container(
-                      padding: EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: containerColor,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(Icons.notifications_outlined),
-                              SizedBox(width: 16),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    notif,
-                                    style: TextStyle(color: textColor),
-                                  ),
-                                  noNotif
-                                      ? SizedBox()
-                                      : FilledButton(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.notifications_outlined),
+                            SizedBox(width: 16),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  notif,
+                                  style: TextStyle(color: textColor),
+                                ),
+                                noNotif
+                                    ? SizedBox()
+                                    : FilledButton(
                                         onPressed: () {
                                           Navigator.of(context).push(
                                             MaterialPageRoute(
-                                              builder:
-                                                  (context) =>
-                                                      Navbar(chosenIndex: 1),
+                                              builder: (context) =>
+                                                  Navbar(chosenIndex: 1),
                                             ),
                                           );
                                         },
                                         style: ButtonStyle(
                                           backgroundColor:
                                               WidgetStateProperty.all(
-                                                buttonColor,
-                                              ),
+                                            buttonColor,
+                                          ),
                                           shape: WidgetStateProperty.all(
                                             RoundedRectangleBorder(
                                               borderRadius:
@@ -271,50 +273,50 @@ class _HomePageState extends State<HomePage> {
                                           child: Text('Lihat Detail'),
                                         ),
                                       ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    SizedBox(height: 32),
-                    noDO.isEmpty
-                        ? SizedBox()
-                        : Text(
+                  ),
+                  SizedBox(height: 32),
+                  noDO.isEmpty
+                      ? SizedBox()
+                      : Text(
                           'Pesanan Selesai Hari Ini',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                    SizedBox(height: 8),
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: noDO.length,
-                        itemBuilder: (context, index) {
-                          return Container(
-                            margin: EdgeInsets.only(bottom: 8),
-                            padding: EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: containerColor,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(Icons.assignment_outlined),
-                                SizedBox(width: 16),
-                                Text(
-                                  // 'SON/00056/0724/MM',
-                                  noDO[index],
-                                  style: TextStyle(color: textColor),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
+                  SizedBox(height: 8),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: noDO.length,
+                      itemBuilder: (context, index) {
+                        return Container(
+                          margin: EdgeInsets.only(bottom: 8),
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: containerColor,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.assignment_outlined),
+                              SizedBox(width: 16),
+                              Text(
+                                // 'SON/00056/0724/MM',
+                                noDO[index],
+                                style: TextStyle(color: textColor),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+            ),
     );
   }
 }
@@ -456,7 +458,7 @@ class _PesananPageState extends State<PesananPage> {
   Future<void> _getPengirimanSupirData() async {
     String formattedDate = DateFormat('yyyy-MM-dd').format(now);
     final prefs = await SharedPreferences.getInstance();
-    String? baseUrl = prefs.getString('ip_addres');
+    String? baseUrl = prefs.getString('ip_address');
     var url = Uri.parse('$baseUrl/pengiriman/tanggal/$formattedDate');
 
     try {
@@ -528,7 +530,7 @@ class _PesananPageState extends State<PesananPage> {
         );
       }
     } catch (e) {
-      print('Error occurred: $e');
+      print('Error occurred in getPengirimanSopirData: $e');
     }
   }
 
@@ -643,7 +645,7 @@ class _PesananPageState extends State<PesananPage> {
     print('status change: $statusChange');
 
     final prefs = await SharedPreferences.getInstance();
-    String? baseUrl = prefs.getString('ip_addres');
+    String? baseUrl = prefs.getString('ip_address');
     var url = Uri.parse('$baseUrl/pengiriman/update/$noPeng/$noUrut');
 
     try {
@@ -664,13 +666,13 @@ class _PesananPageState extends State<PesananPage> {
         print('Failed to update status. Status code: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error occurred: $e');
+      print('Error occurred in changeStatus: $e');
     }
   }
 
   Future<void> _getDbsppDetData(String nobukti) async {
     final prefs = await SharedPreferences.getInstance();
-    String? baseUrl = prefs.getString('ip_addres');
+    String? baseUrl = prefs.getString('ip_address');
     var url = Uri.parse('$baseUrl/dbsppdet/nobukti');
 
     try {
@@ -698,7 +700,7 @@ class _PesananPageState extends State<PesananPage> {
         print('Failed to load user data: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error occurred: $e');
+      print('Error occurred in getDbsppDetData: $e');
     }
   }
 
@@ -712,17 +714,17 @@ class _PesananPageState extends State<PesananPage> {
             (_initialPosition.latitude == 0 && _initialPosition.longitude == 0)
                 ? Center(child: CircularProgressIndicator())
                 : GoogleMap(
-                  initialCameraPosition: CameraPosition(
-                    target: _initialPosition,
-                    zoom: 12,
+                    initialCameraPosition: CameraPosition(
+                      target: _initialPosition,
+                      zoom: 12,
+                    ),
+                    polylines: _polylines,
+                    markers: _markers,
+                    onMapCreated: (GoogleMapController controller) {
+                      mapController = controller;
+                      _initializeWithAsync();
+                    },
                   ),
-                  polylines: _polylines,
-                  markers: _markers,
-                  onMapCreated: (GoogleMapController controller) {
-                    mapController = controller;
-                    _initializeWithAsync();
-                  },
-                ),
         // GoogleMap(
         //   onMapCreated: _onMapCreated,
         //   initialCameraPosition: CameraPosition(
@@ -766,158 +768,157 @@ class _PesananPageState extends State<PesananPage> {
   Widget _listPesananPage() {
     return Expanded(
       child: ListView(
-        children:
-            details
-                .asMap()
-                .map((index, item) {
-                  return MapEntry(
-                    index,
-                    Container(
-                      margin: EdgeInsets.all(10),
-                      padding: EdgeInsets.all(16),
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(16)),
-                        color: containerColor,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+        children: details
+            .asMap()
+            .map((index, item) {
+              return MapEntry(
+                index,
+                Container(
+                  margin: EdgeInsets.all(10),
+                  padding: EdgeInsets.all(16),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(16)),
+                    color: containerColor,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                item['NoDO']!, // Access NoDO from the item
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                ),
-                              ),
-                              Container(
-                                padding: EdgeInsets.only(
-                                  top: 8,
-                                  bottom: 8,
-                                  left: 12,
-                                  right: 12,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: getStatusColor(item['Status']),
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(20),
-                                  ),
-                                ),
-                                child: Text(
-                                  getStatusString(item['Status']),
-                                  style: TextStyle(
-                                    color: getStatusTextColor(item['Status']),
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 10),
-                          Row(
-                            children: [
-                              Icon(Icons.location_on_outlined, size: 20),
-                              SizedBox(width: 8),
-                              Text(
-                                item['Alamat']!, // Access Alamat from the item
-                                style: TextStyle(
-                                  color: textColor,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 10),
-                          Row(
-                            children: [
-                              Icon(Icons.person_outline, size: 20),
-                              SizedBox(width: 8),
-                              Text(
-                                item['Nama']!,
-                                style: TextStyle(
-                                  color: textColor,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Icon(Icons.inbox_outlined, size: 20),
-                              SizedBox(width: 8),
-                              Text(
-                                '${item['JumlahBarang']} jenis barang',
-                                style: TextStyle(
-                                  color: textColor,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
+                          Text(
+                            item['NoDO']!, // Access NoDO from the item
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
                           ),
                           Container(
-                            padding: const EdgeInsets.only(top: 24),
-                            child: SizedBox(
-                              width: double.infinity,
-                              height: 40,
-                              child: FilledButton(
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: const Color.fromARGB(
-                                    255,
-                                    23,
-                                    96,
-                                    232,
-                                  ),
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(30),
-                                  ),
-                                  textStyle: const TextStyle(fontSize: 16.0),
-                                ),
-                                onPressed: () {
-                                  print(
-                                    'no pengiriman: ${item['NoPengiriman']}',
-                                  );
-                                  setState(() {
-                                    pilihan_widget = 1;
-                                    index_selected = index;
-                                    if (item['Status'] != "2") {
-                                      _changeStatus(
-                                        item['NoPengiriman'],
-                                        item['NoUrut'],
-                                        1,
-                                      );
-                                      detStatus = '1';
-                                    }
-                                    detNoDO = item['NoDO'];
-                                    detAlamat = item['Alamat'];
-                                    detCust = item['Nama'];
-                                    detJumlahBrg = item['JumlahBarang'];
-                                    detNoPeng = item['NoPengiriman'];
-                                    detNoUrut = item['NoUrut'];
-                                    _getPengirimanSupirData();
-                                    _getDbsppDetData(item['NoDO']);
-                                  });
-                                  print('det no do: $detNoDO');
-                                },
-                                child: Text(
-                                  'Lihat Detail',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
+                            padding: EdgeInsets.only(
+                              top: 8,
+                              bottom: 8,
+                              left: 12,
+                              right: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              color: getStatusColor(item['Status']),
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(20),
+                              ),
+                            ),
+                            child: Text(
+                              getStatusString(item['Status']),
+                              style: TextStyle(
+                                color: getStatusTextColor(item['Status']),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
                               ),
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  );
-                })
-                .values
-                .toList(),
+                      SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Icon(Icons.location_on_outlined, size: 20),
+                          SizedBox(width: 8),
+                          Text(
+                            item['Alamat']!, // Access Alamat from the item
+                            style: TextStyle(
+                              color: textColor,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Icon(Icons.person_outline, size: 20),
+                          SizedBox(width: 8),
+                          Text(
+                            item['Nama']!,
+                            style: TextStyle(
+                              color: textColor,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(Icons.inbox_outlined, size: 20),
+                          SizedBox(width: 8),
+                          Text(
+                            '${item['JumlahBarang']} jenis barang',
+                            style: TextStyle(
+                              color: textColor,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        padding: const EdgeInsets.only(top: 24),
+                        child: SizedBox(
+                          width: double.infinity,
+                          height: 40,
+                          child: FilledButton(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: const Color.fromARGB(
+                                255,
+                                23,
+                                96,
+                                232,
+                              ),
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              textStyle: const TextStyle(fontSize: 16.0),
+                            ),
+                            onPressed: () {
+                              print(
+                                'no pengiriman: ${item['NoPengiriman']}',
+                              );
+                              setState(() {
+                                pilihan_widget = 1;
+                                index_selected = index;
+                                if (item['Status'] != "2") {
+                                  _changeStatus(
+                                    item['NoPengiriman'],
+                                    item['NoUrut'],
+                                    1,
+                                  );
+                                  detStatus = '1';
+                                }
+                                detNoDO = item['NoDO'];
+                                detAlamat = item['Alamat'];
+                                detCust = item['Nama'];
+                                detJumlahBrg = item['JumlahBarang'];
+                                detNoPeng = item['NoPengiriman'];
+                                detNoUrut = item['NoUrut'];
+                                _getPengirimanSupirData();
+                                _getDbsppDetData(item['NoDO']);
+                              });
+                              print('det no do: $detNoDO');
+                            },
+                            child: Text(
+                              'Lihat Detail',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            })
+            .values
+            .toList(),
       ),
     );
   }
@@ -1093,15 +1094,13 @@ class _PesananPageState extends State<PesananPage> {
                   height: 40,
                   child: FilledButton(
                     style: FilledButton.styleFrom(
-                      backgroundColor:
-                          detStatus == "2"
-                              ? Color.fromARGB(255, 217, 217, 217)
-                              : Color.fromARGB(255, 13, 130, 75),
+                      backgroundColor: detStatus == "2"
+                          ? Color.fromARGB(255, 217, 217, 217)
+                          : Color.fromARGB(255, 13, 130, 75),
                       // backgroundColor: const Color.fromARGB(255, 13, 130, 75),
-                      foregroundColor:
-                          detStatus == "2"
-                              ? Color.fromARGB(255, 82, 89, 105)
-                              : Colors.white,
+                      foregroundColor: detStatus == "2"
+                          ? Color.fromARGB(255, 82, 89, 105)
+                          : Colors.white,
                       // foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
@@ -1176,24 +1175,23 @@ class _SelesaiPageState extends State<SelesaiPage> {
   List<Map<String, dynamic>> ordersData = [];
   void applyFilters() {
     setState(() {
-      filteredOrdersData =
-          ordersData.where((order) {
-            DateTime date = DateTime.parse(order["TANGGAL"]);
-            String month = DateFormat(
-              'MMMM',
-            ).format(date); // Month in full text
-            String year = date.year.toString();
+      filteredOrdersData = ordersData.where((order) {
+        DateTime date = DateTime.parse(order["TANGGAL"]);
+        String month = DateFormat(
+          'MMMM',
+        ).format(date); // Month in full text
+        String year = date.year.toString();
 
-            // Match the selected months and years
-            return (selectedMonths[month] ?? false) ||
-                (selectedYears[year] ?? false);
-          }).toList();
+        // Match the selected months and years
+        return (selectedMonths[month] ?? false) ||
+            (selectedYears[year] ?? false);
+      }).toList();
     });
   }
 
   Future<void> _getHistory() async {
     final prefs = await SharedPreferences.getInstance();
-    String? baseUrl = prefs.getString('ip_addres');
+    String? baseUrl = prefs.getString('ip_address');
     var url = Uri.parse('$baseUrl/dbso/tanggal');
 
     try {
@@ -1216,7 +1214,7 @@ class _SelesaiPageState extends State<SelesaiPage> {
         print('Failed to load user data(gethistory): ${response.statusCode}');
       }
     } catch (e) {
-      print('Error occurred: $e');
+      print('Error occurred in getHistory: $e');
     }
   }
 

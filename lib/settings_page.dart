@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:aplikasi_1/main.dart';
+import 'package:aplikasi_1/views/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -22,7 +24,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> _setIpAddress(String ipAddress) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('ip_address', 'http://${ipAddress}/backend_api');
-    String? ip = prefs.getString('ip_addres');
+    String? ip = prefs.getString('ip_address');
     print('done input ip: $ip');
   }
 
@@ -59,6 +61,10 @@ class _SettingsPageState extends State<SettingsPage> {
             FilledButton(
               onPressed: () {
                 _setIpAddress(inputIpController.text);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginScreen()),
+                );
               },
               style: ButtonStyle(
                 backgroundColor: WidgetStateProperty.all(
