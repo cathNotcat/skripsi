@@ -229,8 +229,10 @@ class TambahPesananViewModel extends ChangeNotifier {
     List<LatLng> pointsConverted = convertToLatLngList(points);
 
     HeldKarp heldKarp = HeldKarp();
-    List<LatLng> pointsWithHeldKarp =
-        await heldKarp.calculateWithHeldKarp(pointsConverted);
+    final result = await heldKarp.calculateWithHeldKarp(pointsConverted);
+    List<LatLng> pointsWithHeldKarp = result['path'];
+    // List<LatLng> pointsWithHeldKarp =
+    //     await heldKarp.calculateWithHeldKarp(pointsConverted);
 
     print('before heldkarp: $points');
     print('after heldkarp: $pointsWithHeldKarp');

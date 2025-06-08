@@ -12,6 +12,7 @@ class PengirimanViewModel extends ChangeNotifier {
   int totalBarang = 0;
 
   List<PengirimanModel> details = [];
+  List<PengirimanAllModel> allModel = [];
   bool isLoading = true;
   bool isLoadingPesanan = true;
   bool isLoadingPesananByTanggal = true;
@@ -21,6 +22,8 @@ class PengirimanViewModel extends ChangeNotifier {
   int belumDikirim = 0;
   int sedangDikirim = 0;
   int selesai = 0;
+  int allPengiriman = 0;
+  int countAllPengiriman = 0;
 
   List<GroupedPengirimanModel> groupedList = [];
 
@@ -65,7 +68,7 @@ class PengirimanViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchPesananSeminggu() async {
+  Future<void> fetchBarang() async {
     int totalPesanan = 0;
     int totalBrg = 0;
 
@@ -91,6 +94,13 @@ class PengirimanViewModel extends ChangeNotifier {
     try {
       groupedList = await apiService.getAllPengirimanDataByTanggal();
       isLoadingPesananByTanggal = false;
+
+      for (var pengiriman in groupedList) {
+        allModel = pengiriman.pengirimanList;
+        for (var i = 0; i < allModel.length; i++) {
+          allPengiriman += 1;
+        }
+      }
 
       notifyListeners();
     } catch (e) {

@@ -35,7 +35,7 @@ class NotificationService {
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({
             'device_token':
-                'fv4_XOOxQdinQoaxh_AhAg:APA91bF2iyb19P6LfiXDFdzLtEd_lTQ05N6ZwVM27nFSWSOa6pTtZ0as_x81cEE_QEMoBg909Sen3nvupXRSdlBstppNLpZSSlGXKknz2oZXFifxN2zmMM4',
+                'eqpDf1kvSLexfUVlLWSPuD:APA91bF0Ne3KmslPSjLihRxuqV6yF7CFI-hGuAxifwxB1Tk4X0pqllJRhuHxD_9t3Agz_YCzVRMiTgMCOE3PjdpWycfCwUp5HqvYLxnwwdpdcOYiFZ9NRLQ',
             'title': 'Pesanan Baru!',
             'body': 'Terdapat pesanan $nodo',
           }),
