@@ -5,6 +5,7 @@ use App\Http\Controllers\get_alamat_by_kodecust;
 use App\Http\Controllers\post_delete_pesanan;
 use App\Http\Controllers\get_sopir;
 use App\Http\Controllers\get_detail_dbpengiriman_by_tanggal;
+use App\Http\Controllers\post_user_admin;
 use App\Http\Controllers\put_update_status_dbPengiriman;
 use App\Http\Controllers\get_all_dbpengiriman_by_tanggal;
 use App\Http\Controllers\get_all_dbPengiriman;
@@ -60,6 +61,10 @@ Route::put('/pengiriman/update/{NoPengiriman}/{NoUrut}', [put_update_status_dbPe
 
 // Notif
 Route::post('/notification/send', [post_notification::class, 'sendNotification']);
+
+// User
+Route::post('/user/admin', 'post_user_admin@getData');
+Route::post('/user/sopir', 'post_user_sopir@getData');
 
 // Ping ipaddress
 Route::get('/ping', function () {

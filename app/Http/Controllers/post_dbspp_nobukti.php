@@ -9,7 +9,6 @@ class post_dbspp_nobukti extends Controller
 {
     public function getDataByNOBUKTI(Request $request)
     {
-
         $request->validate([
             'NOBUKTI' => 'required|string|max:255',
         ]);

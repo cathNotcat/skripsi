@@ -4,20 +4,16 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-// use App\Model\NewMenu;
-// use App\Model\NewAksesMenu;
-// use App\Model\NewUsers;
 use Illuminate\Support\Facades\DB;
 
 class get_all_dbspp_by_tanggal extends Controller
 {
 
 
-    public function index()
-    {
-        // return view('tesApiCath');
-        return response()->json(['message' => 'API is working']);
-    }
+    // public function index()
+    // {
+    //     return response()->json(['message' => 'API is working']);
+    // }
 
     public function getData()
     {

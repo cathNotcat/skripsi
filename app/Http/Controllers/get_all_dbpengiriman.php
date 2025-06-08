@@ -4,9 +4,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-// use App\Model\NewMenu;
-// use App\Model\NewAksesMenu;
-// use App\Model\NewUsers;
 use Illuminate\Support\Facades\DB;
 
 class get_all_dbpengiriman extends Controller
@@ -25,8 +22,13 @@ class get_all_dbpengiriman extends Controller
             SELECT * FROM dbPengiriman p
             JOIN DBALAMATCUST c ON c.KODECUSTSUPP = p.KodeCustSupp
             ORDER BY NoPengiriman DESC, NoUrut DESC');
-        //   SELECT * FROM dbPengiriman ORDER BY NoPengiriman DESC, NoUrut DESC');
 
+        if (!$listData) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Tidak ada data pengiriman',
+            ], 404);
+        }
         $formattedData = [];
 
         foreach ($listData as $item) {

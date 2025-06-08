@@ -12,7 +12,6 @@ class get_detail_dbpengiriman_by_tanggal extends Controller
     }
     public function getData($tanggal)
     {
-        // Run the query to fetch the data
         $listData = DB::connection('SML')->select(
             'SELECT p.NoUrut, p.NoPengiriman, p.NoDO, p.KodeSopir, a.Nama, p.KodeCustSupp, a.Alamat, a.Koordinat, p.Status, p.TanggalKirim, COUNT(s.NoBukti) AS JumlahBarang  
                 FROM dbPengiriman p
@@ -24,16 +23,14 @@ class get_detail_dbpengiriman_by_tanggal extends Controller
             ['tanggal' => $tanggal]
         );
 
-        // If no data is found, return an empty response
         if (!$listData) {
             return response()->json([
                 'status' => 200,
-                'message' => 'No data found',
+                'message' => 'Tidak ada data',
                 'data' => []
             ], 200);
         }
 
-        // Prepare the final output array, returning each record individually
         $finalOutput = [];
         foreach ($listData as $item) {
             $finalOutput[] = [

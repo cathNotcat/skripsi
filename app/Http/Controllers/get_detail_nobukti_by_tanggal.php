@@ -25,7 +25,7 @@ class get_detail_nobukti_by_tanggal extends Controller
         if (!$data) {
             return response()->json([
                 'status' => 404,
-                'message' => 'Data not found for the provided date',
+                'message' => 'Gagal mengambil data',
                 'data' => []
             ], 404);
         }
@@ -36,7 +36,7 @@ class get_detail_nobukti_by_tanggal extends Controller
         ];
 
         foreach ($data as $item) {
-            $formattedData['NOBUKTI'][] = $item->NOBUKTI; // Add each NOBUKTI to the array
+            $formattedData['NOBUKTI'][] = $item->NOBUKTI;
         }
 
         return response()->json([
@@ -44,28 +44,6 @@ class get_detail_nobukti_by_tanggal extends Controller
             'message' => 'Berhasil mengambil data',
             'data' => $formattedData
         ]);
-
-        // if (empty($data)) {
-        //     return response()->json([
-        //         'status' => 404,
-        //         'message' => 'Data not found for the provided date',
-        //         'data' => []
-        //     ], 404);
-        // }
-
-        // $formattedData = [];
-        // foreach ($data as $item) {
-        //     $formattedData[] = [
-        //         'TANGGAL' => $item->TANGGAL,
-        //         'NOBUKTI' => $item->NOBUKTI,
-        //     ];
-        // }
-
-        // return response()->json([
-        //     'status' => 200,
-        //     'message' => 'Berhasil mengambil data',
-        //     'data' => $formattedData
-        // ]);
     }
 }
 ?>

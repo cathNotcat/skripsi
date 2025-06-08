@@ -24,7 +24,7 @@ class put_update_status_dbPengiriman extends Controller
             if (!$record) {
                 return response()->json([
                     'status' => 404,
-                    'message' => 'No data found with the provided NoPengiriman',
+                    'message' => 'Tidak ada data',
                 ], 404);
             }
 
@@ -45,12 +45,12 @@ class put_update_status_dbPengiriman extends Controller
 
             return response()->json([
                 'status' => 200,
-                'message' => 'Status updated successfully',
+                'message' => 'Status berhasil diubah',
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 500,
-                'message' => 'Failed to update status',
+                'message' => 'Gagal untuk update status',
                 'error' => $e->getMessage(),
             ], 500);
         }

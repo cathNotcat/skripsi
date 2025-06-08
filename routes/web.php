@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\post_user_admin;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -46,6 +48,10 @@ Route::put('/pengiriman/update/{NoPengiriman}/{NoUrut}', 'put_update_status_dbPe
 
 // Notif
 Route::post('/notification/send', 'post_notification@sendNotification');
+
+// User
+Route::post('/user/admin', 'post_user_admin@getData');
+Route::post('/user/sopir', 'post_user_sopir@getData');
 
 // Ping
 Route::get('/ping', function () {

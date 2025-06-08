@@ -40,33 +40,5 @@ class post_delete_pesanan extends Controller
             'message' => 'Pesanan berhasil dihapus!',
             'deleted_rows' => $deleted,
         ]);
-
-
-        // try {
-        //     $deleted = DB::connection('SML')
-        //         ->table('dbPengiriman')
-        //         ->where('NoDO', $request->input('NoDO'))
-        //         ->whereDate('TanggalKirim', $request->input('TanggalKirim'))
-        //         ->delete();
-
-        //     if ($deleted) {
-        //         return response()->json([
-        //             'status' => 200,
-        //             'message' => 'Data berhasil dihapus',
-        //             'deleted_rows' => $deleted,
-        //         ]);
-        //     } else {
-        //         return response()->json([
-        //             'status' => 404,
-        //             'message' => 'Data tidak ditemukan',
-        //         ]);
-        //     }
-        // } catch (\Exception $e) {
-        //     return response()->json([
-        //         'status' => 500,
-        //         'message' => 'Gagal menghapus data',
-        //         'error' => $e->getMessage(),
-        //     ], 500);
-        // }
     }
 }

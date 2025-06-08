@@ -19,7 +19,7 @@ class post_dbsppdet_nobukti extends Controller
         if (empty($nobukti)) {
             return response()->json([
                 'status' => 400,
-                'message' => 'NOBUKTI field is required',
+                'message' => 'NOBUKTI harus diisi',
             ], 400);
         }
 
@@ -32,7 +32,7 @@ class post_dbsppdet_nobukti extends Controller
         if (empty($listData)) {
             return response()->json([
                 'status' => 404,
-                'message' => 'Data not found',
+                'message' => 'Tidak ada data',
             ], 404);
         }
 
@@ -51,7 +51,7 @@ class post_dbsppdet_nobukti extends Controller
 
         return response()->json([
             'status' => 200,
-            'message' => 'Data retrieved successfully',
+            'message' => 'Berhasil mengambil data',
             'data' => $formattedData,
         ]);
     }

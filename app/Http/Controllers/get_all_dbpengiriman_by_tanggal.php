@@ -4,15 +4,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-// use App\Model\NewMenu;
-// use App\Model\NewAksesMenu;
-// use App\Model\NewUsers;
 use Illuminate\Support\Facades\DB;
 
 class get_all_dbpengiriman_by_tanggal extends Controller
 {
-
-
     public function index()
     {
         // return view('tesApiCath');
@@ -29,6 +24,13 @@ class get_all_dbpengiriman_by_tanggal extends Controller
         JOIN DBALAMATCUST c ON c.KODECUSTSUPP = p.KodeCustSupp
         ORDER BY p.TanggalKirim DESC, p.NoPengiriman DESC, p.NoUrut DESC
       ');
+
+        if (!$listData) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Tidak ada data pengiriman',
+            ], 404);
+        }
 
         $groupedData = [];
 
