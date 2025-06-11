@@ -42,6 +42,7 @@ Route::post('/dbspp/nobukti', 'post_dbspp_nobukti@getDataByNOBUKTI');
 Route::post('/upload/pengiriman', 'post_upload_dbPengiriman@uploadDataPengiriman');
 Route::post('/pengiriman/delete', 'post_delete_pesanan@deleteData');
 Route::get('/pengiriman/tanggal/{tanggal}', 'get_detail_dbpengiriman_by_tanggal@getData');
+Route::get('/pengiriman/tanggal/sopir/{tanggal}/{sopir}', 'get_pengiriman_by_tanggal_sopir@getData');
 Route::get('/pengiriman/tanggal', 'get_all_dbpengiriman_by_tanggal@getData');
 Route::get('/pengiriman', 'get_all_dbpengiriman@getData');
 Route::put('/pengiriman/update/{NoPengiriman}/{NoUrut}', 'put_update_status_dbPengiriman@updateStatus');
@@ -52,6 +53,7 @@ Route::post('/notification/send', 'post_notification@sendNotification');
 // User
 Route::post('/user/admin', 'post_user_admin@getData');
 Route::post('/user/sopir', 'post_user_sopir@getData');
+Route::get('/sopir', 'get_all_sopir@getData');
 
 // Ping
 Route::get('/ping', function () {
