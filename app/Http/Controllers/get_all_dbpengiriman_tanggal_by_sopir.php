@@ -6,18 +6,20 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class get_all_dbpengiriman_by_tanggal extends Controller
+class get_all_dbpengiriman_tanggal_by_sopir extends Controller
 {
-    public function getData()
+    public function getData($sopir)
     {
-        $listData = DB::connection('SML')->select('
-        SELECT 
+        $listData = DB::connection('SML')->select(
+            'SELECT 
             p.*, 
             c.Nama 
         FROM dbPengiriman p
         JOIN DBALAMATCUST c ON c.KODECUSTSUPP = p.KodeCustSupp
-        ORDER BY p.TanggalKirim DESC, p.NoPengiriman DESC, p.NoUrut ASC
-      ');
+        WHERE p.KodeSopir = :sopir
+        ORDER BY p.TanggalKirim DESC, p.NoPengiriman DESC, p.NoUrut ASC',
+            ['sopir' => $sopir]
+        );
 
         if (!$listData) {
             return response()->json([

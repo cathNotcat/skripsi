@@ -44,6 +44,7 @@ Route::post('/pengiriman/delete', 'post_delete_pesanan@deleteData');
 Route::get('/pengiriman/tanggal/{tanggal}', 'get_detail_dbpengiriman_by_tanggal@getData');
 Route::get('/pengiriman/tanggal/sopir/{tanggal}/{sopir}', 'get_pengiriman_by_tanggal_sopir@getData');
 Route::get('/pengiriman/tanggal', 'get_all_dbpengiriman_by_tanggal@getData');
+Route::get('/pengiriman/all/tanggal/{sopir}', 'get_all_dbpengiriman_tanggal_by_sopir@getData');
 Route::get('/pengiriman', 'get_all_dbpengiriman@getData');
 Route::put('/pengiriman/update/{NoPengiriman}/{NoUrut}', 'put_update_status_dbPengiriman@updateStatus');
 
