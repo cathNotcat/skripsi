@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:web_admin_1/models/login_response_model.dart';
 import 'package:web_admin_1/services/login_service.dart';
 
 class LoginViewModel extends ChangeNotifier {
   final loginService = LoginService();
-  int status = 0;
+  late LoginResponseModel response;
   String errorMessage = '';
+  bool isLoading = false;
 
   TextEditingController kodeController = TextEditingController();
   TextEditingController namaController = TextEditingController();
 
   Future<void> isLogin() async {
+    isLoading = true;
     errorMessage = '';
     notifyListeners();
 
@@ -21,22 +24,22 @@ class LoginViewModel extends ChangeNotifier {
     }
 
     try {
-      status = await loginService.login(
+      response = await loginService.login(
         kodeController.text,
         namaController.text,
       );
 
-      if (status == 200) {
+      if (response.status == 200) {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool('isLoggedIn', true);
         await prefs.setString('loginTime', DateTime.now().toIso8601String());
       } else {
-        errorMessage = 'Nama atau Kode salah. Silakan periksa kembali.';
+        errorMessage = response.message;
       }
     } catch (e) {
-      errorMessage = 'Nama atau Kode salah. Silakan periksa kembali.';
+      errorMessage = 'Tidak ada koneksi. Silakan periksa kembali.';
     }
-
+    isLoading = false;
     notifyListeners();
   }
 }

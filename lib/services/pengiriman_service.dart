@@ -23,6 +23,23 @@ class PengirimanService {
     }
   }
 
+  Future<List<PengirimanModel>> getPengirimanDataBySopir(
+      String date, String sopir) async {
+    var url = Uri.parse('$baseUrl/pengiriman/tanggal/sopir/$date/$sopir');
+    var response = await http.get(
+      url,
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      var responseBody = jsonDecode(response.body);
+      final List<dynamic> data = responseBody['data'] ?? [];
+      return data.map((item) => PengirimanModel.fromJson(item)).toList();
+    } else {
+      throw Exception('Error in getPengirimanData');
+    }
+  }
+
   Future<List<GroupedPengirimanModel>> getAllPengirimanDataByTanggal() async {
     var url = Uri.parse('$baseUrl/pengiriman/tanggal');
     var response = await http.get(

@@ -2,17 +2,22 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_admin_1/models/pengiriman_model.dart';
 import 'package:web_admin_1/services/pengiriman_service.dart';
+import 'package:web_admin_1/services/sopir_service.dart';
 
 class PengirimanViewModel extends ChangeNotifier {
   final apiService = PengirimanService();
+  final sopirService = SopirService();
 
   int totalPesanan7Hari = 0;
   int totalBarang = 0;
 
   List<PengirimanModel> details = [];
   List<PengirimanAllModel> allModel = [];
+  List<String> namaSopir = [];
+
   bool isLoading = true;
   bool isLoadingPesanan = true;
   bool isLoadingPesananByTanggal = true;
@@ -25,14 +30,58 @@ class PengirimanViewModel extends ChangeNotifier {
   int allPengiriman = 0;
   int countAllPengiriman = 0;
 
+  String? selectedSopir;
+
   List<GroupedPengirimanModel> groupedList = [];
+
+  Future<void> fetchSopirNow() async {
+    final prefs = await SharedPreferences.getInstance();
+    selectedSopir = prefs.getString('selected_sopir');
+    notifyListeners();
+  }
+
+  Future<void> fetchAllSopir() async {
+    try {
+      final List<String> data = await sopirService.getAllSopir();
+
+      print('nama sopir: $data');
+
+      for (var nama in data) {
+        namaSopir.add(nama);
+      }
+      notifyListeners();
+    } catch (e) {
+      print('Error in fetchAllSopir view model: $e');
+    }
+  }
 
   Future<void> fetchPengirimanData(String formattedDate) async {
     try {
       final List<PengirimanModel> data =
           await apiService.getPengirimanData(formattedDate);
 
-      print('Raw data: ${data.runtimeType}');
+      details = data;
+      isLoading = false;
+
+      if (data.isNotEmpty) {
+        adaPengiriman = true;
+        statusCount(data);
+      } else {
+        adaPengiriman = false;
+        statusCount([]);
+      }
+
+      notifyListeners();
+    } catch (e) {
+      print('Error in fetchPengirimanData in pengiriman view model: $e');
+    }
+  }
+
+  Future<void> fetchPengirimanBySopir(String formattedDate) async {
+    try {
+      await fetchSopirNow();
+      final List<PengirimanModel> data = await apiService
+          .getPengirimanDataBySopir(formattedDate, selectedSopir ?? '');
 
       details = data;
       isLoading = false;

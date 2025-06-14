@@ -50,7 +50,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   const SizedBox(width: 32),
                                   _dashboardCard(
                                       'Total Barang Dikirim',
-                                      'hari ini',
+                                      'seminggu terakhir',
                                       viewModel.totalBarang.toString()),
                                   const SizedBox(width: 32),
                                   _dashboardCard(
@@ -238,6 +238,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                               textAlign:
                                                                   TextAlign
                                                                       .start)),
+                                                      Expanded(
+                                                          child: Text('Sopir',
+                                                              style: TextStyle(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold),
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .start)),
                                                     ],
                                                   ),
                                                   Divider(),
@@ -278,6 +287,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                               child: Text(
                                                                   item
                                                                       .selesaiAt,
+                                                                  textAlign:
+                                                                      TextAlign
+                                                                          .start)),
+                                                          Expanded(
+                                                              child: Text(
+                                                                  item
+                                                                      .kodeSopir,
                                                                   textAlign:
                                                                       TextAlign
                                                                           .start)),

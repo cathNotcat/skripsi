@@ -16,7 +16,12 @@ class ProsesScreen extends StatelessWidget {
     final String formattedDate =
         DateFormat('yyyy-MM-dd').format(DateTime.now());
     return ChangeNotifierProvider(
-      create: (_) => PengirimanViewModel()..fetchPengirimanData(formattedDate),
+      create: (_) {
+        final viewModel = PengirimanViewModel();
+        viewModel.fetchPengirimanBySopir(formattedDate);
+        viewModel.fetchSopirNow();
+        return viewModel;
+      },
       child: Scaffold(
         body: Consumer<PengirimanViewModel>(builder: (context, viewModel, _) {
           return Padding(
@@ -35,7 +40,7 @@ class ProsesScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Proses',
+                      'Proses ${viewModel.selectedSopir}',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
@@ -79,91 +84,98 @@ class ProsesScreen extends StatelessWidget {
   Widget _listPengiriman(List<PengirimanModel> details) {
     return details.isEmpty
         ? Center(child: CircularProgressIndicator())
-        : Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Container(
-                  padding: EdgeInsets.all(16),
+        : Column(
+            children: [
+              Text(''),
+              Container(
                   width: double.infinity,
+                  padding: EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: Table(
-                      columnWidths: const {
-                        0: FlexColumnWidth(
-                            1), // Adjust these to control the column width ratio
-                        1: FlexColumnWidth(1),
-                        2: FlexColumnWidth(1),
-                        3: FlexColumnWidth(1),
-                      },
-                      border: TableBorder.all(color: Colors.grey[300]!),
-                      children: [
-                        // Header row
-                        TableRow(
-                          decoration: BoxDecoration(color: Colors.grey[200]),
-                          children: [
-                            _columnTitles('No Bukti'),
-                            _columnTitles('Nama Customer'),
-                            _columnTitles('Alamat'),
-                            _columnTitles('Status'),
-                          ],
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(16),
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
                         ),
-                        // Data rows
-                        ...details.map(
-                          (item) => TableRow(
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.vertical,
+                          child: Table(
+                            columnWidths: const {
+                              0: FlexColumnWidth(
+                                  1), // Adjust these to control the column width ratio
+                              1: FlexColumnWidth(1),
+                              2: FlexColumnWidth(1),
+                              3: FlexColumnWidth(1),
+                            },
+                            border: TableBorder.all(color: Colors.grey[300]!),
                             children: [
-                              Center(
-                                  child: Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: Text(item.noDO))),
-                              Center(
-                                  child: Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: Text(item.nama))),
-                              Center(
-                                  child: Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: Text(item.alamat))),
-                              Center(
-                                child: Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Container(
-                                      padding: EdgeInsets.only(
-                                          top: 8,
-                                          bottom: 8,
-                                          left: 12,
-                                          right: 12),
-                                      decoration: BoxDecoration(
-                                          color: getStatusColor(item.status),
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(20))),
-                                      child: Text(
-                                        getStatusString(item.status),
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 14),
-                                      ),
-                                    )),
+                              // Header row
+                              TableRow(
+                                decoration:
+                                    BoxDecoration(color: Colors.grey[200]),
+                                children: [
+                                  _columnTitles('No Bukti'),
+                                  _columnTitles('Nama Customer'),
+                                  _columnTitles('Alamat'),
+                                  _columnTitles('Status'),
+                                ],
+                              ),
+                              // Data rows
+                              ...details.map(
+                                (item) => TableRow(
+                                  children: [
+                                    Center(
+                                        child: Padding(
+                                            padding: EdgeInsets.all(8.0),
+                                            child: Text(item.noDO))),
+                                    Center(
+                                        child: Padding(
+                                            padding: EdgeInsets.all(8.0),
+                                            child: Text(item.nama))),
+                                    Center(
+                                        child: Padding(
+                                            padding: EdgeInsets.all(8.0),
+                                            child: Text(item.alamat))),
+                                    Center(
+                                      child: Padding(
+                                          padding: EdgeInsets.all(8.0),
+                                          child: Container(
+                                            padding: EdgeInsets.only(
+                                                top: 8,
+                                                bottom: 8,
+                                                left: 12,
+                                                right: 12),
+                                            decoration: BoxDecoration(
+                                                color:
+                                                    getStatusColor(item.status),
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(20))),
+                                            child: Text(
+                                              getStatusString(item.status),
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 14),
+                                            ),
+                                          )),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ));
+                      ),
+                    ],
+                  )),
+            ],
+          );
   }
 
   Widget _columnTitles(String title) {

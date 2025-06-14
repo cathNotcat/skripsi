@@ -43,6 +43,7 @@ class PengirimanAllModel {
   final String noPengiriman;
   final String noDO;
   final String kodeCustSupp;
+  final String kodeSopir;
   final String namaCust;
   final String tanggalKirim;
   final String status;
@@ -53,6 +54,7 @@ class PengirimanAllModel {
       {required this.noPengiriman,
       required this.noDO,
       required this.kodeCustSupp,
+      required this.kodeSopir,
       required this.namaCust,
       required this.tanggalKirim,
       required this.status,
@@ -69,6 +71,7 @@ class PengirimanAllModel {
       noPengiriman: json['NoPengiriman'] ?? '-',
       noDO: json['NoDO'] ?? '-',
       kodeCustSupp: json['KodeCustSupp'] ?? '-',
+      kodeSopir: json['KodeSopir'],
       namaCust: json['Nama'] ?? '-',
       tanggalKirim: json['TanggalKirim'] ?? '-',
       status: json['Status'] ?? '-',

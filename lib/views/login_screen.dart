@@ -89,29 +89,56 @@ class _LoginScreenState extends State<LoginScreen> {
                     // const SizedBox(height: 24),
                     SizedBox(
                       width: double.infinity,
+                      // child: ElevatedButton(
+                      //   onPressed: () async {
+                      //     await viewModel.isLogin();
+                      //     if (viewModel.response.status == 200) {
+                      //       Navigator.push(
+                      //         context,
+                      //         MaterialPageRoute(
+                      //             builder: (context) => const Navbar()),
+                      //       );
+                      //     } else {
+                      //       print('error');
+                      //     }
+                      //   },
+                      //   style: ElevatedButton.styleFrom(
+                      //     backgroundColor:
+                      //         const Color.fromARGB(255, 23, 96, 232),
+                      //     shape: RoundedRectangleBorder(
+                      //       borderRadius: BorderRadius.circular(8),
+                      //     ),
+                      //   ),
+                      //   child: const Text(
+                      //     'Login',
+                      //     style: TextStyle(color: Colors.white),
+                      //   ),
+                      // ),
                       child: ElevatedButton(
-                        onPressed: () async {
-                          await viewModel.isLogin();
-                          if (viewModel.status == 200) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const Navbar()),
-                            );
-                          } else {
-                            print('error');
-                          }
-                        },
+                        onPressed: viewModel.isLoading
+                            ? null
+                            : () async {
+                                await viewModel.isLogin();
+                                if (viewModel.response.status == 200) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => const Navbar()),
+                                  );
+                                } else {
+                                  print('error');
+                                }
+                              },
+                        child: viewModel.isLoading
+                            ? CircularProgressIndicator(color: Colors.white)
+                            : const Text('Login',
+                                style: TextStyle(color: Colors.white)),
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
                               const Color.fromARGB(255, 23, 96, 232),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
-                        ),
-                        child: const Text(
-                          'Login',
-                          style: TextStyle(color: Colors.white),
                         ),
                       ),
                     ),

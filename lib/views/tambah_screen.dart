@@ -108,7 +108,13 @@ class _TambahScreenState extends State<TambahScreen> {
                                         counter = 1;
                                         counterTambah = 1;
                                         print('clicked');
-                                        viewModel.fetchDbsppData();
+                                        viewModel.fetchDbsppData(
+                                            showSnackBar: (msg, color) =>
+                                                ErrorTopSnackbar.show(
+                                                  context,
+                                                  message: msg,
+                                                  backgroundColor: color,
+                                                ));
                                         print('clicked');
                                         viewModel.fetchDbsppDetData();
                                         print('clicked');

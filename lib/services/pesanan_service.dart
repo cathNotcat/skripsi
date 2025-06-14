@@ -25,20 +25,45 @@ class PesananService {
     }
   }
 
+  // Future<DBSPPModel> getDbsppData(String noDO) async {
+  //   var url = Uri.parse('$baseUrl/dbspp/nobukti');
+  //   var response = await http.post(url,
+  //       headers: {'Content-Type': 'application/json'},
+  //       body: jsonEncode({
+  //         'NOBUKTI': noDO,
+  //       }));
+
+  //   if (response.statusCode == 200) {
+  //     var data = jsonDecode(response.body)['data'];
+  //     print('data dbspp: $data');
+  //     return DBSPPModel.fromJson(data);
+  //   } else {
+  //     print('response.body: ${response.body}');
+  //     throw Exception('Error in getDbsppData: status ${response.statusCode}');
+  //   }
+  // }
+
   Future<DBSPPModel> getDbsppData(String noDO) async {
     var url = Uri.parse('$baseUrl/dbspp/nobukti');
-    var response = await http.post(url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'NOBUKTI': noDO,
-        }));
+    var response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'NOBUKTI': noDO}),
+    );
 
     if (response.statusCode == 200) {
-      var data = jsonDecode(response.body)['data'];
+      var decoded = jsonDecode(response.body);
+      var data = decoded['data'];
       print('data dbspp: $data');
+
+      if (data == null) {
+        throw Exception('Data is null for NOBUKTI $noDO');
+      }
+
       return DBSPPModel.fromJson(data);
     } else {
-      throw Exception('Error in getDbsppData');
+      print('response.body: ${response.body}');
+      throw Exception('Error in getDbsppData: status ${response.statusCode}');
     }
   }
 

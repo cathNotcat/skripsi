@@ -58,18 +58,21 @@ class _NavbarState extends State<Navbar> {
   @override
   void initState() {
     super.initState();
-    selectedIndex = widget.chosenIndex ?? 0;
+    selectedIndex = widget.chosenIndex ?? 1;
   }
 
   void onSidebarItemClicked(int index) {
     setState(() {
       selectedIndex = index;
     });
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (_) => Navbar(chosenIndex: index),
-      ),
-    );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => Navbar(chosenIndex: index),
+        ),
+      );
+    });
   }
 
   @override
@@ -99,7 +102,7 @@ class _NavbarState extends State<Navbar> {
                 Container(
                   padding: EdgeInsets.symmetric(vertical: 20),
                   child: Text(
-                    'LOGO',
+                    'PT X',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -116,7 +119,7 @@ class _NavbarState extends State<Navbar> {
                     title: 'Dashboard',
                     isSelected: selectedIndex == 0,
                     onTap: () async {
-                      await Future.delayed(Duration(seconds: 1));
+                      // await Future.delayed(Duration(seconds: 1));
                       onSidebarItemClicked(0);
                     }),
                 SizedBox(height: 16),
@@ -125,7 +128,7 @@ class _NavbarState extends State<Navbar> {
                     title: 'Pengiriman',
                     isSelected: selectedIndex == 1,
                     onTap: () async {
-                      await Future.delayed(Duration(seconds: 1));
+                      // await Future.delayed(Duration(seconds: 1));
                       onSidebarItemClicked(1);
                     }),
                 SizedBox(height: 16),
@@ -134,7 +137,7 @@ class _NavbarState extends State<Navbar> {
                     title: 'Pesanan',
                     isSelected: selectedIndex == 2,
                     onTap: () async {
-                      await Future.delayed(Duration(seconds: 1));
+                      // await Future.delayed(Duration(seconds: 1));
                       onSidebarItemClicked(2);
                     }),
                 SizedBox(height: 16),

@@ -14,13 +14,18 @@ class DBSPPModel {
   });
 
   factory DBSPPModel.fromJson(Map<String, dynamic> json) {
-    return DBSPPModel(
-      noBukti: json['NoBukti'],
-      noUrut: json['NoUrut'],
-      noSO: json['NoSO'],
-      noPesan: json['NoPesan'],
-      kodeCustSupp: json['KodeCustSupp'],
-    );
+    try {
+      return DBSPPModel(
+        noBukti: json['NoBukti']?.toString() ?? '',
+        noUrut: json['NoUrut']?.toString() ?? '',
+        noSO: json['NoSO']?.toString() ?? '',
+        noPesan: json['NoPesan']?.toString() ?? '',
+        kodeCustSupp: json['KodeCustSupp']?.toString() ?? '',
+      );
+    } catch (e, stack) {
+      print('Error parsing DBSPPModel: $e\n$stack');
+      rethrow;
+    }
   }
 }
 

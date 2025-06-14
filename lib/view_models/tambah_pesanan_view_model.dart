@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_admin_1/held_karp.dart';
 import 'package:web_admin_1/models/customer_model.dart';
 import 'package:web_admin_1/models/dbspp_model.dart';
@@ -23,11 +24,14 @@ class TambahPesananViewModel extends ChangeNotifier {
   bool isLoading = true;
   bool isPesananExist = false;
   bool isCalculating = false;
+  bool isError = false;
 
   List<String> points = ['-7.375729652261953, 112.6788318829139'];
   Map<String, String> custCoordinateMap = {};
   String namaCust = '';
   String message = '';
+  String errorMessage = '';
+
   int counter = 1;
 
   DateTime now = DateTime.now();
@@ -54,6 +58,7 @@ class TambahPesananViewModel extends ChangeNotifier {
       if (data.isNotEmpty) {
         isPesananExist = true;
         listOfPesanan = data;
+        print('listOfPesanan: $listOfPesanan');
       } else {
         isPesananExist = false;
       }
@@ -64,24 +69,32 @@ class TambahPesananViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchDbsppData() async {
+  Future<void> fetchDbsppData({
+    required void Function(String message, Color color) showSnackBar,
+  }) async {
+    print('in fetchDbsppData');
     String dateNow = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
     try {
+      print('in fetchDbsppData try');
       if (inputDoController.text != '' || inputDoController.text.isNotEmpty) {
         dbsppData = await pesananService.getDbsppData(inputDoController.text);
         print('dbspp data: $dbsppData');
         if (dbsppData != null) {
+          print('dbspp data: $dbsppData');
           noUrutController.text = dbsppData!.noUrut;
           noSoController.text = dbsppData!.noSO;
           tanggalKirimController.text = dateNow;
           noPesanController.text = dbsppData!.noPesan;
           customerController.text = dbsppData!.kodeCustSupp;
           isLoading = false;
+        } else {
+          print('dbsppdata null');
         }
         notifyListeners();
       }
     } catch (e) {
       print('Error in fetchDbsppData. Errors: $e');
+      showSnackBar("Data tidak ada.", Colors.red);
     }
   }
 
@@ -130,9 +143,12 @@ class TambahPesananViewModel extends ChangeNotifier {
 
     await fetchCustDetails(customerController.text);
 
+    final prefs = await SharedPreferences.getInstance();
+    String? selectedSopir = prefs.getString('selected_sopir');
+
     final newPesanan = PesananModel(
       noDO: inputDoController.text,
-      kodeSopir: 'ADI',
+      kodeSopir: selectedSopir ?? '',
       kodeCustSupp: customerController.text,
       tanggalKirim: tanggalKirimController.text,
       nama: namaCust,
@@ -150,15 +166,20 @@ class TambahPesananViewModel extends ChangeNotifier {
   }) async {
     listOfPesanan.removeWhere((item) => item.noDO == inputDoController.text);
     notifyListeners();
-
+    showSnackBar('Pesanan berhasil dihapus', Colors.green.shade300);
+    isPesananExist = false;
     try {
-      final success = await pesananService.hapusPesanan(
-          inputDoController.text, tanggalKirimController.text);
-      if (success) {
-        showSnackBar('Pesanan berhasil dihapus', Colors.green.shade300);
-      } else {
-        showSnackBar('Gagal menghapus pesanan', Colors.red);
-      }
+      // final success = await pesananService.hapusPesanan(
+      //     inputDoController.text, tanggalKirimController.text);
+      // if (success) {
+      //   listOfPesanan
+      //       .removeWhere((item) => item.noDO == inputDoController.text);
+      //   notifyListeners();
+      //   showSnackBar('Pesanan berhasil dihapus', Colors.green.shade300);
+      //   isPesananExist = false;
+      // } else {
+      //   showSnackBar('Gagal menghapus pesanan', Colors.red);
+      // }
     } catch (e) {
       print('Gagal hapus pesanan: $e');
       showSnackBar('Terjadi kesalahan saat menghapus', Colors.red);
