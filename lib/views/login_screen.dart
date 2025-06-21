@@ -23,101 +23,129 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Container(
               height: MediaQuery.of(context).size.height,
               alignment: Alignment.center,
-              child: viewModel.isLoading
-                  ? Center(child: CircularProgressIndicator())
-                  : Container(
-                      padding: const EdgeInsets.all(24),
-                      child: Form(
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                child: Form(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        'LOGO',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 40),
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(16),
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Color.fromARGB(255, 255, 255, 255),
+                          borderRadius: BorderRadius.all(Radius.circular(16)),
+                        ),
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            SizedBox(height: 8),
                             Text(
-                              'LOGO',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 40),
+                              'Nama',
+                              style: TextStyle(fontWeight: FontWeight.bold),
                             ),
+                            SizedBox(height: 8),
+                            inputField(viewModel.namaController, 'Nama', false),
+                            SizedBox(height: 16),
+                            Text(
+                              'Kode',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(height: 8),
+                            inputField(viewModel.kodeController, 'Kode', true),
+                            SizedBox(height: 8),
+                            Text(
+                              viewModel.errorMessage,
+                              style: TextStyle(color: Colors.red),
+                            ),
+                            // viewModel.isError
+                            //     ? Text(
+                            //         // 'Nama atau Kode salah!',
+                            //         viewModel.errorMessage,
+                            //         style: TextStyle(color: Colors.red),
+                            //       )
+                            //     : SizedBox(),
                             Container(
-                              padding: EdgeInsets.all(16),
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: Color.fromARGB(255, 255, 255, 255),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(16)),
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  SizedBox(height: 8),
-                                  Text(
-                                    'Nama',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                  SizedBox(height: 8),
-                                  inputField(
-                                      viewModel.namaController, 'Nama', false),
-                                  SizedBox(height: 16),
-                                  Text(
-                                    'Kode',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                  SizedBox(height: 8),
-                                  inputField(
-                                      viewModel.kodeController, 'Kode', true),
-                                  SizedBox(height: 8),
-                                  viewModel.isError
-                                      ? Text(
-                                          'Nama atau Kode salah!',
-                                          style: TextStyle(color: Colors.red),
-                                        )
-                                      : SizedBox(),
-                                  Container(
-                                    padding: const EdgeInsets.only(top: 20),
-                                    child: SizedBox(
-                                      width: double.infinity,
-                                      height: 48,
-                                      child: FilledButton(
-                                        style: FilledButton.styleFrom(
-                                          backgroundColor: const Color.fromARGB(
-                                              255, 23, 96, 232),
-                                          foregroundColor: Colors.white,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                          ),
-                                          textStyle: const TextStyle(
-                                            fontSize: 16.0,
-                                          ),
-                                        ),
-                                        onPressed: () async {
-                                          await viewModel.getLoginInfo();
-                                          if (!viewModel.isError) {
+                              padding: const EdgeInsets.only(top: 20),
+                              child: SizedBox(
+                                width: double.infinity,
+                                height: 48,
+                                child:
+                                    // FilledButton(
+                                    //   style: FilledButton.styleFrom(
+                                    //     backgroundColor:
+                                    //         const Color.fromARGB(255, 23, 96, 232),
+                                    //     foregroundColor: Colors.white,
+                                    //     shape: RoundedRectangleBorder(
+                                    //       borderRadius: BorderRadius.circular(10),
+                                    //     ),
+                                    //     textStyle: const TextStyle(
+                                    //       fontSize: 16.0,
+                                    //     ),
+                                    //   ),
+                                    //   onPressed: () async {
+                                    //     await viewModel.getLoginInfo();
+                                    //     if (!viewModel.isError) {
+                                    //       Navigator.push(
+                                    //         context,
+                                    //         MaterialPageRoute(
+                                    //             builder: (context) => Navbar()),
+                                    //       );
+                                    //     }
+                                    //   },
+                                    //   child: const Text(
+                                    //     'LOGIN',
+                                    //     style:
+                                    //         TextStyle(fontWeight: FontWeight.bold),
+                                    //   ),
+                                    // ),
+                                    ElevatedButton(
+                                  onPressed: viewModel.isLoading
+                                      ? null
+                                      : () async {
+                                          await viewModel.isLogin();
+                                          if (viewModel.response.status ==
+                                              200) {
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
                                                   builder: (context) =>
                                                       Navbar()),
                                             );
+                                          } else {
+                                            print('error');
                                           }
                                         },
-                                        child: const Text(
-                                          'LOGIN',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                      ),
+                                  child: viewModel.isLoading
+                                      ? CircularProgressIndicator(
+                                          color: Colors.white)
+                                      : const Text('Login',
+                                          style:
+                                              TextStyle(color: Colors.white)),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        const Color.fromARGB(255, 23, 96, 232),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
                                     ),
                                   ),
-                                ],
+                                ),
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ),
+                    ],
+                  ),
+                ),
+              ),
             ),
           );
         }),

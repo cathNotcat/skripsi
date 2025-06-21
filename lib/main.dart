@@ -4,6 +4,7 @@ import 'package:aplikasi_1/firebase_options.dart';
 import 'package:aplikasi_1/home_page.dart';
 import 'package:aplikasi_1/services/notification_service.dart';
 import 'package:aplikasi_1/settings_page.dart';
+import 'package:aplikasi_1/views/history_screen.dart';
 import 'package:aplikasi_1/views/home_screen.dart';
 import 'package:aplikasi_1/views/login_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -21,7 +22,16 @@ void main() async {
   await NotificationService.instance.initialize();
   await requestLocationPermission();
   await dotenv.load();
-  runApp(MainApp());
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setBool('isIPSet', false);
+  final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+  final isIPSet = prefs.getBool('isIPSet') ?? false;
+  print('isloggedin: $isLoggedIn');
+  print('isipset: $isIPSet');
+  runApp(MainApp(
+    isLoggedIn: isLoggedIn,
+    isIPSet: isIPSet,
+  ));
 }
 
 Future<void> requestLocationPermission() async {
@@ -43,7 +53,10 @@ Future<void> requestLocationPermission() async {
 }
 
 class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+  final bool isLoggedIn;
+  final bool isIPSet;
+
+  const MainApp({super.key, required this.isLoggedIn, required this.isIPSet});
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +69,13 @@ class MainApp extends StatelessWidget {
             bodyMedium: TextStyle(fontSize: 16),
           )),
       debugShowCheckedModeBanner: false,
-      home: SafeArea(child: SettingsPage()),
+      // home: SafeArea(child: HistoryScreen()),
+      home: SafeArea(
+          child: isIPSet
+              ? isLoggedIn
+                  ? Navbar()
+                  : LoginScreen()
+              : SettingsPage()),
       // home: SafeArea(child: LoginScreen()),
       // home: SafeArea(child: HomePage()),
       // home: SafeArea(child: Navbar()),
@@ -80,7 +99,8 @@ class _NavbarState extends State<Navbar> {
   final List<Widget> _pages = [
     HomeScreen(),
     PesananPage(),
-    SelesaiPage(),
+    // SelesaiPage(),
+    HistoryScreen(),
     SettingsPage(),
   ];
 

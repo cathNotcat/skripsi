@@ -109,8 +109,10 @@ class PengirimanViewModel extends ChangeNotifier {
 
   Future<void> fetchPengirimanSopirData() async {
     try {
-      final List<PengirimanModel> dataList = await pengirimanService
-          .getPengirimanByDate(DateFormatter.formatDateToday());
+      final prefs = await SharedPreferences.getInstance();
+      String? sopir = prefs.getString('selected_sopir');
+      final List<PengirimanDetailModel> dataList = await pengirimanService
+          .getPengirimanByDate(DateFormatter.formatDateToday(), sopir ?? '');
 
       details = [];
       points = [];

@@ -6,6 +6,7 @@ import 'package:aplikasi_1/services/sopir_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:geolocator/geolocator.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -14,306 +15,6 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'dart:math';
-
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
-
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  DateTime now = DateTime.now();
-
-  final SopirService sopirService = SopirService();
-  Sopir? sopir;
-
-  String hariIni = '';
-
-  String notif = 'Tidak ada pesanan untuk hari ini';
-  bool noNotif = true;
-  bool isLoadingSupir = true;
-
-  int pesanan = 0;
-  int selesai = 0;
-
-  Color buttonColor = Color.fromARGB(255, 23, 96, 232);
-  Color containerColor = Color.fromARGB(255, 255, 255, 255);
-  Color textColor = Color.fromARGB(255, 82, 89, 105);
-
-  List<String> noDO = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _getBaseUrl();
-    _formatDate();
-    _getPengirimanSupirData();
-    _getSopir();
-  }
-
-  Future<void> _getBaseUrl() async {
-    final prefs = await SharedPreferences.getInstance();
-    String? baseUrl = prefs.getString('ip_address');
-    print('BASE URL = $baseUrl');
-  }
-
-  void _formatDate() {
-    initializeDateFormatting('id_ID', null).then((_) {
-      Intl.defaultLocale = 'id_ID';
-
-      DateTime today = DateTime.now();
-      String formattedDate = DateFormat('EEEE, d MMMM yyyy').format(today);
-      setState(() {
-        hariIni = formattedDate;
-      });
-      print(formattedDate);
-    });
-  }
-
-  Future<void> _getPengirimanSupirData() async {
-    pesanan = 0;
-    selesai = 0;
-    noDO.clear();
-    String formattedDate = DateFormat('yyyy-MM-dd').format(now);
-    final prefs = await SharedPreferences.getInstance();
-    String? baseUrl = prefs.getString('ip_address');
-    print('base url in _getPengirimanSupirData: $baseUrl');
-    var url = Uri.parse('$baseUrl/pengiriman/tanggal/$formattedDate');
-
-    try {
-      var response = await http.get(
-        url,
-        headers: {'Content-Type': 'application/json'},
-      );
-      print('status: ${response.statusCode}');
-
-      if (response.statusCode == 200) {
-        var responseBody = jsonDecode(response.body);
-        print('response message: ${responseBody['message']}');
-        var data = responseBody['data'];
-        if (data != null) {
-          setState(() {
-            for (var item in data) {
-              String status = item["Status"];
-              if (status == "0") {
-                pesanan++;
-              }
-              if (status == "1") {
-                pesanan++;
-              }
-              if (status == "2") {
-                selesai++;
-                noDO.add(item['NoDO']);
-              }
-            }
-            if (responseBody['message'] != 'No data found') {
-              notif = 'Anda memiliki $pesanan pesanan';
-              noNotif = false;
-            }
-          });
-        } else {
-          print('Unexpected response structure.');
-        }
-      } else {
-        print(
-          'Failed to load user data(getpengiriman on home): ${response.statusCode}',
-        );
-      }
-    } catch (e) {
-      print('Error occurred in getPengirimanSopirData: $e');
-    }
-  }
-
-  void _getSopir() async {
-    final result = await sopirService.getSopir();
-    print('sopir belum: ${sopir}');
-    if (mounted) {
-      setState(() {
-        sopir = result;
-        isLoadingSupir = false;
-        print('sopir: ${sopir}');
-      });
-    }
-  }
-
-  Future<void> _refreshData() async {
-    _getSopir();
-    _getPengirimanSupirData();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: isLoadingSupir
-          ? Center(child: CircularProgressIndicator())
-          : Container(
-              padding: EdgeInsets.all(24),
-              margin: EdgeInsets.only(top: 40),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Selamat Datang,'),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        // sopir!.kodeSopir,
-                        'ADI',
-                        style: TextStyle(
-                          fontSize: 42,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: _refreshData,
-                        child: Icon(Icons.refresh),
-                      ),
-                    ],
-                  ),
-                  Container(
-                    height: 130,
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: containerColor,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.calendar_month_outlined),
-                            SizedBox(width: 16),
-                            Text(hariIni, style: TextStyle(color: textColor)),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Icon(Icons.drive_eta_outlined),
-                            SizedBox(width: 16),
-                            Text(
-                              'L 1622 JK',
-                              style: TextStyle(color: textColor),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Icon(Icons.history_rounded),
-                            SizedBox(width: 16),
-                            Text(
-                              '$selesai pesanan selesai',
-                              style: TextStyle(color: textColor),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 32),
-                  Text(
-                    'Notifikasi',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 8),
-                  Container(
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: containerColor,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.notifications_outlined),
-                            SizedBox(width: 16),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  notif,
-                                  style: TextStyle(color: textColor),
-                                ),
-                                noNotif
-                                    ? SizedBox()
-                                    : FilledButton(
-                                        onPressed: () {
-                                          Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  Navbar(chosenIndex: 1),
-                                            ),
-                                          );
-                                        },
-                                        style: ButtonStyle(
-                                          backgroundColor:
-                                              WidgetStateProperty.all(
-                                            buttonColor,
-                                          ),
-                                          shape: WidgetStateProperty.all(
-                                            RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                            ),
-                                          ),
-                                        ),
-                                        child: FittedBox(
-                                          // 🔹 Ensures text scales correctly
-                                          fit: BoxFit.scaleDown,
-                                          child: Text('Lihat Detail'),
-                                        ),
-                                      ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 32),
-                  noDO.isEmpty
-                      ? SizedBox()
-                      : Text(
-                          'Pesanan Selesai Hari Ini',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                  SizedBox(height: 8),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: noDO.length,
-                      itemBuilder: (context, index) {
-                        return Container(
-                          margin: EdgeInsets.only(bottom: 8),
-                          padding: EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: containerColor,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.assignment_outlined),
-                              SizedBox(width: 16),
-                              Text(
-                                // 'SON/00056/0724/MM',
-                                noDO[index],
-                                style: TextStyle(color: textColor),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-    );
-  }
-}
 
 class PesananPage extends StatefulWidget {
   const PesananPage({super.key});
@@ -363,6 +64,8 @@ class _PesananPageState extends State<PesananPage> {
   void initState() {
     super.initState();
     _getLatLong();
+    print('is data available: $isDataAvailable');
+    print('pilihan widget: $pilihan_widget');
   }
 
   Future<void> _getLatLong() async {
@@ -382,22 +85,53 @@ class _PesananPageState extends State<PesananPage> {
   Future<void> _initializeWithAsync() async {
     await _getPengirimanSupirData();
 
-    _initializeMarkers();
+    setMarkersFromDetails();
     _moveCameraToShowRoute();
   }
 
-  void _initializeMarkers() {
-    for (int i = 0; i < points.length; i++) {
-      _markers.add(
-        Marker(
-          markerId: MarkerId('marker_$i'),
-          position: points[i],
-          infoWindow: InfoWindow(
-            title: 'Destination ${i + 1}',
-            snippet: 'Location ${i + 1}',
-          ),
-        ),
-      );
+  // void _initializeMarkers() {
+  //   for (int i = 0; i < points.length; i++) {
+  //     _markers.add(
+  //       Marker(
+  //         markerId: MarkerId('marker_$i'),
+  //         position: points[i],
+  //         infoWindow: InfoWindow(
+  //           title: '${i + 1} $detNoDO',
+  //           snippet: '${i + 1} $detAlamat',
+  //         ),
+  //       ),
+  //     );
+  //   }
+  // }
+
+  void setMarkersFromDetails() {
+    for (int i = 0; i < details.length; i++) {
+      // for (var detail in details) {
+      final detail = details[i];
+      String? noDo = detail['NoDO'];
+      String? alamat = detail['Alamat'];
+      String? koordinat = detail['Koordinat'];
+
+      if (koordinat != null && koordinat.isNotEmpty) {
+        var parts = koordinat.split(',');
+        if (parts.length == 2) {
+          double? lat = double.tryParse(parts[0].trim());
+          double? lng = double.tryParse(parts[1].trim());
+
+          if (lat != null && lng != null) {
+            _markers.add(
+              Marker(
+                markerId: MarkerId(noDo ?? UniqueKey().toString()),
+                position: LatLng(lat, lng),
+                infoWindow: InfoWindow(
+                  title: '${i + 1}. $noDo' ?? 'NoDO Not Available',
+                  snippet: alamat ?? 'Location Not Available',
+                ),
+              ),
+            );
+          }
+        }
+      }
     }
   }
 
@@ -450,7 +184,11 @@ class _PesananPageState extends State<PesananPage> {
     String formattedDate = DateFormat('yyyy-MM-dd').format(now);
     final prefs = await SharedPreferences.getInstance();
     String? baseUrl = prefs.getString('ip_address');
-    var url = Uri.parse('$baseUrl/pengiriman/tanggal/$formattedDate');
+    String? selectedSopir = prefs.getString('selected_sopir');
+    var url = Uri.parse(
+        '$baseUrl/pengiriman/tanggal/sopir/$formattedDate/$selectedSopir');
+
+    print('url in getPengirimanSupirData: $url');
 
     try {
       var response = await http.get(
@@ -488,7 +226,7 @@ class _PesananPageState extends State<PesananPage> {
             }
             pesanan = data.length;
 
-            if (responseBody['message'] != 'No data found') {
+            if (responseBody['message'] != 'Tidak ada pesanan') {
               isDataAvailable = true;
             }
           });
@@ -640,10 +378,40 @@ class _PesananPageState extends State<PesananPage> {
     var url = Uri.parse('$baseUrl/pengiriman/update/$noPeng/$noUrut');
 
     try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        print('Location services disabled.');
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          print('Location permission denied.');
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        print('Location permission permanently denied.');
+        return;
+      }
+
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+
+      double latitude = position.latitude;
+      double longitude = position.longitude;
+
       var response = await http.put(
         url,
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'Status': statusChange}),
+        body: jsonEncode({
+          'Status': statusChange,
+          'Latitude': latitude,
+          'Longitude': longitude,
+        }),
       );
 
       if (response.statusCode == 200) {
@@ -716,20 +484,6 @@ class _PesananPageState extends State<PesananPage> {
                       _initializeWithAsync();
                     },
                   ),
-        // GoogleMap(
-        //   onMapCreated: _onMapCreated,
-        //   initialCameraPosition: CameraPosition(
-        //     target: _initialPosition,
-        //     zoom: 14,
-        //   ),
-        //   markers: {
-        //     Marker(
-        //       markerId: MarkerId('marker_1'),
-        //       position: _initialPosition,
-        //       infoWindow: InfoWindow(title: 'My Marker'),
-        //     ),
-        //   },
-        // ),
         panel: Container(
           color: backgroundColor,
           child: Column(
@@ -744,11 +498,11 @@ class _PesananPageState extends State<PesananPage> {
                 margin: EdgeInsets.symmetric(vertical: 10),
               ),
               SizedBox(height: 10),
-              isDataAvailable == true
-                  ? pilihan_widget == 0
+              pilihan_widget == 0
+                  ? isDataAvailable == true
                       ? _listPesananPage()
-                      : _detailPesananPage()
-                  : Center(child: Text('Tidak ada pesanan')),
+                      : Center(child: Text('Tidak ada pesanan'))
+                  : _detailPesananPage()
             ],
           ),
         ),
@@ -779,7 +533,7 @@ class _PesananPageState extends State<PesananPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            item['NoDO']!, // Access NoDO from the item
+                            item['NoDO']!,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
@@ -912,6 +666,8 @@ class _PesananPageState extends State<PesananPage> {
             .toList(),
       ),
     );
+    // return Center(
+    //     child: Text('Tidak ada pesanan', style: TextStyle(fontSize: 18)));
   }
 
   Widget _detailPesananPage() {
@@ -1123,229 +879,229 @@ class _PesananPageState extends State<PesananPage> {
   }
 }
 
-class SelesaiPage extends StatefulWidget {
-  const SelesaiPage({super.key});
+// class SelesaiPage extends StatefulWidget {
+//   const SelesaiPage({super.key});
 
-  @override
-  State<SelesaiPage> createState() => _SelesaiPageState();
-}
+//   @override
+//   State<SelesaiPage> createState() => _SelesaiPageState();
+// }
 
-class _SelesaiPageState extends State<SelesaiPage> {
-  // var baseUrl = dotenv.env['BASE_URL'];
+// class _SelesaiPageState extends State<SelesaiPage> {
+//   // var baseUrl = dotenv.env['BASE_URL'];
 
-  List<Map<String, dynamic>> filteredOrdersData = [];
+//   List<Map<String, dynamic>> filteredOrdersData = [];
 
-  Color buttonColor = Color.fromARGB(255, 23, 96, 232);
-  Color containerColor = Color.fromARGB(255, 255, 255, 255);
-  Color textColor = Color.fromARGB(255, 82, 89, 105);
+//   Color buttonColor = Color.fromARGB(255, 23, 96, 232);
+//   Color containerColor = Color.fromARGB(255, 255, 255, 255);
+//   Color textColor = Color.fromARGB(255, 82, 89, 105);
 
-  @override
-  void initState() {
-    super.initState();
-    _getHistory();
-    filteredOrdersData = ordersData;
-  }
+//   @override
+//   void initState() {
+//     super.initState();
+//     _getHistory();
+//     filteredOrdersData = ordersData;
+//   }
 
-  Map<String, bool> selectedMonths = {
-    "January": false,
-    "February": false,
-    "March": false,
-    "April": false,
-    "May": false,
-    "June": false,
-    "July": false,
-    "August": false,
-    "September": false,
-    "October": false,
-    "November": false,
-    "December": false,
-  };
+//   Map<String, bool> selectedMonths = {
+//     "January": false,
+//     "February": false,
+//     "March": false,
+//     "April": false,
+//     "May": false,
+//     "June": false,
+//     "July": false,
+//     "August": false,
+//     "September": false,
+//     "October": false,
+//     "November": false,
+//     "December": false,
+//   };
 
-  Map<String, bool> selectedYears = {"2023": false, "2024": false};
+//   Map<String, bool> selectedYears = {"2023": false, "2024": false};
 
-  List<Map<String, dynamic>> ordersData = [];
-  void applyFilters() {
-    setState(() {
-      filteredOrdersData = ordersData.where((order) {
-        DateTime date = DateTime.parse(order["TANGGAL"]);
-        String month = DateFormat(
-          'MMMM',
-        ).format(date); // Month in full text
-        String year = date.year.toString();
+//   List<Map<String, dynamic>> ordersData = [];
+//   void applyFilters() {
+//     setState(() {
+//       filteredOrdersData = ordersData.where((order) {
+//         DateTime date = DateTime.parse(order["TANGGAL"]);
+//         String month = DateFormat(
+//           'MMMM',
+//         ).format(date); // Month in full text
+//         String year = date.year.toString();
 
-        // Match the selected months and years
-        return (selectedMonths[month] ?? false) ||
-            (selectedYears[year] ?? false);
-      }).toList();
-    });
-  }
+//         // Match the selected months and years
+//         return (selectedMonths[month] ?? false) ||
+//             (selectedYears[year] ?? false);
+//       }).toList();
+//     });
+//   }
 
-  Future<void> _getHistory() async {
-    final prefs = await SharedPreferences.getInstance();
-    String? baseUrl = prefs.getString('ip_address');
-    var url = Uri.parse('$baseUrl/dbso/tanggal');
+//   Future<void> _getHistory() async {
+//     final prefs = await SharedPreferences.getInstance();
+//     String? baseUrl = prefs.getString('ip_address');
+//     var url = Uri.parse('$baseUrl/dbso/tanggal');
 
-    try {
-      var response = await http.get(url);
+//     try {
+//       var response = await http.get(url);
 
-      if (response.statusCode == 200) {
-        var responseBody = jsonDecode(response.body);
-        var data = responseBody['data'];
-        if (data != null) {
-          for (var orders in data) {
-            setState(() {
-              ordersData.add(orders);
-            });
-          }
-          // print(ordersData);
-        } else {
-          print('Unexpected response structure.');
-        }
-      } else {
-        print('Failed to load user data(gethistory): ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error occurred in getHistory: $e');
-    }
-  }
+//       if (response.statusCode == 200) {
+//         var responseBody = jsonDecode(response.body);
+//         var data = responseBody['data'];
+//         if (data != null) {
+//           for (var orders in data) {
+//             setState(() {
+//               ordersData.add(orders);
+//             });
+//           }
+//           // print(ordersData);
+//         } else {
+//           print('Unexpected response structure.');
+//         }
+//       } else {
+//         print('Failed to load user data(gethistory): ${response.statusCode}');
+//       }
+//     } catch (e) {
+//       print('Error occurred in getHistory: $e');
+//     }
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        padding: EdgeInsets.all(24),
-        margin: EdgeInsets.only(top: 40),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Pesanan Selesai',
-              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-            ),
-            // Container(
-            //   padding: EdgeInsets.all(16),
-            //   color: Colors.grey[200],
-            //   child: Column(
-            //     crossAxisAlignment: CrossAxisAlignment.start,
-            //     children: [
-            //       // Filter by Month
-            //       Text(
-            //         "Filter by Month",
-            //         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            //       ),
-            //       Wrap(
-            //         spacing: 8.0,
-            //         children: selectedMonths.keys.map((month) {
-            //           return FilterChip(
-            //             label: Text(month),
-            //             selected: selectedMonths[month] ?? false,
-            //             onSelected: (selected) {
-            //               setState(() {
-            //                 selectedMonths[month] = selected;
-            //               });
-            //               applyFilters();
-            //             },
-            //           );
-            //         }).toList(),
-            //       ),
-            //       SizedBox(height: 16),
-            //       // Filter by Year
-            //       Text(
-            //         "Filter by Year",
-            //         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            //       ),
-            //       Wrap(
-            //         spacing: 8.0,
-            //         children: selectedYears.keys.map((year) {
-            //           return FilterChip(
-            //             label: Text(year),
-            //             selected: selectedYears[year] ?? false,
-            //             onSelected: (selected) {
-            //               setState(() {
-            //                 selectedYears[year] = selected;
-            //               });
-            //               applyFilters();
-            //             },
-            //           );
-            //         }).toList(),
-            //       ),
-            //     ],
-            //   ),
-            // ),
-            Expanded(
-              child: Scrollbar(
-                thumbVisibility: true,
-                interactive: true,
-                thickness: 8.0,
-                radius: Radius.circular(8.0),
-                child: ListView.builder(
-                  itemCount: ordersData.length,
-                  itemBuilder: (context, index) {
-                    var dateData = ordersData[index];
-                    String rawDate = dateData["TANGGAL"];
-                    List<String> orders = List<String>.from(
-                      dateData["NOBUKTI"],
-                    );
-                    DateTime dateTime = DateTime.parse(rawDate);
-                    String formattedDate = DateFormat(
-                      'd MMMM yyyy',
-                    ).format(dateTime);
-                    return Container(
-                      margin: EdgeInsets.all(8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              formattedDate,
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: NeverScrollableScrollPhysics(),
-                            itemCount: orders.length,
-                            itemBuilder: (context, orderIndex) {
-                              return Container(
-                                padding: EdgeInsets.all(16),
-                                margin: EdgeInsets.only(bottom: 8),
-                                decoration: BoxDecoration(
-                                  color: containerColor,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Icon(Icons.assignment_outlined),
-                                        SizedBox(width: 16),
-                                        Text(
-                                          orders[orderIndex],
-                                          style: TextStyle(color: textColor),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       body: Container(
+//         padding: EdgeInsets.all(24),
+//         margin: EdgeInsets.only(top: 40),
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             Text(
+//               'Pesanan Selesai',
+//               style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+//             ),
+//             // Container(
+//             //   padding: EdgeInsets.all(16),
+//             //   color: Colors.grey[200],
+//             //   child: Column(
+//             //     crossAxisAlignment: CrossAxisAlignment.start,
+//             //     children: [
+//             //       // Filter by Month
+//             //       Text(
+//             //         "Filter by Month",
+//             //         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+//             //       ),
+//             //       Wrap(
+//             //         spacing: 8.0,
+//             //         children: selectedMonths.keys.map((month) {
+//             //           return FilterChip(
+//             //             label: Text(month),
+//             //             selected: selectedMonths[month] ?? false,
+//             //             onSelected: (selected) {
+//             //               setState(() {
+//             //                 selectedMonths[month] = selected;
+//             //               });
+//             //               applyFilters();
+//             //             },
+//             //           );
+//             //         }).toList(),
+//             //       ),
+//             //       SizedBox(height: 16),
+//             //       // Filter by Year
+//             //       Text(
+//             //         "Filter by Year",
+//             //         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+//             //       ),
+//             //       Wrap(
+//             //         spacing: 8.0,
+//             //         children: selectedYears.keys.map((year) {
+//             //           return FilterChip(
+//             //             label: Text(year),
+//             //             selected: selectedYears[year] ?? false,
+//             //             onSelected: (selected) {
+//             //               setState(() {
+//             //                 selectedYears[year] = selected;
+//             //               });
+//             //               applyFilters();
+//             //             },
+//             //           );
+//             //         }).toList(),
+//             //       ),
+//             //     ],
+//             //   ),
+//             // ),
+//             Expanded(
+//               child: Scrollbar(
+//                 thumbVisibility: true,
+//                 interactive: true,
+//                 thickness: 8.0,
+//                 radius: Radius.circular(8.0),
+//                 child: ListView.builder(
+//                   itemCount: ordersData.length,
+//                   itemBuilder: (context, index) {
+//                     var dateData = ordersData[index];
+//                     String rawDate = dateData["TANGGAL"];
+//                     List<String> orders = List<String>.from(
+//                       dateData["NOBUKTI"],
+//                     );
+//                     DateTime dateTime = DateTime.parse(rawDate);
+//                     String formattedDate = DateFormat(
+//                       'd MMMM yyyy',
+//                     ).format(dateTime);
+//                     return Container(
+//                       margin: EdgeInsets.all(8),
+//                       child: Column(
+//                         crossAxisAlignment: CrossAxisAlignment.start,
+//                         children: [
+//                           Padding(
+//                             padding: const EdgeInsets.all(8.0),
+//                             child: Text(
+//                               formattedDate,
+//                               style: TextStyle(
+//                                 fontSize: 18,
+//                                 fontWeight: FontWeight.bold,
+//                               ),
+//                             ),
+//                           ),
+//                           ListView.builder(
+//                             shrinkWrap: true,
+//                             physics: NeverScrollableScrollPhysics(),
+//                             itemCount: orders.length,
+//                             itemBuilder: (context, orderIndex) {
+//                               return Container(
+//                                 padding: EdgeInsets.all(16),
+//                                 margin: EdgeInsets.only(bottom: 8),
+//                                 decoration: BoxDecoration(
+//                                   color: containerColor,
+//                                   borderRadius: BorderRadius.circular(10),
+//                                 ),
+//                                 child: Row(
+//                                   mainAxisAlignment:
+//                                       MainAxisAlignment.spaceBetween,
+//                                   children: [
+//                                     Row(
+//                                       children: [
+//                                         Icon(Icons.assignment_outlined),
+//                                         SizedBox(width: 16),
+//                                         Text(
+//                                           orders[orderIndex],
+//                                           style: TextStyle(color: textColor),
+//                                         ),
+//                                       ],
+//                                     ),
+//                                   ],
+//                                 ),
+//                               );
+//                             },
+//                           ),
+//                         ],
+//                       ),
+//                     );
+//                   },
+//                 ),
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }

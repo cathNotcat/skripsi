@@ -19,63 +19,22 @@ class HomeViewModel extends ChangeNotifier {
 
   String hariIni = '';
 
-  String notif = 'Tidak ada pesanan untuk hari ini';
+  String notif = '';
   bool noNotif = true;
   bool isLoadingSupir = true;
 
   String? baseUrl = '';
+  String? selectedSopir;
+  String? platNo;
 
-  // Future<void> getPengirimanSopirData() async {
-  //   pesanan = 0;
-  //   selesai = 0;
-  //   noDO.clear();
+  Future<void> fetchSopirNow() async {
+    final prefs = await SharedPreferences.getInstance();
+    selectedSopir = prefs.getString('selected_sopir');
+    platNo = prefs.getString('plat_nomor');
+    notifyListeners();
+  }
 
-  //   String formattedDate = DateFormatter.formatDateToday();
-
-  //   final prefs = await SharedPreferences.getInstance();
-  //   baseUrl = prefs.getString('ip_address');
-  //   notifyListeners();
-  //   var url = Uri.parse('$baseUrl/pengiriman/tanggal/$formattedDate');
-
-  //   try {
-  //     var response = await http.get(
-  //       url,
-  //       headers: {'Content-Type': 'application/json'},
-  //     );
-  //     if (response.statusCode == 200) {
-  //       var responseBody = jsonDecode(response.body);
-  //       var data = responseBody['data'];
-  //       if (data != null) {
-  //         for (var item in data) {
-  //           String status = item["Status"];
-  //           if (status == "0" || status == "1") {
-  //             pesanan++;
-  //             notifyListeners();
-  //           }
-  //           if (status == "2") {
-  //             selesai++;
-  //             noDO.add(item['NoDO']);
-  //             notifyListeners();
-  //           }
-  //           if (responseBody['message'] != 'No data found') {
-  //             notif = 'Anda memiliki $pesanan pesanan';
-  //             noNotif = false;
-  //             notifyListeners();
-  //           }
-  //         }
-  //       } else {
-  //         print('Unexpected response structure.');
-  //       }
-  //     } else {
-  //       print(
-  //         'Gagal memuat user di _getPengirimanSopirData Home: ${response.statusCode}',
-  //       );
-  //     }
-  //   } catch (e) {
-  //     print('Error in _getPengirimanSopirData: $e');
-  //   }
-  // }
-  Future<void> getPengirimanSopirData() async {
+  Future<void> fetchPengirimanData() async {
     // Reset values
     pesanan = 0;
     selesai = 0;
@@ -84,9 +43,12 @@ class HomeViewModel extends ChangeNotifier {
     notif = '';
     notifyListeners();
 
+    final prefs = await SharedPreferences.getInstance();
+    String? sopir = prefs.getString('selected_sopir');
+
     try {
-      final List<PengirimanModel> dataList = await pengirimanService
-          .getPengirimanByDate(DateFormatter.formatDateToday());
+      final List<PengirimanDetailModel> dataList = await pengirimanService
+          .getPengirimanByDate(DateFormatter.formatToday(), sopir ?? '');
 
       for (var item in dataList) {
         final status = item.status;
@@ -98,19 +60,23 @@ class HomeViewModel extends ChangeNotifier {
           noDO.add(item.noDO);
         }
       }
+      print('pesanan in fetchPengirimanData before: $pesanan');
 
       if (dataList.isNotEmpty) {
+        print('pesanan in fetchPengirimanData: $pesanan');
         notif = 'Anda memiliki $pesanan pesanan';
         noNotif = false;
+      } else {
+        notif = 'Tidak ada pesanan untuk hari ini';
       }
 
       notifyListeners();
     } catch (e) {
-      print('Error in getPengirimanSopirData ViewModel: $e');
+      print('Error in fetchPengirimanData ViewModel: $e');
     }
   }
 
-  void getSopir() async {
+  void fetchSopir() async {
     final result = await sopirService.getSopir();
     sopir = result;
     isLoadingSupir = false;
@@ -119,7 +85,7 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   Future<void> refreshData() async {
-    getSopir();
-    getPengirimanSopirData();
+    fetchSopir();
+    fetchPengirimanData();
   }
 }

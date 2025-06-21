@@ -1,45 +1,47 @@
+import 'package:aplikasi_1/models/login_response_model.dart';
+import 'package:aplikasi_1/services/login_service.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 
 class LoginViewModel extends ChangeNotifier {
+  final loginService = LoginService();
+  LoginResponseModel response =
+      LoginResponseModel(status: 0, message: 'message');
+  String errorMessage = '';
+  bool isLoading = false;
+
   TextEditingController kodeController = TextEditingController();
   TextEditingController namaController = TextEditingController();
 
-  bool isError = false;
-  bool isLoading = false;
-
-  Future<void> getLoginInfo() async {
+  Future<void> isLogin() async {
     isLoading = true;
+    errorMessage = '';
     notifyListeners();
-    final prefs = await SharedPreferences.getInstance();
-    String? baseUrl = prefs.getString('ip_address');
 
-    var url = Uri.parse('$baseUrl/user/admin');
-    try {
-      var response = await http.post(url,
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({
-            "kode": kodeController.text,
-            "nama": namaController.text,
-          }));
-
-      if (response.statusCode == 200) {
-        var responseBody = jsonDecode(response.body);
-        var data = responseBody['data'];
-        if (data != null) {
-          isError = false;
-          notifyListeners();
-        }
-      } else {
-        isError = true;
-        notifyListeners();
-      }
+    if (kodeController.text.isEmpty || namaController.text.isEmpty) {
+      errorMessage = 'Semua field harus diisi.';
       isLoading = false;
       notifyListeners();
-    } catch (e) {
-      print('Error in getLoginInfo: $e');
+      return;
     }
+
+    try {
+      response = await loginService.login(
+        kodeController.text,
+        namaController.text,
+      );
+
+      if (response.status == 200) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('isLoggedIn', true);
+        await prefs.setString('loginTime', DateTime.now().toIso8601String());
+      } else {
+        errorMessage = response.message;
+      }
+    } catch (e) {
+      errorMessage = 'Tidak ada koneksi. Silakan periksa kembali.';
+    }
+    isLoading = false;
+    notifyListeners();
   }
 }

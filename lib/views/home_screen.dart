@@ -20,6 +20,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return ChangeNotifierProvider(
       create: (_) {
         final viewModel = HomeViewModel();
+        viewModel.fetchSopirNow();
+        viewModel.fetchPengirimanData();
         return viewModel;
       },
       child: Scaffold(
@@ -36,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'ADI',
+                      '${viewModel.selectedSopir}',
                       style: TextStyle(
                         fontSize: 42,
                         fontWeight: FontWeight.bold,
@@ -71,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           Icon(Icons.drive_eta_outlined),
                           SizedBox(width: 16),
                           Text(
-                            'L 1622 JK',
+                            '${viewModel.platNo}',
                             style: TextStyle(color: ColorsWidget.textColor),
                           ),
                         ],
@@ -114,6 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               Text(
                                 viewModel.notif,
                                 style: TextStyle(color: ColorsWidget.textColor),
+                                softWrap: true,
                               ),
                               viewModel.noNotif
                                   ? SizedBox()
