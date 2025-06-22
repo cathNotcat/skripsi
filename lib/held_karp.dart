@@ -26,8 +26,6 @@ class HeldKarp {
 
   Future<DistanceDuration> getDistanceDuration(
       double startLong, double startLat, double endLong, double endLat) async {
-    // String url =
-    //     "https://api.openrouteservice.org/v2/directions/driving-car?api_key=$apiKey&start=$startLong,$startLat&end=$endLong,$endLat";
     var url = Uri.parse(
         '$baseUrl/get-distance?start=$startLong,$startLat&end=$endLong,$endLat');
 

@@ -180,6 +180,9 @@ class _NavbarState extends State<Navbar> {
                 if (settings.name == '/pengirimanPage') {
                   page = PengirimanScreen();
                 }
+                if (settings.name == '/belumDikirimPage') {
+                  page = PesananBelumDikirim();
+                }
                 return MaterialPageRoute(builder: (_) => page);
               },
             ),
