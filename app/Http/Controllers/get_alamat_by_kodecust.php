@@ -34,7 +34,7 @@ class get_alamat_by_kodecust extends Controller
 
             return response()->json([
                 'status' => 200,
-                'message' => 'Data berhasil diambil',
+                'message' => 'Berhasil mengambil data.',
                 'data' => [
                     'KODECUSTSUPP' => $item->KODECUSTSUPP,
                     'NAMA' => $item->NAMA,

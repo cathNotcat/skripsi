@@ -24,7 +24,8 @@ class get_all_dbpengiriman_tanggal_by_sopir extends Controller
         if (!$listData) {
             return response()->json([
                 'status' => 404,
-                'message' => 'Tidak ada data pengiriman',
+                'message' => 'Tidak ada data pengiriman.',
+                'data' => [],
             ], 404);
         }
 

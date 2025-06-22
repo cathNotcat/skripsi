@@ -15,7 +15,7 @@ class post_user_sopir extends Controller
         ]);
 
         $user = DB::connection('SML')->selectOne(
-            'SELECT KodeUser, Username, Nama, Role, IsAktif 
+            'SELECT KodeUser, Username, Nama, Role, IsAktif, platNomor 
             FROM dbUser 
             WHERE KodeUser COLLATE Latin1_General_CS_AS = ?
             AND Username COLLATE Latin1_General_CS_AS = ?
@@ -52,6 +52,7 @@ class post_user_sopir extends Controller
                 'Username' => $user->Username,
                 'Nama' => $user->Nama,
                 'Role' => $user->Role,
+                'PlatNo' => $user->platNomor,
             ],
         ]);
     }

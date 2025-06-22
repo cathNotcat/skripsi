@@ -60,3 +60,9 @@ Route::get('/sopir', 'get_all_sopir@getData');
 Route::get('/ping', function () {
     return response()->json(['status' => 'ok'], 200);
 });
+
+// ORS get distance
+Route::get('/get-distance', 'get_distance@getRoute');
+
+// Target penjualan
+Route::get('/get-monthly-so', 'get_monthly_so@getMonthlyData');

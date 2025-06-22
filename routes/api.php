@@ -14,6 +14,8 @@ use App\Http\Controllers\get_all_dbpengiriman_tanggal_by_sopir;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\post_upload_dbPengiriman;
+use App\Http\Controllers\get_distance;
+use App\Http\Controllers\get_monthly_so;
 
 
 /*
@@ -75,6 +77,12 @@ Route::get('/sopir', 'get_all_sopir@getData');
 Route::get('/ping', function () {
     return response()->json(['status' => 'ok'], 200);
 });
+
+// ORS get distance
+Route::get('/get-distance', [get_distance::class, 'getRoute']);
+
+// Target penjualan
+Route::get('/get-monthly-so', [get_monthly_so::class, 'getMonthlyData']);
 
 
 

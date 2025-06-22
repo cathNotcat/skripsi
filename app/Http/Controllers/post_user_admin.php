@@ -25,27 +25,27 @@ class post_user_admin extends Controller
         if (!$user) {
             return response()->json([
                 'status' => 404,
-                'message' => 'User tidak ada',
+                'message' => 'User tidak ditemukan.',
             ], 404);
         }
 
         if ($user->Role !== 'A') {
             return response()->json([
                 'status' => 403,
-                'message' => "Anda tidak memiliki akses",
+                'message' => 'Anda tidak memiliki akses.',
             ], 403);
         }
 
         if ($user->IsAktif != '1') {
             return response()->json([
                 'status' => 422,
-                'message' => 'Akun tidak ada',
+                'message' => 'Akun tidak aktif.',
             ], 404);
         }
 
         return response()->json([
             'status' => 200,
-            'message' => 'Data tersedia',
+            'message' => 'Berhasil mengambil data.',
             'data' => [
                 'KodeUser' => $user->KodeUser,
                 'Username' => $user->Username,
