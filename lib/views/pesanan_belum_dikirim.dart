@@ -5,14 +5,14 @@ import 'package:provider/provider.dart';
 import 'package:web_admin_1/view_models/pengiriman_view_model.dart';
 import 'package:web_admin_1/widget/date_formatter.dart';
 
-class SemuaPesanan extends StatefulWidget {
-  const SemuaPesanan({super.key});
+class PesananBelumDikirim extends StatefulWidget {
+  const PesananBelumDikirim({super.key});
 
   @override
-  State<SemuaPesanan> createState() => _SemuaPesananState();
+  State<PesananBelumDikirim> createState() => _PesananBelumDikirimState();
 }
 
-class _SemuaPesananState extends State<SemuaPesanan> {
+class _PesananBelumDikirimState extends State<PesananBelumDikirim> {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -20,7 +20,7 @@ class _SemuaPesananState extends State<SemuaPesanan> {
         final viewModel = PengirimanViewModel();
         viewModel.fetchAllPengirimanByTanggal();
         viewModel.fetchAllSopir();
-        viewModel.setFilterStatus(-1);
+        viewModel.setFilterStatus(0);
         return viewModel;
       },
       child: Scaffold(
@@ -34,10 +34,11 @@ class _SemuaPesananState extends State<SemuaPesanan> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 32),
-                        const Text('Semua Pesanan',
+                        const Text('Pesanan Belum Dikirim',
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 12),
+                        SizedBox(height: 16),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
@@ -86,39 +87,6 @@ class _SemuaPesananState extends State<SemuaPesanan> {
                                   border: Border.all(color: Colors.grey),
                                 ),
                                 child: DropdownButtonHideUnderline(
-                                  child: DropdownButton<int>(
-                                    value: viewModel.filterStatus,
-                                    hint: const Text('Status'),
-                                    items: const [
-                                      DropdownMenuItem(
-                                          value: -1, child: Text('Semua')),
-                                      DropdownMenuItem(
-                                          value: 0,
-                                          child: Text('Belum Dikirim')),
-                                      DropdownMenuItem(
-                                          value: 1,
-                                          child: Text('Sedang Dikirim')),
-                                      DropdownMenuItem(
-                                          value: 2, child: Text('Selesai')),
-                                    ],
-                                    onChanged: (value) {
-                                      viewModel.setFilterStatus(
-                                          value == -1 ? null : value);
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 16),
-                            Expanded(
-                              child: Container(
-                                padding: EdgeInsets.symmetric(horizontal: 16),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(color: Colors.grey),
-                                ),
-                                child: DropdownButtonHideUnderline(
                                   child: DropdownButton<String>(
                                     value: viewModel.filterSopir,
                                     hint: Text(
@@ -146,7 +114,7 @@ class _SemuaPesananState extends State<SemuaPesanan> {
                             Expanded(
                               child: InkWell(
                                 onTap: () async {
-                                  viewModel.clearFilter();
+                                  // viewModel.clearFilterBD();
                                 },
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(
@@ -170,7 +138,7 @@ class _SemuaPesananState extends State<SemuaPesanan> {
                           ],
                         ),
                         SizedBox(height: 16),
-                        viewModel.filteredGroupedList.isEmpty
+                        viewModel.groupedList.isEmpty
                             ? Container(
                                 height: 150,
                                 width: double.infinity,

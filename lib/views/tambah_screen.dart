@@ -103,36 +103,36 @@ class _TambahScreenState extends State<TambahScreen> {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        counter = 1;
-                                        counterTambah = 1;
-                                        print('clicked');
-                                        viewModel.fetchDbsppData(
-                                            showSnackBar: (msg, color) =>
-                                                ErrorTopSnackbar.show(
-                                                  context,
-                                                  message: msg,
-                                                  backgroundColor: color,
-                                                ));
-                                        print('clicked');
-                                        viewModel.fetchDbsppDetData();
-                                        print('clicked');
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color.fromARGB(
-                                            255, 23, 96, 232),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                        ),
-                                      ),
-                                      child: Text(
-                                        'Lihat Detail',
-                                        style: const TextStyle(
-                                            color: Colors.white),
-                                      ),
-                                    )
+                                    viewModel.isCalculating
+                                        ? SizedBox()
+                                        : ElevatedButton(
+                                            onPressed: () {
+                                              counter = 1;
+                                              counterTambah = 1;
+                                              viewModel.fetchDbsppData(
+                                                  showSnackBar: (msg, color) =>
+                                                      ErrorTopSnackbar.show(
+                                                        context,
+                                                        message: msg,
+                                                        backgroundColor: color,
+                                                      ));
+                                              viewModel.fetchDbsppDetData();
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor:
+                                                  const Color.fromARGB(
+                                                      255, 23, 96, 232),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
+                                            ),
+                                            child: Text(
+                                              'Lihat Detail',
+                                              style: const TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                          )
                                   ],
                                 ),
                               ],
@@ -198,32 +198,36 @@ class _TambahScreenState extends State<TambahScreen> {
                                     ),
                                   ),
                                   const SizedBox(height: 24),
-                                  ElevatedButton(
-                                    onPressed: () async {
-                                      await viewModel.tambahPesanan(
-                                        showSnackBar: (msg, color) =>
-                                            ErrorTopSnackbar.show(
-                                          context,
-                                          message: msg,
-                                          backgroundColor: color,
-                                        ),
-                                      );
-                                      counter = 1;
-                                      counterTambah = 1;
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color.fromARGB(
-                                          255, 23, 96, 232),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                    ),
-                                    child: Text(
-                                      'Tambah Pesanan',
-                                      style:
-                                          const TextStyle(color: Colors.white),
-                                    ),
-                                  )
+                                  viewModel.isCalculating
+                                      ? SizedBox()
+                                      : ElevatedButton(
+                                          onPressed: () async {
+                                            await viewModel.tambahPesanan(
+                                              showSnackBar: (msg, color) =>
+                                                  ErrorTopSnackbar.show(
+                                                context,
+                                                message: msg,
+                                                backgroundColor: color,
+                                              ),
+                                            );
+                                            counter = 1;
+                                            counterTambah = 1;
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor:
+                                                const Color.fromARGB(
+                                                    255, 23, 96, 232),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            'Tambah Pesanan',
+                                            style: const TextStyle(
+                                                color: Colors.white),
+                                          ),
+                                        )
                                 ],
                               )
                         : const SizedBox(),

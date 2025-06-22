@@ -168,22 +168,6 @@ class TambahPesananViewModel extends ChangeNotifier {
     notifyListeners();
     showSnackBar('Pesanan berhasil dihapus', Colors.green.shade300);
     isPesananExist = false;
-    try {
-      // final success = await pesananService.hapusPesanan(
-      //     inputDoController.text, tanggalKirimController.text);
-      // if (success) {
-      //   listOfPesanan
-      //       .removeWhere((item) => item.noDO == inputDoController.text);
-      //   notifyListeners();
-      //   showSnackBar('Pesanan berhasil dihapus', Colors.green.shade300);
-      //   isPesananExist = false;
-      // } else {
-      //   showSnackBar('Gagal menghapus pesanan', Colors.red);
-      // }
-    } catch (e) {
-      print('Gagal hapus pesanan: $e');
-      showSnackBar('Terjadi kesalahan saat menghapus', Colors.red);
-    }
   }
 
   Future<void> selesaiPesanan() async {
@@ -217,7 +201,7 @@ class TambahPesananViewModel extends ChangeNotifier {
 
       print('sortedPesanan before: $sortedPesanan');
       await pengirimanService.uploadPesanan(sortedPesanan);
-      // await notificationService.sendNotifications(sortedPesanan);
+      await notificationService.sendNotifications(sortedPesanan);
       notifyListeners();
     } catch (e) {
       print('Error in selesaiPesanan: $e');

@@ -18,4 +18,8 @@ class DateFormatter {
     final now = DateTime.now();
     return DateFormat('d MMMM y').format(now);
   }
+
+  static String formatDateFromDateTime(DateTime date) {
+    return DateFormat('d MMMM yyyy', 'en_US').format(date);
+  }
 }

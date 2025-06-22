@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_admin_1/models/pengiriman_model.dart';
 import 'package:web_admin_1/services/pengiriman_service.dart';
 import 'package:web_admin_1/services/sopir_service.dart';
+import 'package:web_admin_1/widget/date_formatter.dart';
 
 class PengirimanViewModel extends ChangeNotifier {
   final apiService = PengirimanService();
@@ -30,9 +31,15 @@ class PengirimanViewModel extends ChangeNotifier {
   int allPengiriman = 0;
   int countAllPengiriman = 0;
 
+  DateTime? filterDate;
+  String? filterSopir;
+  int? filterStatus;
+
   String? selectedSopir;
 
   List<GroupedPengirimanModel> groupedList = [];
+  List<GroupedPengirimanModel> filteredGroupedList = [];
+  List<GroupedPengirimanModel> _originalGroupedList = [];
 
   Future<void> fetchSopirNow() async {
     final prefs = await SharedPreferences.getInstance();
@@ -42,6 +49,7 @@ class PengirimanViewModel extends ChangeNotifier {
 
   Future<void> fetchAllSopir() async {
     try {
+      namaSopir.clear();
       final List<String> data = await sopirService.getAllSopir();
 
       print('nama sopir: $data');
@@ -141,15 +149,23 @@ class PengirimanViewModel extends ChangeNotifier {
 
   Future<void> fetchAllPengirimanByTanggal() async {
     try {
-      groupedList = await apiService.getAllPengirimanDataByTanggal();
+      final data = await apiService.getAllPengirimanDataByTanggal();
+
+      _originalGroupedList = data;
+      filteredGroupedList = data;
+      notifyListeners();
+
       isLoadingPesananByTanggal = false;
 
-      for (var pengiriman in groupedList) {
+      for (var pengiriman in filteredGroupedList) {
         allModel = pengiriman.pengirimanList;
         for (var i = 0; i < allModel.length; i++) {
           allPengiriman += 1;
         }
       }
+
+      setFilterStatus(0);
+      groupedList = data;
 
       notifyListeners();
     } catch (e) {
@@ -181,5 +197,66 @@ class PengirimanViewModel extends ChangeNotifier {
       default:
         return const Color.fromARGB(255, 217, 217, 217);
     }
+  }
+
+  void _applyFilters() {
+    filteredGroupedList = _originalGroupedList
+        .map((group) {
+          final isDateMatch = filterDate == null ||
+              DateFormatter.formatDate(group.tanggal) ==
+                  DateFormatter.formatDateFromDateTime(filterDate!);
+
+          final filteredItems = group.pengirimanList.where((item) {
+            final statusMatch = filterStatus == null ||
+                int.tryParse(item.status.toString()) == filterStatus;
+            final sopirMatch = filterSopir == null ||
+                item.kodeSopir
+                    .toLowerCase()
+                    .contains(filterSopir!.toLowerCase());
+
+            return statusMatch && sopirMatch;
+          }).toList();
+
+          if (isDateMatch && filteredItems.isNotEmpty) {
+            return GroupedPengirimanModel(
+              tanggal: group.tanggal,
+              pengirimanList: filteredItems,
+            );
+          } else {
+            return null;
+          }
+        })
+        .whereType<GroupedPengirimanModel>()
+        .toList();
+
+    notifyListeners();
+  }
+
+  void setFilterDate(DateTime? date) {
+    filterDate = date;
+    _applyFilters();
+  }
+
+  void setFilterSopir(String? sopir) {
+    filterSopir = sopir?.isEmpty == true ? null : sopir;
+    _applyFilters();
+  }
+
+  void setFilterStatus(int? status) {
+    filterStatus = status;
+    _applyFilters();
+  }
+
+  void clearFilter() {
+    filterDate = null;
+    filterStatus = null;
+    filterSopir = null;
+    _applyFilters();
+  }
+
+  void clearFilterBD() {
+    filterDate = null;
+    filterSopir = null;
+    _applyFilters();
   }
 }

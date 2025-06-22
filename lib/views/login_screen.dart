@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:web_admin_1/main.dart';
 import 'package:web_admin_1/view_models/login_view_model.dart';
+import 'package:web_admin_1/widget/error_top_snackbar.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -89,37 +90,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     // const SizedBox(height: 24),
                     SizedBox(
                       width: double.infinity,
-                      // child: ElevatedButton(
-                      //   onPressed: () async {
-                      //     await viewModel.isLogin();
-                      //     if (viewModel.response.status == 200) {
-                      //       Navigator.push(
-                      //         context,
-                      //         MaterialPageRoute(
-                      //             builder: (context) => const Navbar()),
-                      //       );
-                      //     } else {
-                      //       print('error');
-                      //     }
-                      //   },
-                      //   style: ElevatedButton.styleFrom(
-                      //     backgroundColor:
-                      //         const Color.fromARGB(255, 23, 96, 232),
-                      //     shape: RoundedRectangleBorder(
-                      //       borderRadius: BorderRadius.circular(8),
-                      //     ),
-                      //   ),
-                      //   child: const Text(
-                      //     'Login',
-                      //     style: TextStyle(color: Colors.white),
-                      //   ),
-                      // ),
                       child: ElevatedButton(
                         onPressed: viewModel.isLoading
                             ? null
                             : () async {
                                 await viewModel.isLogin();
                                 if (viewModel.response.status == 200) {
+                                  TopSnackbar.show(
+                                    context,
+                                    message: 'Login Berhasil!',
+                                    backgroundColor: Colors.green,
+                                  );
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(

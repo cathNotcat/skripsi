@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_admin_1/views/dashboard_screen.dart';
 import 'package:web_admin_1/views/login_screen.dart';
 import 'package:web_admin_1/views/pengiriman_screen.dart';
+import 'package:web_admin_1/views/pesanan_belum_dikirim.dart';
 import 'package:web_admin_1/views/proses_screen.dart';
 import 'package:web_admin_1/views/semua_pesanan_screen.dart';
 import 'package:web_admin_1/views/tambah_screen.dart';
@@ -49,6 +50,7 @@ class _NavbarState extends State<Navbar> {
   final List<Widget> pages = [
     DashboardScreen(),
     PengirimanScreen(),
+    PesananBelumDikirim(),
     SemuaPesanan(),
     TambahScreen(),
     LoginScreen(),
@@ -58,7 +60,7 @@ class _NavbarState extends State<Navbar> {
   @override
   void initState() {
     super.initState();
-    selectedIndex = widget.chosenIndex ?? 1;
+    selectedIndex = widget.chosenIndex ?? 0;
   }
 
   void onSidebarItemClicked(int index) {
@@ -119,7 +121,6 @@ class _NavbarState extends State<Navbar> {
                     title: 'Dashboard',
                     isSelected: selectedIndex == 0,
                     onTap: () async {
-                      // await Future.delayed(Duration(seconds: 1));
                       onSidebarItemClicked(0);
                     }),
                 SizedBox(height: 16),
@@ -128,23 +129,29 @@ class _NavbarState extends State<Navbar> {
                     title: 'Pengiriman',
                     isSelected: selectedIndex == 1,
                     onTap: () async {
-                      // await Future.delayed(Duration(seconds: 1));
                       onSidebarItemClicked(1);
                     }),
                 SizedBox(height: 16),
                 SidebarItem(
-                    icon: Icons.card_travel,
-                    title: 'Pesanan',
+                    icon: Icons.warning_amber_outlined,
+                    title: 'Belum Dikirim',
                     isSelected: selectedIndex == 2,
                     onTap: () async {
-                      // await Future.delayed(Duration(seconds: 1));
                       onSidebarItemClicked(2);
+                    }),
+                SizedBox(height: 16),
+                SidebarItem(
+                    icon: Icons.card_travel,
+                    title: 'History',
+                    isSelected: selectedIndex == 3,
+                    onTap: () async {
+                      onSidebarItemClicked(3);
                     }),
                 SizedBox(height: 16),
                 SidebarItem(
                   icon: Icons.logout,
                   title: 'Log Out',
-                  isSelected: selectedIndex == 3,
+                  isSelected: selectedIndex == 4,
                   onTap: () async {
                     final prefs = await SharedPreferences.getInstance();
                     await prefs.setBool('isLoggedIn', false);
@@ -169,6 +176,9 @@ class _NavbarState extends State<Navbar> {
                 }
                 if (settings.name == '/semuaPesanan') {
                   page = SemuaPesanan();
+                }
+                if (settings.name == '/pengirimanPage') {
+                  page = PengirimanScreen();
                 }
                 return MaterialPageRoute(builder: (_) => page);
               },
