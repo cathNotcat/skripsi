@@ -108,15 +108,13 @@ class ProsesScreen extends StatelessWidget {
                           scrollDirection: Axis.vertical,
                           child: Table(
                             columnWidths: const {
-                              0: FlexColumnWidth(
-                                  1), // Adjust these to control the column width ratio
+                              0: FlexColumnWidth(1),
                               1: FlexColumnWidth(1),
                               2: FlexColumnWidth(1),
                               3: FlexColumnWidth(1),
                             },
                             border: TableBorder.all(color: Colors.grey[300]!),
                             children: [
-                              // Header row
                               TableRow(
                                 decoration:
                                     BoxDecoration(color: Colors.grey[200]),

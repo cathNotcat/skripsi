@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:web_admin_1/main.dart';
 import 'package:web_admin_1/view_models/pengiriman_view_model.dart';
 import 'package:web_admin_1/widget/button.dart';
+import 'package:web_admin_1/widget/charts.dart';
 import 'package:web_admin_1/widget/date_formatter.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -22,6 +23,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         viewModel.fetchBarang();
         viewModel.fetchAllPengirimanByTanggal();
         viewModel.setFilterStatus(0);
+        viewModel.loadMonthlyData();
         return viewModel;
       },
       child: Scaffold(
@@ -40,27 +42,144 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           const Text('Dashboard',
                               style: TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 12),
+                          // const SizedBox(height: 12),
+                          const SizedBox(height: 24),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              _dashboardCard('Total Pesanan', 'semua',
+                                  '${viewModel.allPengiriman}'),
+                              const SizedBox(width: 32),
+                              _dashboardCard(
+                                  'Total Barang Dikirim',
+                                  'seminggu terakhir',
+                                  viewModel.totalBarang.toString()),
+                              const SizedBox(width: 32),
+                              _dashboardCard(
+                                  'Pesanan Belum Dikirim',
+                                  'hari ini',
+                                  viewModel.belumDikirim.toString()),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
                           viewModel.isLoadingPesanan
                               ? const Center(child: CircularProgressIndicator())
-                              : Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    _dashboardCard('Total Pesanan', 'semua',
-                                        '${viewModel.allPengiriman}'),
-                                    const SizedBox(width: 32),
-                                    _dashboardCard(
-                                        'Total Barang Dikirim',
-                                        'seminggu terakhir',
-                                        viewModel.totalBarang.toString()),
-                                    const SizedBox(width: 32),
-                                    _dashboardCard(
-                                        'Pesanan Belum Dikirim',
-                                        'hari ini',
-                                        viewModel.belumDikirim.toString()),
-                                  ],
+                              : Container(
+                                  height: 380,
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(20),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.2),
+                                        blurRadius: 4,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: viewModel.items.isEmpty
+                                      ? const Center(
+                                          child: Text('No data available'))
+                                      : Column(
+                                          children: [
+                                            const Text('Target Penjualan',
+                                                style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight:
+                                                        FontWeight.w700)),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Expanded(
+                                                  child: SizedBox(
+                                                    width: double.infinity,
+                                                    height: 300,
+                                                    child: DashboardBarChart(
+                                                      data: viewModel.items,
+                                                      maxY: viewModel.maxY,
+                                                      barWidth: 30,
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 100),
+                                                const Column(
+                                                  children: [
+                                                    Text('Jumlah Sales Order',
+                                                        style: TextStyle(
+                                                            fontSize: 16,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .w700)),
+                                                    Text('tahun lalu',
+                                                        style: TextStyle(
+                                                            fontSize: 12)),
+                                                    Text('980',
+                                                        style: TextStyle(
+                                                            fontSize: 40,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold)),
+                                                    Text('sales order',
+                                                        style: TextStyle(
+                                                            fontSize: 12)),
+                                                  ],
+                                                ),
+                                                const SizedBox(width: 100),
+                                                const Column(
+                                                  children: [
+                                                    Text('Target Kenaikan',
+                                                        style: TextStyle(
+                                                            fontSize: 16,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .w700)),
+                                                    Text('tahun ini',
+                                                        style: TextStyle(
+                                                            fontSize: 12)),
+                                                    Text('20%',
+                                                        style: TextStyle(
+                                                            fontSize: 40,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold)),
+                                                    Text('dari tahun lalu',
+                                                        style: TextStyle(
+                                                            fontSize: 12)),
+                                                  ],
+                                                ),
+                                                const SizedBox(width: 100),
+                                                const Column(
+                                                  children: [
+                                                    Text('Target Jumlah',
+                                                        style: TextStyle(
+                                                            fontSize: 16,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .w700)),
+                                                    Text('tahun ini',
+                                                        style: TextStyle(
+                                                            fontSize: 12)),
+                                                    Text('1.176',
+                                                        style: TextStyle(
+                                                            fontSize: 40,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold)),
+                                                    Text('sales order',
+                                                        style: TextStyle(
+                                                            fontSize: 12)),
+                                                  ],
+                                                ),
+                                                const SizedBox(width: 80),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
                                 ),
+
                           const SizedBox(height: 24),
                           Container(
                             height: 100,
@@ -72,7 +191,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 BoxShadow(
                                   color: Colors.grey.withOpacity(0.2),
                                   blurRadius: 4,
-                                  offset: Offset(0, 2),
+                                  offset: const Offset(0, 2),
                                 ),
                               ],
                             ),
@@ -97,7 +216,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ),
                           const SizedBox(height: 24),
                           Container(
-                            padding: EdgeInsets.all(8),
+                            padding: const EdgeInsets.all(8),
                             child: const Text(
                               'Pesanan Belum Dikirim',
                               style: TextStyle(
@@ -117,11 +236,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                           BoxShadow(
                                             color: Colors.grey.withOpacity(0.2),
                                             blurRadius: 4,
-                                            offset: Offset(0, 2),
+                                            offset: const Offset(0, 2),
                                           ),
                                         ],
                                       ),
-                                      child: Center(
+                                      child: const Center(
                                           child: Text('Tidak ada pesanan')),
                                     )
                                   : Column(children: [
@@ -150,7 +269,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                         color: Colors.grey
                                                             .withOpacity(0.2),
                                                         blurRadius: 4,
-                                                        offset: Offset(0, 2),
+                                                        offset:
+                                                            const Offset(0, 2),
                                                       ),
                                                     ],
                                                   ),
@@ -190,7 +310,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                           ),
                                                         ],
                                                       ),
-                                                      SizedBox(height: 24),
+                                                      const SizedBox(
+                                                          height: 24),
                                                       const Row(
                                                         children: [
                                                           Expanded(
@@ -245,7 +366,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                                           .start)),
                                                         ],
                                                       ),
-                                                      Divider(),
+                                                      const Divider(),
                                                       const SizedBox(height: 8),
                                                       ...group.pengirimanList
                                                           .map((item) {
@@ -323,10 +444,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                           ),
                                         ),
                                     ])
-                              : SizedBox(),
+                              : const SizedBox(),
                           const SizedBox(height: 16),
                           Container(
-                            padding: EdgeInsets.all(8),
+                            padding: const EdgeInsets.all(8),
                             child: const Text(
                               'Pesanan Terakhir',
                               style: TextStyle(
@@ -345,12 +466,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       BoxShadow(
                                         color: Colors.grey.withOpacity(0.2),
                                         blurRadius: 4,
-                                        offset: Offset(0, 2),
+                                        offset: const Offset(0, 2),
                                       ),
                                     ],
                                   ),
-                                  child:
-                                      Center(child: Text('Tidak ada pesanan')),
+                                  child: const Center(
+                                      child: Text('Tidak ada pesanan')),
                                 )
                               : Column(
                                   children: [
@@ -378,7 +499,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                       color: Colors.grey
                                                           .withOpacity(0.2),
                                                       blurRadius: 4,
-                                                      offset: Offset(0, 2),
+                                                      offset:
+                                                          const Offset(0, 2),
                                                     ),
                                                   ],
                                                 ),
@@ -418,7 +540,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                         ),
                                                       ],
                                                     ),
-                                                    SizedBox(height: 24),
+                                                    const SizedBox(height: 24),
                                                     const Row(
                                                       children: [
                                                         Expanded(
@@ -472,7 +594,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                                         .start)),
                                                       ],
                                                     ),
-                                                    Divider(),
+                                                    const Divider(),
                                                     const SizedBox(height: 8),
                                                     ...group.pengirimanList
                                                         .map((item) {
@@ -572,7 +694,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             BoxShadow(
               color: Colors.grey.withOpacity(0.2),
               blurRadius: 4,
-              offset: Offset(0, 2),
+              offset: const Offset(0, 2),
             ),
           ],
         ),

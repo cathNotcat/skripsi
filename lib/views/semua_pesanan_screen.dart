@@ -124,8 +124,7 @@ class _SemuaPesananState extends State<SemuaPesanan> {
                                     hint: Text(
                                       'Pilih Sopir',
                                       style: TextStyle(
-                                        color: Colors
-                                            .black, // ✅ Set to desired color
+                                        color: Colors.black,
                                         fontSize: 14,
                                       ),
                                     ),
@@ -170,7 +169,7 @@ class _SemuaPesananState extends State<SemuaPesanan> {
                           ],
                         ),
                         SizedBox(height: 16),
-                        viewModel.filteredGroupedList.isEmpty
+                        viewModel.groupedList.isEmpty
                             ? Container(
                                 height: 150,
                                 width: double.infinity,
@@ -190,14 +189,11 @@ class _SemuaPesananState extends State<SemuaPesanan> {
                               )
                             : Expanded(
                                 child: ListView.builder(
-                                  itemCount:
-                                      viewModel.filteredGroupedList.length > 7
-                                          ? 7
-                                          : viewModel
-                                              .filteredGroupedList.length,
+                                  itemCount: viewModel.groupedList.length > 7
+                                      ? 7
+                                      : viewModel.groupedList.length,
                                   itemBuilder: (context, index) {
-                                    final group =
-                                        viewModel.filteredGroupedList[index];
+                                    final group = viewModel.groupedList[index];
                                     return Padding(
                                       padding: const EdgeInsets.symmetric(
                                           vertical: 8),

@@ -6,11 +6,29 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_admin_1/models/pengiriman_model.dart';
 import 'package:web_admin_1/services/pengiriman_service.dart';
 import 'package:web_admin_1/services/sopir_service.dart';
+import 'package:web_admin_1/services/target_service.dart';
+import 'package:web_admin_1/widget/charts.dart';
 import 'package:web_admin_1/widget/date_formatter.dart';
+
+const monthMap = {
+  "January": "Jan",
+  "February": "Feb",
+  "March": "Mar",
+  "April": "Apr",
+  "May": "May",
+  "June": "Jun",
+  "July": "Jul",
+  "August": "Aug",
+  "September": "Sep",
+  "October": "Oct",
+  "November": "Nov",
+  "December": "Dec",
+};
 
 class PengirimanViewModel extends ChangeNotifier {
   final apiService = PengirimanService();
   final sopirService = SopirService();
+  final monthlyService = TargetService();
 
   int totalPesanan7Hari = 0;
   int totalBarang = 0;
@@ -37,9 +55,39 @@ class PengirimanViewModel extends ChangeNotifier {
 
   String? selectedSopir;
 
+  List<BarChartItem> items = [];
+  String? error;
+
   List<GroupedPengirimanModel> groupedList = [];
   List<GroupedPengirimanModel> filteredGroupedList = [];
   List<GroupedPengirimanModel> _originalGroupedList = [];
+
+  Future<void> loadMonthlyData() async {
+    isLoading = true;
+    error = null;
+    notifyListeners();
+
+    try {
+      final data = await monthlyService.fetchMonthlySO();
+      items = data.entries.map((entry) {
+        final shortLabel = monthMap[entry.key] ?? entry.key;
+        final value = double.tryParse(entry.value) ?? 0;
+        return BarChartItem(label: shortLabel, value: value);
+      }).toList();
+      print('itemss: $items');
+    } catch (e) {
+      error = e.toString();
+    }
+
+    isLoading = false;
+    notifyListeners();
+  }
+
+  double get maxY {
+    final maxVal =
+        items.map((e) => e.value).fold<double>(0, (a, b) => a > b ? a : b);
+    return (maxVal / 10).ceil() * 10;
+  }
 
   Future<void> fetchSopirNow() async {
     final prefs = await SharedPreferences.getInstance();
@@ -201,6 +249,35 @@ class PengirimanViewModel extends ChangeNotifier {
 
   void _applyFilters() {
     filteredGroupedList = _originalGroupedList
+        .map((group) {
+          final isDateMatch = filterDate == null ||
+              DateFormatter.formatDate(group.tanggal) ==
+                  DateFormatter.formatDateFromDateTime(filterDate!);
+
+          final filteredItems = group.pengirimanList.where((item) {
+            final statusMatch = filterStatus == null ||
+                int.tryParse(item.status.toString()) == filterStatus;
+            final sopirMatch = filterSopir == null ||
+                item.kodeSopir
+                    .toLowerCase()
+                    .contains(filterSopir!.toLowerCase());
+
+            return statusMatch && sopirMatch;
+          }).toList();
+
+          if (isDateMatch && filteredItems.isNotEmpty) {
+            return GroupedPengirimanModel(
+              tanggal: group.tanggal,
+              pengirimanList: filteredItems,
+            );
+          } else {
+            return null;
+          }
+        })
+        .whereType<GroupedPengirimanModel>()
+        .toList();
+
+    groupedList = _originalGroupedList
         .map((group) {
           final isDateMatch = filterDate == null ||
               DateFormatter.formatDate(group.tanggal) ==

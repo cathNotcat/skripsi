@@ -114,7 +114,7 @@ class _PesananBelumDikirimState extends State<PesananBelumDikirim> {
                             Expanded(
                               child: InkWell(
                                 onTap: () async {
-                                  // viewModel.clearFilterBD();
+                                  viewModel.clearFilterBD();
                                 },
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(
