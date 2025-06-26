@@ -2,16 +2,17 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:web_admin_1/models/latlng_model.dart';
 
-class LatLng {
-  final double latitude;
-  final double longitude;
+// class LatLng {
+//   final double latitude;
+//   final double longitude;
 
-  LatLng(this.latitude, this.longitude);
+//   LatLng(this.latitude, this.longitude);
 
-  @override
-  String toString() => "($latitude, $longitude)";
-}
+//   @override
+//   String toString() => "($latitude, $longitude)";
+// }
 
 class DistanceDuration {
   final double distance;

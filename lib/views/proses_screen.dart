@@ -20,6 +20,7 @@ class ProsesScreen extends StatelessWidget {
         final viewModel = PengirimanViewModel();
         viewModel.fetchPengirimanBySopir(formattedDate);
         viewModel.fetchSopirNow();
+        // viewModel.initSelected(details);
         return viewModel;
       },
       child: Scaffold(
@@ -54,7 +55,7 @@ class ProsesScreen extends StatelessWidget {
                     ? Center(child: CircularProgressIndicator())
                     : viewModel.adaPengiriman == false
                         ? _nullPengiriman()
-                        : _listPengiriman(viewModel.details)
+                        : _listPengiriman(viewModel, viewModel.details)
               ],
             ),
           );
@@ -81,7 +82,8 @@ class ProsesScreen extends StatelessWidget {
     );
   }
 
-  Widget _listPengiriman(List<PengirimanModel> details) {
+  Widget _listPengiriman(
+      PengirimanViewModel viewModel, List<PengirimanModel> details) {
     return details.isEmpty
         ? Center(child: CircularProgressIndicator())
         : Column(
@@ -112,6 +114,7 @@ class ProsesScreen extends StatelessWidget {
                               1: FlexColumnWidth(1),
                               2: FlexColumnWidth(1),
                               3: FlexColumnWidth(1),
+                              // 4: FlexColumnWidth(1),
                             },
                             border: TableBorder.all(color: Colors.grey[300]!),
                             children: [
@@ -120,19 +123,36 @@ class ProsesScreen extends StatelessWidget {
                                     BoxDecoration(color: Colors.grey[200]),
                                 children: [
                                   _columnTitles('No Bukti'),
+                                  // _columnTitles('No Bukti'),
                                   _columnTitles('Nama Customer'),
                                   _columnTitles('Alamat'),
                                   _columnTitles('Status'),
                                 ],
                               ),
-                              // Data rows
                               ...details.map(
                                 (item) => TableRow(
                                   children: [
-                                    Center(
-                                        child: Padding(
-                                            padding: EdgeInsets.all(8.0),
-                                            child: Text(item.noDO))),
+                                    Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Row(
+                                        children: [
+                                          Checkbox(
+                                            value: viewModel
+                                                    .selectedMap[item.noDO] ??
+                                                false,
+                                            onChanged: (bool? value) {
+                                              viewModel.toggleSelection(
+                                                  item.noDO, value ?? false);
+                                            },
+                                          ),
+                                          Expanded(child: Text(item.noDO)),
+                                        ],
+                                      ),
+                                    ),
+                                    // Center(
+                                    //     child: Padding(
+                                    //         padding: EdgeInsets.all(8.0),
+                                    //         child: Text(item.noDO))),
                                     Center(
                                         child: Padding(
                                             padding: EdgeInsets.all(8.0),
@@ -172,6 +192,14 @@ class ProsesScreen extends StatelessWidget {
                       ),
                     ],
                   )),
+              // if (viewModel.selectedMap.containsValue(true))
+              //   Padding(
+              //     padding: EdgeInsets.only(top: 16),
+              //     child: ElevatedButton(
+              //       onPressed: viewModel.cal,
+              //       child: Text('Calculate'),
+              //     ),
+              //   ),
             ],
           );
   }

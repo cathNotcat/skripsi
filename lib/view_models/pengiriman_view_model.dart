@@ -62,6 +62,17 @@ class PengirimanViewModel extends ChangeNotifier {
   List<GroupedPengirimanModel> filteredGroupedList = [];
   List<GroupedPengirimanModel> _originalGroupedList = [];
 
+  Map<String, bool> selectedMap = {};
+
+  void toggleSelection(String noDO, bool isSelected) {
+    selectedMap[noDO] = isSelected;
+    notifyListeners();
+  }
+
+  List<PengirimanModel> get selectedItems {
+    return details.where((item) => selectedMap[item.noDO] == true).toList();
+  }
+
   Future<void> loadMonthlyData() async {
     isLoading = true;
     error = null;

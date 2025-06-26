@@ -3,8 +3,10 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_admin_1/held_karp.dart';
+import 'package:web_admin_1/k_means.dart';
 import 'package:web_admin_1/models/customer_model.dart';
 import 'package:web_admin_1/models/dbspp_model.dart';
+import 'package:web_admin_1/models/latlng_model.dart';
 import 'package:web_admin_1/models/pesanan_model.dart';
 import 'package:web_admin_1/services/customer_service.dart';
 import 'package:web_admin_1/services/notification_service.dart';
@@ -230,48 +232,129 @@ class TambahPesananViewModel extends ChangeNotifier {
     return latLngList;
   }
 
+  // Future<List<String>> _calculateHeldKarp() async {
+  //   List<LatLng> pointsConverted = convertToLatLngList(points);
+
+  //   HeldKarp heldKarp = HeldKarp();
+  //   final stopwatch = Stopwatch()..start();
+  //   final clusters = KMeans.clusterPoints(pointsConverted, 2);
+
+  //   for (var entry in clusters.entries) {
+  //     int driverIndex = entry.key;
+  //     List<LatLng> driverPoints = entry.value;
+
+  //     final result = await HeldKarp().calculateWithHeldKarp(driverPoints);
+  //     print("Driver $driverIndex route: ${result['path']}");
+  //   }
+  //   // final result = await heldKarp.calculateWithHeldKarp(pointsConverted);
+
+  //   stopwatch.stop();
+  //   print('Held-Karp runtime: ${stopwatch.elapsedMilliseconds} ms');
+
+  //   List<LatLng> pointsWithHeldKarp = result['path'];
+
+  //   print('before heldkarp: $points');
+  //   print('after heldkarp: $pointsWithHeldKarp');
+
+  //   List<String> sortedKodeCustSupp = [];
+
+  //   for (LatLng coord in pointsWithHeldKarp) {
+  //     String coordString =
+  //         "${coord.latitude.toStringAsFixed(15)}, ${coord.longitude.toStringAsFixed(15)}";
+  //     print("Checking for: $coordString");
+
+  //     for (var entry in custCoordinateMap.entries) {
+  //       print("Stored: ${entry.value} -> ${entry.key}");
+  //     }
+
+  //     String? kodeCust;
+  //     double epsilon = 0.000001;
+
+  //     for (var entry in custCoordinateMap.entries) {
+  //       List<String> storedCoords = entry.value.split(',');
+  //       double storedLat = double.parse(storedCoords[0]);
+  //       double storedLng = double.parse(storedCoords[1]);
+
+  //       if ((storedLat - coord.latitude).abs() < epsilon &&
+  //           (storedLng - coord.longitude).abs() < epsilon) {
+  //         kodeCust = entry.key;
+  //         break;
+  //       }
+  //     }
+
+  //     if (kodeCust != null) {
+  //       sortedKodeCustSupp.add(kodeCust);
+  //     }
+  //   }
+
+  //   print("Sorted KodeCustSupp after Held-Karp: $sortedKodeCustSupp");
+
+  //   return sortedKodeCustSupp;
+  // }
+
   Future<List<String>> _calculateHeldKarp() async {
-    List<LatLng> pointsConverted = convertToLatLngList(points);
+    // 1. Define your warehouse/starting location
+    LatLng startingPoint = LatLng(-7.375729652261953, 112.6788318829139);
 
-    HeldKarp heldKarp = HeldKarp();
-    final result = await heldKarp.calculateWithHeldKarp(pointsConverted);
-    List<LatLng> pointsWithHeldKarp = result['path'];
+    // 2. Convert input DOs into LatLng
+    List<LatLng> deliveryPoints = convertToLatLngList(points);
 
-    print('before heldkarp: $points');
-    print('after heldkarp: $pointsWithHeldKarp');
+    // 3. Start timer
+    final stopwatch = Stopwatch()..start();
 
+    // 4. Cluster the delivery points (only delivery destinations)
+    final clusters = KMeans.clusterPoints(deliveryPoints, 2);
+
+    // 5. Store all sorted KodeCustSupp
     List<String> sortedKodeCustSupp = [];
 
-    for (LatLng coord in pointsWithHeldKarp) {
-      String coordString =
-          "${coord.latitude.toStringAsFixed(15)}, ${coord.longitude.toStringAsFixed(15)}";
-      print("Checking for: $coordString");
+    for (var entry in clusters.entries) {
+      int driverIndex = entry.key;
+      List<LatLng> clusterPoints = entry.value;
 
-      for (var entry in custCoordinateMap.entries) {
-        print("Stored: ${entry.value} -> ${entry.key}");
-      }
+      // 6. Add starting point at index 0 for Held-Karp
+      final result = await HeldKarp()
+          .calculateWithHeldKarp([startingPoint, ...clusterPoints]);
 
-      String? kodeCust;
-      double epsilon = 0.000001;
+      List<LatLng> route = result['path'];
+      print("Driver $driverIndex route: $route");
 
-      for (var entry in custCoordinateMap.entries) {
-        List<String> storedCoords = entry.value.split(',');
-        double storedLat = double.parse(storedCoords[0]);
-        double storedLng = double.parse(storedCoords[1]);
-
-        if ((storedLat - coord.latitude).abs() < epsilon &&
-            (storedLng - coord.longitude).abs() < epsilon) {
-          kodeCust = entry.key;
-          break;
+      // 7. Map back coordinates to KodeCustSupp
+      for (LatLng coord in route) {
+        // Skip if it's the starting location (optional)
+        if ((coord.latitude - startingPoint.latitude).abs() < 0.000001 &&
+            (coord.longitude - startingPoint.longitude).abs() < 0.000001) {
+          continue;
         }
-      }
 
-      if (kodeCust != null) {
-        sortedKodeCustSupp.add(kodeCust);
+        String? kodeCust;
+        double epsilon = 0.000001;
+
+        for (var entry in custCoordinateMap.entries) {
+          List<String> storedCoords = entry.value.split(',');
+          double storedLat = double.parse(storedCoords[0]);
+          double storedLng = double.parse(storedCoords[1]);
+
+          if ((storedLat - coord.latitude).abs() < epsilon &&
+              (storedLng - coord.longitude).abs() < epsilon) {
+            kodeCust = entry.key;
+            break;
+          }
+        }
+
+        if (kodeCust != null) {
+          sortedKodeCustSupp.add(kodeCust);
+        }
       }
     }
 
-    print("Sorted KodeCustSupp after Held-Karp: $sortedKodeCustSupp");
+    // 8. Stop timer
+    stopwatch.stop();
+    print(
+        'Held-Karp + clustering runtime: ${stopwatch.elapsedMilliseconds} ms');
+
+    print(
+        "Sorted KodeCustSupp after clustering & Held-Karp: $sortedKodeCustSupp");
 
     return sortedKodeCustSupp;
   }
