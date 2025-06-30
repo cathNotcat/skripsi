@@ -140,6 +140,7 @@ class TambahPesananViewModel extends ChangeNotifier {
       noUrut: '0',
       noPengiriman: '',
       tanggalKirim: p.tanggalKirim,
+      kodeSopir: p.kodeSopir,
       noDO: p.noDO,
       nama: p.nama,
       kodeCustSupp: p.kodeCustSupp,

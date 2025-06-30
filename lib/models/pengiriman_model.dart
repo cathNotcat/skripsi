@@ -2,6 +2,7 @@ class PengirimanModel {
   final String noUrut;
   final String noPengiriman;
   final String tanggalKirim;
+  final String kodeSopir;
   final String noDO;
   final String nama;
   final String kodeCustSupp;
@@ -14,6 +15,7 @@ class PengirimanModel {
     required this.noUrut,
     required this.noPengiriman,
     required this.tanggalKirim,
+    required this.kodeSopir,
     required this.noDO,
     required this.nama,
     required this.kodeCustSupp,
@@ -28,6 +30,7 @@ class PengirimanModel {
       noUrut: json['NoUrut'],
       noPengiriman: json['NoPengiriman'],
       tanggalKirim: json['TanggalKirim'],
+      kodeSopir: json['KodeSopir'],
       noDO: json['NoDO'],
       nama: json['Nama'],
       kodeCustSupp: json['KodeCustSupp'],

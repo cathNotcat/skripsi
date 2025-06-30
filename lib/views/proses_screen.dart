@@ -107,6 +107,7 @@ class ProsesScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Container(
+                height: 400,
                 padding: EdgeInsets.all(16),
                 width: double.infinity,
                 decoration: BoxDecoration(
@@ -121,6 +122,7 @@ class ProsesScreen extends StatelessWidget {
                       1: FlexColumnWidth(1),
                       2: FlexColumnWidth(1),
                       3: FlexColumnWidth(1),
+                      4: FlexColumnWidth(1),
                     },
                     border: TableBorder.all(color: Colors.grey[300]!),
                     children: [
@@ -131,6 +133,7 @@ class ProsesScreen extends StatelessWidget {
                           _columnTitles('Nama Customer'),
                           _columnTitles('Alamat'),
                           _columnTitles('Status'),
+                          _columnTitles('Sopir'),
                         ],
                       ),
                       ...details.map((item) => TableRow(
@@ -166,6 +169,15 @@ class ProsesScreen extends StatelessWidget {
                                   ),
                                 ),
                               )),
+                              Center(
+                                // 👈 NEW COLUMN
+                                child: Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: Text(item.kodeSopir?.isNotEmpty == true
+                                      ? item.kodeSopir!
+                                      : "-"),
+                                ),
+                              )
                             ],
                           )),
                       ...tempPengirimanList.map((item) => TableRow(
@@ -213,6 +225,15 @@ class ProsesScreen extends StatelessWidget {
                                   ),
                                 ),
                               )),
+                              Center(
+                                // 👈 NEW COLUMN
+                                child: Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: Text(item.kodeSopir?.isNotEmpty == true
+                                      ? item.kodeSopir!
+                                      : "-"),
+                                ),
+                              )
                             ],
                           ))
                     ],
