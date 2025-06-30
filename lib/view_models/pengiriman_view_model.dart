@@ -3,12 +3,19 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:web_admin_1/held_karp.dart';
+import 'package:web_admin_1/k_means.dart';
+import 'package:web_admin_1/models/customer_model.dart';
+import 'package:web_admin_1/models/latlng_model.dart';
 import 'package:web_admin_1/models/pengiriman_model.dart';
+import 'package:web_admin_1/models/pesanan_model.dart';
+import 'package:web_admin_1/services/customer_service.dart';
 import 'package:web_admin_1/services/pengiriman_service.dart';
 import 'package:web_admin_1/services/sopir_service.dart';
 import 'package:web_admin_1/services/target_service.dart';
 import 'package:web_admin_1/widget/charts.dart';
 import 'package:web_admin_1/widget/date_formatter.dart';
+import 'package:collection/collection.dart';
 
 const monthMap = {
   "January": "Jan",
@@ -28,19 +35,28 @@ const monthMap = {
 class PengirimanViewModel extends ChangeNotifier {
   final apiService = PengirimanService();
   final sopirService = SopirService();
+  final pengirimanService = PengirimanService();
   final monthlyService = TargetService();
+  final customerService = CustomerService();
+
+  CustomerModel? customer;
 
   int totalPesanan7Hari = 0;
   int totalBarang = 0;
+
+  String namaCust = '';
+  String alamatCust = '';
 
   List<PengirimanModel> details = [];
   List<PengirimanAllModel> allModel = [];
   List<String> namaSopir = [];
 
-  bool isLoading = true;
+  bool isLoading = false;
+  // bool isLoading = true;
   bool isLoadingPesanan = true;
   bool isLoadingPesananByTanggal = true;
   bool adaPengiriman = false;
+  bool isCalculating = false;
 
   int pesanan = 0;
   int belumDikirim = 0;
@@ -58,14 +74,32 @@ class PengirimanViewModel extends ChangeNotifier {
   List<BarChartItem> items = [];
   String? error;
 
+  List<String> points = [];
+  // List<String> points = ['-7.375729652261953, 112.6788318829139'];
   List<GroupedPengirimanModel> groupedList = [];
   List<GroupedPengirimanModel> filteredGroupedList = [];
   List<GroupedPengirimanModel> _originalGroupedList = [];
+  List<PesananModel> selectedPesananForCalculation = [];
+  List<PesananModel> tempPesananList = [];
+  List<PengirimanModel> tempPengirimanList = [];
+  List<PesananModel> listOfPesanan = [];
+  List<PengirimanModel> rutePengirimanList = [];
+
+  Map<String, String> custCoordinateMap = {};
 
   Map<String, bool> selectedMap = {};
 
   void toggleSelection(String noDO, bool isSelected) {
     selectedMap[noDO] = isSelected;
+    notifyListeners();
+  }
+
+  void togglePesananSelection(PesananModel pesanan, bool selected) {
+    if (selected) {
+      selectedPesananForCalculation.add(pesanan);
+    } else {
+      selectedPesananForCalculation.removeWhere((p) => p.noDO == pesanan.noDO);
+    }
     notifyListeners();
   }
 
@@ -122,25 +156,195 @@ class PengirimanViewModel extends ChangeNotifier {
     }
   }
 
+  Future<void> fetchCustDetails(String kodeCust) async {
+    try {
+      customer = await customerService.getCustomerDetails(kodeCust);
+      namaCust = customer!.nama;
+      alamatCust = customer!.alamat;
+      String coordinate = customer!.koordinat;
+      points.add(coordinate.toString());
+      custCoordinateMap[kodeCust] = coordinate;
+      notifyListeners();
+    } catch (e) {
+      print('Error in fetchCustDetails: $e');
+    }
+  }
+
+  List<LatLng> convertToLatLngList(List<String> coordinateStrings) {
+    List<LatLng> latLngList = [];
+
+    for (var coord in coordinateStrings) {
+      List<String> parts = coord.split(',');
+
+      if (parts.length == 2) {
+        double latitude = double.parse(parts[0].trim());
+        double longitude = double.parse(parts[1].trim());
+
+        latLngList.add(LatLng(latitude, longitude));
+      } else {
+        print("Invalid coordinate format: $coord");
+      }
+    }
+
+    return latLngList;
+  }
+
+  void moveSelectedToRutePengiriman() {
+    final selectedNoDOs = selectedMap.entries
+        .where((entry) => entry.value)
+        .map((entry) => entry.key)
+        .toSet();
+
+    final movedItems = tempPengirimanList
+        .where((item) => selectedNoDOs.contains(item.noDO))
+        .toList();
+    rutePengirimanList.addAll(movedItems);
+
+    tempPengirimanList.removeWhere((item) => selectedNoDOs.contains(item.noDO));
+
+    selectedMap.clear();
+    notifyListeners();
+  }
+
+  Future<void> selesaiPesanan() async {
+    if (points.isEmpty || custCoordinateMap.isEmpty) {
+      print('Tidak ada koordinat');
+      return;
+    }
+
+    isCalculating = true;
+    notifyListeners();
+
+    try {
+      listOfPesanan = PesananTempStorage.tempPesananList;
+
+      Map<int, List<String>> clusteredKodeCustSupp = await _calculateHeldKarp();
+
+      List<Map<String, dynamic>> sortedPesanan = [];
+
+      for (var entry in clusteredKodeCustSupp.entries) {
+        int driverIndex = entry.key;
+        List<String> sortedKodeCustSupp = entry.value;
+
+        // Assign KodeSopir by cluster index
+        String sopir = driverIndex == 0 ? 'Satuman' : 'Bakri';
+
+        for (String kodeCust in sortedKodeCustSupp) {
+          PesananModel? pesanan = listOfPesanan.firstWhereOrNull(
+            (item) => item.kodeCustSupp == kodeCust,
+          );
+
+          if (pesanan != null) {
+            sortedPesanan.add({
+              'NoDO': pesanan.noDO,
+              'KodeSopir': sopir,
+              'KodeCustSupp': pesanan.kodeCustSupp,
+              'TanggalKirim': pesanan.tanggalKirim,
+              'Status': pesanan.status,
+            });
+          } else {
+            print('⚠️ KodeCustSupp $kodeCust not found in listOfPesanan');
+          }
+        }
+      }
+
+      print('sortedPesanan before upload: $sortedPesanan');
+      await pengirimanService.uploadPesanan(sortedPesanan);
+
+      // Optional: you can also clear temp storage or update state here
+
+      notifyListeners();
+    } catch (e) {
+      print('Error in selesaiPesanan: $e');
+    }
+
+    isCalculating = false;
+    notifyListeners();
+  }
+
+  Future<Map<int, List<String>>> _calculateHeldKarp() async {
+    LatLng startingPoint = LatLng(-7.375729652261953, 112.6788318829139);
+    List<LatLng> deliveryPoints = convertToLatLngList(points);
+
+    final stopwatch = Stopwatch()..start();
+    final clusters = KMeans.clusterPoints(deliveryPoints, 2);
+
+    Map<int, List<String>> clusteredKodeCustSupp = {};
+
+    for (var entry in clusters.entries) {
+      int driverIndex = entry.key;
+      List<LatLng> clusterPoints = entry.value;
+
+      final result = await HeldKarp()
+          .calculateWithHeldKarp([startingPoint, ...clusterPoints]);
+      List<LatLng> route = result['path'];
+      print("Driver $driverIndex route: $route");
+
+      List<String> sortedCusts = [];
+
+      for (LatLng coord in route) {
+        if ((coord.latitude - startingPoint.latitude).abs() < 0.000001 &&
+            (coord.longitude - startingPoint.longitude).abs() < 0.000001) {
+          continue;
+        }
+
+        String? kodeCust;
+        double epsilon = 0.000001;
+
+        for (var entry in custCoordinateMap.entries) {
+          List<String> storedCoords = entry.value.split(',');
+          double storedLat = double.parse(storedCoords[0]);
+          double storedLng = double.parse(storedCoords[1]);
+
+          if ((storedLat - coord.latitude).abs() < epsilon &&
+              (storedLng - coord.longitude).abs() < epsilon) {
+            kodeCust = entry.key;
+            break;
+          }
+        }
+
+        if (kodeCust != null) {
+          sortedCusts.add(kodeCust);
+        }
+      }
+
+      clusteredKodeCustSupp[driverIndex] = sortedCusts;
+    }
+
+    stopwatch.stop();
+    print(
+        'Held-Karp + clustering runtime: ${stopwatch.elapsedMilliseconds} ms');
+    print("Clustered & sorted KodeCustSupp: $clusteredKodeCustSupp");
+
+    return clusteredKodeCustSupp;
+  }
+
   Future<void> fetchPengirimanData(String formattedDate) async {
     try {
       final List<PengirimanModel> data =
           await apiService.getPengirimanData(formattedDate);
 
-      details = data;
-      isLoading = false;
+      final List<PengirimanModel> temp =
+          PengirimanTempStorage.tempPengirimanList;
 
-      if (data.isNotEmpty) {
-        adaPengiriman = true;
-        statusCount(data);
-      } else {
-        adaPengiriman = false;
-        statusCount([]);
+      final Set<String> uploadedNoDOs = data.map((e) => e.noDO).toSet();
+
+      details = data;
+
+      tempPengirimanList =
+          temp.where((item) => !uploadedNoDOs.contains(item.noDO)).toList();
+
+      for (var item in tempPengirimanList) {
+        await fetchCustDetails(item.kodeCustSupp);
       }
+
+      isLoading = false;
+      adaPengiriman = details.isNotEmpty || tempPengirimanList.isNotEmpty;
+      statusCount([...details, ...tempPengirimanList]);
 
       notifyListeners();
     } catch (e) {
-      print('Error in fetchPengirimanData in pengiriman view model: $e');
+      print('Error in fetchPengirimanData: $e');
     }
   }
 

@@ -105,3 +105,7 @@ class GroupedPengirimanModel {
     );
   }
 }
+
+class PengirimanTempStorage {
+  static final List<PengirimanModel> tempPengirimanList = [];
+}

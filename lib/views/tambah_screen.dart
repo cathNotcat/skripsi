@@ -318,7 +318,7 @@ class _TambahScreenState extends State<TambahScreen> {
                                           child: CircularProgressIndicator())
                                       : ElevatedButton(
                                           onPressed: () async {
-                                            await viewModel.selesaiPesanan();
+                                            // await viewModel.selesaiPesanan();
                                             Navigator.of(context)
                                                 .pushNamed('/sopirProses');
                                           },

@@ -6,7 +6,7 @@ class TargetService {
   final baseUrl = dotenv.env['BASE_URL'] ?? '';
 
   Future<Map<String, String>> fetchMonthlySO() async {
-    final response = await http.get(Uri.parse('$baseUrl/get-monthly-so'));
+    final response = await http.get(Uri.parse('$baseUrl/get-monthly-so/2024'));
 
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body);

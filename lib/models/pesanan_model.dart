@@ -18,7 +18,7 @@ class PesananModel {
   Map<String, dynamic> toJson() {
     return {
       'NoDO': noDO,
-      'KodeSopir': kodeSopir,
+      // 'KodeSopir': kodeSopir,
       'KodeCustSupp': kodeCustSupp,
       'TanggalKirim': tanggalKirim,
       'Nama': nama,
@@ -36,4 +36,8 @@ class PesananModel {
       status: json['Status'] ?? '',
     );
   }
+}
+
+class PesananTempStorage {
+  static final List<PesananModel> tempPesananList = [];
 }

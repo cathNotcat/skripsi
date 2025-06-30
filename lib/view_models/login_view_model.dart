@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_admin_1/models/login_response_model.dart';
 import 'package:web_admin_1/services/login_service.dart';
-import 'package:web_admin_1/widget/error_top_snackbar.dart';
 
 class LoginViewModel extends ChangeNotifier {
   final loginService = LoginService();

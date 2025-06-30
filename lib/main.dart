@@ -3,6 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:web_admin_1/view_models/csv_upload_view_model.dart';
+import 'package:web_admin_1/views/csv_upload_screen.dart';
 import 'package:web_admin_1/views/dashboard_screen.dart';
 import 'package:web_admin_1/views/login_screen.dart';
 import 'package:web_admin_1/views/pengiriman_screen.dart';
@@ -49,18 +51,19 @@ class _NavbarState extends State<Navbar> {
 
   final List<Widget> pages = [
     DashboardScreen(),
-    PengirimanScreen(),
+    ProsesScreen(),
     PesananBelumDikirim(),
     SemuaPesanan(),
-    TambahScreen(),
+    UploadCsvScreen(),
     LoginScreen(),
-    ProsesScreen(),
+    TambahScreen(),
+    PengirimanScreen(),
   ];
 
   @override
   void initState() {
     super.initState();
-    selectedIndex = widget.chosenIndex ?? 0;
+    selectedIndex = widget.chosenIndex ?? 1;
   }
 
   void onSidebarItemClicked(int index) {
@@ -149,9 +152,17 @@ class _NavbarState extends State<Navbar> {
                     }),
                 SizedBox(height: 16),
                 SidebarItem(
+                    icon: Icons.file_copy_outlined,
+                    title: 'Upload CSV',
+                    isSelected: selectedIndex == 4,
+                    onTap: () async {
+                      onSidebarItemClicked(4);
+                    }),
+                SizedBox(height: 16),
+                SidebarItem(
                   icon: Icons.logout,
                   title: 'Log Out',
-                  isSelected: selectedIndex == 4,
+                  isSelected: selectedIndex == 5,
                   onTap: () async {
                     final prefs = await SharedPreferences.getInstance();
                     await prefs.setBool('isLoggedIn', false);

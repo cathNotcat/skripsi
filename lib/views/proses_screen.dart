@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:web_admin_1/models/pengiriman_model.dart';
+import 'package:web_admin_1/models/pesanan_model.dart';
 import 'package:web_admin_1/view_models/pengiriman_view_model.dart';
 import 'package:web_admin_1/widget/button.dart';
+import 'package:web_admin_1/widget/date_formatter.dart';
 import 'package:web_admin_1/widget/header.dart';
 
 class ProsesScreen extends StatelessWidget {
@@ -18,8 +20,9 @@ class ProsesScreen extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (_) {
         final viewModel = PengirimanViewModel();
-        viewModel.fetchPengirimanBySopir(formattedDate);
-        viewModel.fetchSopirNow();
+        viewModel.fetchPengirimanData(formattedDate);
+        // viewModel.fetchPengirimanBySopir(formattedDate);
+        // viewModel.fetchSopirNow();
         // viewModel.initSelected(details);
         return viewModel;
       },
@@ -41,7 +44,8 @@ class ProsesScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Proses ${viewModel.selectedSopir}',
+                      'Proses',
+                      // 'Proses ${viewModel.selectedSopir}',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
@@ -51,11 +55,13 @@ class ProsesScreen extends StatelessWidget {
                   ],
                 ),
                 SizedBox(height: 12),
+                // _listPengiriman(v iewModel, viewModel.details)
                 viewModel.isLoading
                     ? Center(child: CircularProgressIndicator())
                     : viewModel.adaPengiriman == false
                         ? _nullPengiriman()
-                        : _listPengiriman(viewModel, viewModel.details)
+                        : _listPengiriman(viewModel, viewModel.details,
+                            viewModel.tempPengirimanList)
               ],
             ),
           );
@@ -83,125 +89,165 @@ class ProsesScreen extends StatelessWidget {
   }
 
   Widget _listPengiriman(
-      PengirimanViewModel viewModel, List<PengirimanModel> details) {
-    return details.isEmpty
-        ? Center(child: CircularProgressIndicator())
-        : Column(
+    PengirimanViewModel viewModel,
+    List<PengirimanModel> details,
+    List<PengirimanModel> tempPengirimanList,
+  ) {
+    return Column(
+      children: [
+        SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(''),
               Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
+                padding: EdgeInsets.all(16),
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: Table(
+                    columnWidths: const {
+                      0: FlexColumnWidth(1),
+                      1: FlexColumnWidth(1),
+                      2: FlexColumnWidth(1),
+                      3: FlexColumnWidth(1),
+                    },
+                    border: TableBorder.all(color: Colors.grey[300]!),
                     children: [
-                      Container(
-                        padding: EdgeInsets.all(16),
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.vertical,
-                          child: Table(
-                            columnWidths: const {
-                              0: FlexColumnWidth(1),
-                              1: FlexColumnWidth(1),
-                              2: FlexColumnWidth(1),
-                              3: FlexColumnWidth(1),
-                              // 4: FlexColumnWidth(1),
-                            },
-                            border: TableBorder.all(color: Colors.grey[300]!),
+                      TableRow(
+                        decoration: BoxDecoration(color: Colors.grey[200]),
+                        children: [
+                          _columnTitles('No Bukti'),
+                          _columnTitles('Nama Customer'),
+                          _columnTitles('Alamat'),
+                          _columnTitles('Status'),
+                        ],
+                      ),
+                      ...details.map((item) => TableRow(
                             children: [
-                              TableRow(
-                                decoration:
-                                    BoxDecoration(color: Colors.grey[200]),
-                                children: [
-                                  _columnTitles('No Bukti'),
-                                  // _columnTitles('No Bukti'),
-                                  _columnTitles('Nama Customer'),
-                                  _columnTitles('Alamat'),
-                                  _columnTitles('Status'),
-                                ],
-                              ),
-                              ...details.map(
-                                (item) => TableRow(
-                                  children: [
-                                    Padding(
+                              Center(
+                                  child: Padding(
                                       padding: EdgeInsets.all(8.0),
-                                      child: Row(
-                                        children: [
-                                          Checkbox(
-                                            value: viewModel
-                                                    .selectedMap[item.noDO] ??
-                                                false,
-                                            onChanged: (bool? value) {
-                                              viewModel.toggleSelection(
-                                                  item.noDO, value ?? false);
-                                            },
-                                          ),
-                                          Expanded(child: Text(item.noDO)),
-                                        ],
-                                      ),
+                                      child: Text(item.noDO))),
+                              Center(
+                                  child: Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Text(item.nama),
+                              )),
+                              Center(
+                                  child: Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Text(item.alamat),
+                              )),
+                              Center(
+                                  child: Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: getStatusColor(item.status),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    getStatusString(item.status),
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              )),
+                            ],
+                          )),
+                      ...tempPengirimanList.map((item) => TableRow(
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Row(
+                                  children: [
+                                    Checkbox(
+                                      value: viewModel.selectedMap[item.noDO] ??
+                                          false,
+                                      onChanged: (bool? value) {
+                                        viewModel.toggleSelection(
+                                            item.noDO, value ?? false);
+                                      },
                                     ),
-                                    // Center(
-                                    //     child: Padding(
-                                    //         padding: EdgeInsets.all(8.0),
-                                    //         child: Text(item.noDO))),
-                                    Center(
-                                        child: Padding(
-                                            padding: EdgeInsets.all(8.0),
-                                            child: Text(item.nama))),
-                                    Center(
-                                        child: Padding(
-                                            padding: EdgeInsets.all(8.0),
-                                            child: Text(item.alamat))),
-                                    Center(
-                                      child: Padding(
-                                          padding: EdgeInsets.all(8.0),
-                                          child: Container(
-                                            padding: EdgeInsets.only(
-                                                top: 8,
-                                                bottom: 8,
-                                                left: 12,
-                                                right: 12),
-                                            decoration: BoxDecoration(
-                                                color:
-                                                    getStatusColor(item.status),
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(20))),
-                                            child: Text(
-                                              getStatusString(item.status),
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 14),
-                                            ),
-                                          )),
-                                    ),
+                                    Expanded(child: Text(item.noDO)),
                                   ],
                                 ),
                               ),
+                              Center(
+                                  child: Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Text(item.nama),
+                              )),
+                              Center(
+                                  child: Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Text(item.alamat),
+                              )),
+                              Center(
+                                  child: Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.orange[200],
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    "Belum Kalkulasi",
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              )),
                             ],
-                          ),
-                        ),
-                      ),
+                          ))
                     ],
-                  )),
-              // if (viewModel.selectedMap.containsValue(true))
-              //   Padding(
-              //     padding: EdgeInsets.only(top: 16),
-              //     child: ElevatedButton(
-              //       onPressed: viewModel.cal,
-              //       child: Text('Calculate'),
-              //     ),
-              //   ),
+                  ),
+                ),
+              ),
             ],
-          );
+          ),
+        ),
+        SizedBox(height: 24),
+        if (viewModel.selectedMap.containsValue(true))
+          viewModel.isCalculating
+              ? Center(child: CircularProgressIndicator())
+              : ElevatedButton(
+                  onPressed: () async {
+                    print('Kalkulasi Rute pressed');
+                    await viewModel.selesaiPesanan();
+                    viewModel.moveSelectedToRutePengiriman();
+                    await viewModel
+                        .fetchPengirimanData(DateFormatter.formatToday());
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 23, 96, 232),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    'Kalkulasi Rute',
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+        SizedBox(height: 24),
+      ],
+    );
   }
 
   Widget _columnTitles(String title) {

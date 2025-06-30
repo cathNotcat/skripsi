@@ -7,17 +7,21 @@ import 'package:web_admin_1/k_means.dart';
 import 'package:web_admin_1/models/customer_model.dart';
 import 'package:web_admin_1/models/dbspp_model.dart';
 import 'package:web_admin_1/models/latlng_model.dart';
+import 'package:web_admin_1/models/pengiriman_model.dart';
 import 'package:web_admin_1/models/pesanan_model.dart';
 import 'package:web_admin_1/services/customer_service.dart';
 import 'package:web_admin_1/services/notification_service.dart';
 import 'package:web_admin_1/services/pengiriman_service.dart';
 import 'package:web_admin_1/services/pesanan_service.dart';
+import 'package:web_admin_1/view_models/pengiriman_view_model.dart';
 
 class TambahPesananViewModel extends ChangeNotifier {
   final pesananService = PesananService();
   final pengirimanService = PengirimanService();
   final customerService = CustomerService();
   final notificationService = NotificationService();
+
+  // final PengirimanViewModel pengirimanViewModel;
 
   DBSPPModel? dbsppData;
   CustomerModel? customer;
@@ -122,12 +126,28 @@ class TambahPesananViewModel extends ChangeNotifier {
       customer = await customerService.getCustomerDetails(kodeCust);
       namaCust = customer!.nama;
       String coordinate = customer!.koordinat;
+
       points.add(coordinate.toString());
       custCoordinateMap[kodeCust] = coordinate;
       notifyListeners();
     } catch (e) {
       print('Error in fetchCustDetails: $e');
     }
+  }
+
+  PengirimanModel convertToPengiriman(PesananModel p) {
+    return PengirimanModel(
+      noUrut: '0',
+      noPengiriman: '',
+      tanggalKirim: p.tanggalKirim,
+      noDO: p.noDO,
+      nama: p.nama,
+      kodeCustSupp: p.kodeCustSupp,
+      alamat: customer!.alamat,
+      koordinat: '',
+      status: p.status,
+      jumlahBarang: '0',
+    );
   }
 
   Future<void> tambahPesanan({
@@ -145,12 +165,12 @@ class TambahPesananViewModel extends ChangeNotifier {
 
     await fetchCustDetails(customerController.text);
 
-    final prefs = await SharedPreferences.getInstance();
-    String? selectedSopir = prefs.getString('selected_sopir');
+    // final prefs = await SharedPreferences.getInstance();
+    // String? selectedSopir = prefs.getString('selected_sopir');
 
     final newPesanan = PesananModel(
       noDO: inputDoController.text,
-      kodeSopir: selectedSopir ?? '',
+      kodeSopir: '',
       kodeCustSupp: customerController.text,
       tanggalKirim: tanggalKirimController.text,
       nama: namaCust,
@@ -158,6 +178,13 @@ class TambahPesananViewModel extends ChangeNotifier {
     );
 
     listOfPesanan.add(newPesanan);
+    PesananTempStorage.tempPesananList.add(newPesanan);
+
+    final pengiriman = convertToPengiriman(newPesanan);
+    PengirimanTempStorage.tempPengirimanList.add(pengiriman);
+
+    print('temp pesanan: sudah ke isi');
+
     print('list of pesanan: $listOfPesanan');
     notifyListeners();
   }
@@ -172,46 +199,46 @@ class TambahPesananViewModel extends ChangeNotifier {
     isPesananExist = false;
   }
 
-  Future<void> selesaiPesanan() async {
-    if (points.isEmpty) {
-      print('Tidak ada koordinat');
-      return;
-    }
+  // Future<void> selesaiPesanan() async {
+  //   if (points.isEmpty) {
+  //     print('Tidak ada koordinat');
+  //     return;
+  //   }
 
-    isCalculating = true;
-    notifyListeners();
-    try {
-      List<String> sortedKodeCustSupp = await _calculateHeldKarp();
+  //   isCalculating = true;
+  //   notifyListeners();
+  //   try {
+  //     List<String> sortedKodeCustSupp = await _calculateHeldKarp();
 
-      List<Map<String, dynamic>> sortedPesanan = [];
-      for (String kodeCust in sortedKodeCustSupp) {
-        PesananModel? pesanan = listOfPesanan
-            .where((item) => item.kodeCustSupp == kodeCust)
-            .cast<PesananModel?>()
-            .firstOrNull;
+  //     List<Map<String, dynamic>> sortedPesanan = [];
+  //     for (String kodeCust in sortedKodeCustSupp) {
+  //       PesananModel? pesanan = listOfPesanan
+  //           .where((item) => item.kodeCustSupp == kodeCust)
+  //           .cast<PesananModel?>()
+  //           .firstOrNull;
 
-        if (pesanan != null) {
-          sortedPesanan.add({
-            'NoDO': pesanan.noDO,
-            'KodeSopir': pesanan.kodeSopir,
-            'KodeCustSupp': pesanan.kodeCustSupp,
-            'TanggalKirim': pesanan.tanggalKirim,
-            'Status': pesanan.status,
-          });
-        }
-      }
+  //       if (pesanan != null) {
+  //         sortedPesanan.add({
+  //           'NoDO': pesanan.noDO,
+  //           'KodeSopir': pesanan.kodeSopir,
+  //           'KodeCustSupp': pesanan.kodeCustSupp,
+  //           'TanggalKirim': pesanan.tanggalKirim,
+  //           'Status': pesanan.status,
+  //         });
+  //       }
+  //     }
 
-      print('sortedPesanan before: $sortedPesanan');
-      await pengirimanService.uploadPesanan(sortedPesanan);
-      await notificationService.sendNotifications(sortedPesanan);
-      notifyListeners();
-    } catch (e) {
-      print('Error in selesaiPesanan: $e');
-    }
+  //     print('sortedPesanan before: $sortedPesanan');
+  //     await pengirimanService.uploadPesanan(sortedPesanan);
+  //     await notificationService.sendNotifications(sortedPesanan);
+  //     notifyListeners();
+  //   } catch (e) {
+  //     print('Error in selesaiPesanan: $e');
+  //   }
 
-    isCalculating = false;
-    notifyListeners();
-  }
+  //   isCalculating = false;
+  //   notifyListeners();
+  // }
 
   List<LatLng> convertToLatLngList(List<String> coordinateStrings) {
     List<LatLng> latLngList = [];
@@ -292,6 +319,7 @@ class TambahPesananViewModel extends ChangeNotifier {
   //   return sortedKodeCustSupp;
   // }
 
+// NEW:
   Future<List<String>> _calculateHeldKarp() async {
     // 1. Define your warehouse/starting location
     LatLng startingPoint = LatLng(-7.375729652261953, 112.6788318829139);
