@@ -64,6 +64,7 @@ class PengirimanViewModel extends ChangeNotifier {
   int selesai = 0;
   int allPengiriman = 0;
   int countAllPengiriman = 0;
+  int totalYear = 0;
 
   DateTime? filterDate;
   String? filterSopir;
@@ -124,8 +125,19 @@ class PengirimanViewModel extends ChangeNotifier {
       error = e.toString();
     }
 
+    await countTotalMonthlySO();
     isLoading = false;
     notifyListeners();
+  }
+
+  Future<int> countTotalMonthlySO() async {
+    final monthlySO = await monthlyService.fetchMonthlySO();
+    monthlySO.forEach((key, value) {
+      totalYear += int.tryParse(value) ?? 0;
+    });
+
+    print('total year: $totalYear');
+    return totalYear;
   }
 
   double get maxY {

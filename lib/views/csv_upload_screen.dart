@@ -27,8 +27,8 @@ class UploadCsvScreen extends StatelessWidget {
                 color: Colors.grey,
                 strokeWidth: 2,
                 child: InkWell(
-                  onTap: () {
-                    viewModel.uploadCsvFile();
+                  onTap: () async {
+                    await viewModel.uploadCsvFile(context);
                   },
                   child: Container(
                     height: 150,

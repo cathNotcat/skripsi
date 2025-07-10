@@ -104,7 +104,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                   ),
                                                 ),
                                                 const SizedBox(width: 100),
-                                                const Column(
+                                                Column(
                                                   children: [
                                                     Text('Jumlah Sales Order',
                                                         style: TextStyle(
@@ -115,7 +115,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                     Text('tahun lalu',
                                                         style: TextStyle(
                                                             fontSize: 12)),
-                                                    Text('980',
+                                                    Text(
+                                                        '${viewModel.totalYear}',
                                                         style: TextStyle(
                                                             fontSize: 40,
                                                             fontWeight:

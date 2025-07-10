@@ -63,7 +63,7 @@ class _NavbarState extends State<Navbar> {
   @override
   void initState() {
     super.initState();
-    selectedIndex = widget.chosenIndex ?? 1;
+    selectedIndex = widget.chosenIndex ?? 0;
   }
 
   void onSidebarItemClicked(int index) {
